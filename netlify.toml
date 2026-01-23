@@ -1,9 +1,9 @@
 
+[build]
+  publish = "."
+  command = "echo 'Geen build stap nodig voor pure ESM folder'"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[build]
-  publish = "."
-  command = "echo 'Geen build stap nodig voor pure ESM folder'"
