@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 
 export class GeminiService {
@@ -8,8 +7,6 @@ export class GeminiService {
     const apiKey = process.env.API_KEY;
     if (apiKey) {
       this.ai = new GoogleGenAI({ apiKey });
-    } else {
-      console.warn("Gemini API Key ontbreekt. AI functionaliteit is uitgeschakeld.");
     }
   }
 
@@ -18,12 +15,27 @@ export class GeminiService {
     try {
       const response = await this.ai.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: `Vertaal de volgende tekst naar het ${targetLanguage}. Houd de toon professioneel maar begrijpelijk voor particulieren. Geef ENKEL de vertaling terug.\n\nTekst: "${text}"`,
+        contents: `Vertaal de volgende tekst naar het ${targetLanguage}. Houd de toon hetzelfde als het origineel. Geef ENKEL de vertaling terug, zonder extra uitleg.\n\nTekst: "${text}"`,
       });
-      return response.text?.trim() || "Vertaling niet beschikbaar";
+      return response.text?.trim() || text;
     } catch (error) {
       console.error("Translation error:", error);
       return text;
+    }
+  }
+
+  async detectNonDutch(text: string): Promise<{ isNonDutch: boolean, language: string }> {
+    if (!this.ai || text.length < 10) return { isNonDutch: false, language: 'Nederlands' };
+    try {
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Analyseer of de volgende tekst in het Nederlands is. Zo niet, welke taal is het? Antwoord in JSON formaat: {"isNonDutch": boolean, "language": string}.\n\nTekst: "${text}"`,
+        config: { responseMimeType: "application/json" }
+      });
+      const result = JSON.parse(response.text || '{"isNonDutch": false}');
+      return result;
+    } catch (error) {
+      return { isNonDutch: false, language: 'Nederlands' };
     }
   }
 
