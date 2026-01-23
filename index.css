@@ -13,15 +13,31 @@ body {
   @apply bg-slate-50 text-slate-900;
   margin: 0;
   padding: 0;
+  /* Zorg dat de body nooit groter is dan het scherm om bouncing te voorkomen */
+  height: 100%;
+  overflow: hidden;
 }
 
 .h-safe {
+  /* Gebruik dvh voor moderne browsers, fallback naar de JS berekende --vh */
   height: 100vh;
+  height: 100dvh;
   height: calc(var(--vh) * 100);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
 }
 
 img {
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+/* Voorkom dat iOS inzoomt op inputs bij focus */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
 }
