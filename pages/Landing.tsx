@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -7,8 +8,17 @@ const Landing: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-white text-center">
-      <div className="w-20 h-20 bg-blue-600 rounded-[28px] flex items-center justify-center mb-10 shadow-2xl shadow-blue-100 animate-pulse-subtle">
-        <span className="text-4xl font-black text-white italic">R</span>
+      <div className="w-32 h-32 mb-10 relative animate-pulse-subtle">
+        <div className="absolute inset-0 bg-orange-400/20 rounded-full blur-2xl animate-pulse"></div>
+        <img 
+          src="https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png" 
+          alt="Rsolve Logo" 
+          className="w-full h-full object-contain relative z-10 drop-shadow-2xl"
+          onError={(e) => {
+            // Fallback voor als de externe URL niet werkt (gebruikt lokaal bestand)
+            e.currentTarget.src = 'logo.png';
+          }}
+        />
       </div>
       
       <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-4 leading-tight">
@@ -20,7 +30,6 @@ const Landing: React.FC = () => {
       </p>
 
       <div className="w-full max-w-xs space-y-4">
-        {/* DIRECT NAAR BETALING */}
         <Button size="lg" className="w-full py-6 text-xl shadow-2xl shadow-blue-200" onClick={() => navigate('/payment')}>
           Start Mediation (€3,99)
         </Button>

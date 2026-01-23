@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatBubble } from '../components/ui/ChatBubble';
 import { Button } from '../components/ui/Button';
@@ -15,7 +16,6 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     
-    // Simuleer check of tegenpartij er is na 7 seconden
     const timer = setTimeout(() => {
       if (!caseData.isRespondent) {
         setIsRespondentJoined(true);
@@ -50,9 +50,12 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
     <div className="flex flex-col h-screen bg-slate-50">
       <header className="px-6 py-4 bg-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-30 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100">
-            <span className="text-white text-base font-black italic">R</span>
-          </div>
+          <img 
+            src="logo.png" 
+            alt="Rsolve" 
+            className="w-10 h-10 object-contain"
+            onError={(e) => e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png'}
+          />
           <div className="overflow-hidden">
             <h1 className="text-sm font-black text-slate-900 truncate max-w-[120px]">{caseData.title}</h1>
             <div className="flex items-center gap-2">

@@ -11,7 +11,6 @@ const JoinCase: React.FC = () => {
 
   const handleJoin = () => {
     setIsJoining(true);
-    // Simuleer aansluiten
     setTimeout(() => {
       const demoCase = {
         title: "Conflict over " + (id ? atob(id).substring(0, 15) : "Dossier"),
@@ -26,9 +25,12 @@ const JoinCase: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-md space-y-8 text-center">
-        <div className="inline-flex w-20 h-20 bg-blue-600 rounded-[32px] items-center justify-center shadow-2xl mb-4">
-           <span className="text-4xl font-black text-white italic">R</span>
-        </div>
+        <img 
+          src="logo.png" 
+          alt="Rsolve" 
+          className="w-24 h-24 mx-auto mb-4 drop-shadow-2xl animate-pulse-subtle"
+          onError={(e) => e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png'}
+        />
         
         <div className="space-y-4">
           <h1 className="text-3xl font-black text-slate-900 leading-tight">Je bent uitgenodigd voor Mediation</h1>

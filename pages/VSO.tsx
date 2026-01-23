@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { ICONS } from '../constants';
 
 const VSO: React.FC<{ data: any, onReset: () => void }> = ({ data, onReset }) => {
   return (
@@ -10,9 +9,12 @@ const VSO: React.FC<{ data: any, onReset: () => void }> = ({ data, onReset }) =>
       <div className="w-full max-w-3xl space-y-8">
         <header className="flex justify-between items-center print:hidden">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-xl font-black">R</span>
-            </div>
+            <img 
+              src="logo.png" 
+              alt="Rsolve" 
+              className="w-12 h-12 object-contain"
+              onError={(e) => e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png'}
+            />
             <div>
               <h1 className="text-xl font-bold text-slate-900">VSO Document</h1>
               <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Rechtsgeldig Document</p>
@@ -24,9 +26,9 @@ const VSO: React.FC<{ data: any, onReset: () => void }> = ({ data, onReset }) =>
         </header>
 
         <Card className="bg-white p-12 md:p-20 shadow-2xl border-none relative overflow-hidden print:p-0 print:shadow-none rounded-[2px]">
-          {/* Watermerk */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] rotate-[35deg] select-none pointer-events-none">
-            <span className="text-[140px] font-black text-slate-900">RSOLVE</span>
+          {/* Watermerk met het nieuwe logo vorm */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] rotate-[15deg] select-none pointer-events-none w-full flex justify-center">
+            <img src="logo.png" alt="" className="w-96 grayscale" />
           </div>
 
           <div className="prose prose-slate max-w-none relative z-10">

@@ -21,7 +21,6 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
     setIsProcessing(true);
     setTimeout(() => {
       onSuccess();
-      // Na betaling gaan we direct naar de uitnodigingspagina
       navigate('/invite-partner');
     }, 2000);
   };
@@ -30,9 +29,12 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
     <div className="min-h-screen bg-slate-50 flex flex-col items-center p-6 pt-12">
       <div className="w-full max-w-md space-y-6 animate-in fade-in slide-in-from-bottom-6">
         <div className="text-center">
-          <div className="inline-flex w-16 h-16 bg-blue-600 rounded-[22px] items-center justify-center mb-6 shadow-xl shadow-blue-200">
-            <span className="text-3xl font-black text-white italic">R</span>
-          </div>
+          <img 
+            src="logo.png" 
+            alt="Rsolve" 
+            className="w-20 h-20 mx-auto mb-6 drop-shadow-lg"
+            onError={(e) => e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png'}
+          />
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Eénmalige Betaling</h1>
           <p className="text-sm text-slate-500 font-medium">Betaling voor AI Mediation Dossier</p>
         </div>

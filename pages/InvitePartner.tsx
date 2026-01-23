@@ -83,9 +83,12 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete }) => {
         ) : (
           <div className="space-y-8 text-center animate-in slide-in-from-right-8 duration-500">
             <div className="space-y-4">
-              <div className="inline-flex w-16 h-16 bg-blue-600 rounded-[22px] items-center justify-center shadow-xl">
-                 <span className="text-3xl font-black text-white italic">R</span>
-              </div>
+              <img 
+                src="logo.png" 
+                alt="Rsolve" 
+                className="w-20 h-20 mx-auto mb-2 drop-shadow-lg"
+                onError={(e) => e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png'}
+              />
               <h1 className="text-3xl font-black tracking-tight text-slate-900 leading-tight">Nodig {formData.otherParty} uit</h1>
               <p className="text-slate-500 font-medium px-4">Deel deze link via WhatsApp. Pas na het uitnodigen start het gesprek met de mediator.</p>
             </div>
