@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatBubble } from '../components/ui/ChatBubble';
 import { Button } from '../components/ui/Button';
@@ -53,7 +52,7 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
           <img 
             src="logo.png" 
             alt="Rsolve" 
-            className="w-10 h-10 object-contain"
+            className="w-12 h-12 object-contain"
             onError={(e) => e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png'}
           />
           <div className="overflow-hidden">

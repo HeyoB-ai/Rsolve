@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -12,7 +11,7 @@ const VSO: React.FC<{ data: any, onReset: () => void }> = ({ data, onReset }) =>
             <img 
               src="logo.png" 
               alt="Rsolve" 
-              className="w-12 h-12 object-contain"
+              className="w-14 h-14 object-contain"
               onError={(e) => e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png'}
             />
             <div>
@@ -26,9 +25,8 @@ const VSO: React.FC<{ data: any, onReset: () => void }> = ({ data, onReset }) =>
         </header>
 
         <Card className="bg-white p-12 md:p-20 shadow-2xl border-none relative overflow-hidden print:p-0 print:shadow-none rounded-[2px]">
-          {/* Watermerk met het nieuwe logo vorm */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] rotate-[15deg] select-none pointer-events-none w-full flex justify-center">
-            <img src="logo.png" alt="" className="w-96 grayscale" />
+            <img src="logo.png" alt="" className="w-96" />
           </div>
 
           <div className="prose prose-slate max-w-none relative z-10">
@@ -42,15 +40,15 @@ const VSO: React.FC<{ data: any, onReset: () => void }> = ({ data, onReset }) =>
               <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-6 rounded-lg border border-slate-100">
                 Ondergetekenden verklaren hierbij een bindende regeling te hebben getroffen met betrekking tot het geschil genaamd <strong>"{data.title}"</strong>:
                 <br /><br />
-                <span className="text-slate-400 font-bold">Partij A (Initiator):</span> {data.parties.split(' en ')[0]} <br />
-                <span className="text-slate-400 font-bold">Partij B (Respondent):</span> {data.parties.split(' en ')[1]}
+                <span className="text-slate-400 font-bold">Partij A (Initiator):</span> {data.parties?.split(' en ')[0] || '...'} <br />
+                <span className="text-slate-400 font-bold">Partij B (Respondent):</span> {data.parties?.split(' en ')[1] || '...'}
               </p>
             </section>
 
             <section className="mb-10">
               <h3 className="text-sm font-black text-slate-900 mb-3 uppercase tracking-wider">2. Overeengekomen Voorwaarden</h3>
               <div className="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap bg-blue-50/50 p-8 rounded-lg border-l-4 border-blue-600 font-serif italic text-lg shadow-inner">
-                "{data.terms}"
+                "{data.terms || 'Geen voorwaarden gespecificeerd.'}"
               </div>
             </section>
 
@@ -64,8 +62,8 @@ const VSO: React.FC<{ data: any, onReset: () => void }> = ({ data, onReset }) =>
             <div className="grid grid-cols-2 gap-16 mt-24">
               <div className="border-t-2 border-slate-900 pt-6 text-center">
                 <p className="text-[10px] font-black text-slate-400 mb-10 uppercase tracking-[0.3em]">Handtekening Partij A</p>
-                <p className="font-serif italic text-blue-900 text-2xl mb-1">Jordan Peterson</p>
-                <p className="text-[10px] text-slate-300">Datum: {data.date}</p>
+                <p className="font-serif italic text-blue-900 text-2xl mb-1">Digitaal Ondertekend</p>
+                <p className="text-[10px] text-slate-300">Datum: {data.date || new Date().toLocaleDateString()}</p>
               </div>
               <div className="border-t-2 border-slate-200 pt-6 text-center">
                 <p className="text-[10px] font-black text-slate-400 mb-10 uppercase tracking-[0.3em]">Handtekening Partij B</p>

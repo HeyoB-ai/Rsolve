@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -28,7 +27,7 @@ const JoinCase: React.FC = () => {
         <img 
           src="logo.png" 
           alt="Rsolve" 
-          className="w-24 h-24 mx-auto mb-4 drop-shadow-2xl animate-pulse-subtle"
+          className="w-24 h-24 mx-auto mb-4 drop-shadow-xl"
           onError={(e) => e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png'}
         />
         

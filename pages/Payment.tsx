@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -32,7 +31,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
           <img 
             src="logo.png" 
             alt="Rsolve" 
-            className="w-20 h-20 mx-auto mb-6 drop-shadow-lg"
+            className="w-24 h-24 mx-auto mb-6 drop-shadow-md"
             onError={(e) => e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png'}
           />
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Eénmalige Betaling</h1>
@@ -90,7 +89,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
       {isProcessing && (
         <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-in fade-in duration-300">
            <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-           <p className="font-black text-slate-900 uppercase tracking-widest animate-pulse text-center">
+           <p className="font-black text-slate-900 uppercase tracking-widest text-center">
              Betaling valideren...
            </p>
         </div>
