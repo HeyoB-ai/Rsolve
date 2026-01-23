@@ -4,6 +4,7 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { ICONS } from '../constants';
+import { Logo } from '../components/ui/Logo';
 
 interface InvitePartnerProps {
   onComplete: (data: any) => void;
@@ -43,7 +44,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
       <div className="w-full max-w-md space-y-8">
         {!showInvite ? (
           <div className="space-y-8 text-center">
@@ -79,20 +80,9 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete }) => {
             </Card>
           </div>
         ) : (
-          <div className="space-y-8 text-center animate-in fade-in duration-500">
+          <div className="space-y-8 text-center animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="space-y-4">
-              <img 
-                src="/logo.png" 
-                alt="Rsolve" 
-                className="w-24 h-24 mx-auto mb-2"
-                onError={(e) => {
-                  const target = e.currentTarget;
-                  if (!target.dataset.tried) {
-                    target.dataset.tried = 'true';
-                    target.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png';
-                  }
-                }}
-              />
+              <Logo className="w-20 h-20 mx-auto mb-2" />
               <h1 className="text-3xl font-black tracking-tight text-slate-900 leading-tight">Nodig {formData.otherParty} uit</h1>
               <p className="text-slate-500 font-medium px-4">Deel deze link via WhatsApp. Pas na het uitnodigen start het gesprek met de mediator.</p>
             </div>

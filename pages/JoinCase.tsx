@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { Logo } from '../components/ui/Logo';
 
 const JoinCase: React.FC = () => {
   const { id } = useParams();
@@ -22,20 +23,9 @@ const JoinCase: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
       <div className="w-full max-w-md space-y-8 text-center">
-        <img 
-          src="/logo.png" 
-          alt="Rsolve" 
-          className="w-24 h-24 mx-auto mb-4"
-          onError={(e) => {
-            const target = e.currentTarget;
-            if (!target.dataset.tried) {
-              target.dataset.tried = 'true';
-              target.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png';
-            }
-          }}
-        />
+        <Logo className="w-24 h-24 mx-auto mb-4" />
         
         <div className="space-y-4">
           <h1 className="text-3xl font-black text-slate-900 leading-tight">Je bent uitgenodigd voor Mediation</h1>

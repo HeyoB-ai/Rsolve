@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { Logo } from '../components/ui/Logo';
 
 interface PaymentProps {
   onSuccess: () => void;
@@ -25,21 +26,10 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center p-6 pt-12">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center p-6 pt-12 animate-in fade-in duration-500">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <img 
-            src="/logo.png" 
-            alt="Rsolve" 
-            className="w-24 h-24 mx-auto mb-6"
-            onError={(e) => {
-              const target = e.currentTarget;
-              if (!target.dataset.tried) {
-                target.dataset.tried = 'true';
-                target.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png';
-              }
-            }}
-          />
+          <Logo className="w-20 h-20 mx-auto mb-6" />
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Eénmalige Betaling</h1>
           <p className="text-sm text-slate-500 font-medium">Betaling voor AI Mediation Dossier</p>
         </div>

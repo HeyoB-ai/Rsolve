@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChatBubble } from '../components/ui/ChatBubble';
 import { Button } from '../components/ui/Button';
 import { ICONS } from '../constants';
+import { Logo } from '../components/ui/Logo';
 
 const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({ caseData, onResolve }) => {
   const [messages, setMessages] = useState([
@@ -49,12 +50,7 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
     <div className="flex flex-col h-screen bg-slate-50">
       <header className="px-6 py-4 bg-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-30 shadow-sm">
         <div className="flex items-center gap-3">
-          <img 
-            src="logo.png" 
-            alt="Rsolve" 
-            className="w-12 h-12 object-contain"
-            onError={(e) => e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png'}
-          />
+          <Logo className="w-10 h-10" />
           <div className="overflow-hidden">
             <h1 className="text-sm font-black text-slate-900 truncate max-w-[120px]">{caseData.title}</h1>
             <div className="flex items-center gap-2">
