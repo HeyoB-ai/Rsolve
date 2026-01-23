@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Pagina's
 import Landing from './pages/Landing';
-import Setup from './pages/Setup';
 import Mediation from './pages/Mediation';
 import VSO from './pages/VSO';
 import Payment from './pages/Payment';
@@ -54,12 +54,9 @@ const App: React.FC = () => {
               <Payment onSuccess={() => setHasPaid(true)} />
             } />
 
-            <Route path="/setup" element={
-              hasPaid ? <Setup onComplete={(data) => setActiveCase(data)} /> : <Navigate to="/payment" />
-            } />
-
+            {/* InvitePartner is nu de pagina die volgt op betaling en de setup afhandelt */}
             <Route path="/invite-partner" element={
-              activeCase ? <InvitePartner caseData={activeCase} /> : <Navigate to="/" />
+              hasPaid ? <InvitePartner onComplete={(data) => setActiveCase(data)} /> : <Navigate to="/payment" />
             } />
 
             <Route path="/invite/:id" element={<JoinCase />} />

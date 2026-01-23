@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { ICONS } from '../constants';
 
 interface PaymentProps {
   onSuccess: () => void;
@@ -21,8 +21,8 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
     setIsProcessing(true);
     setTimeout(() => {
       onSuccess();
-      // Na betaling gaan we naar de Setup om het dossier te definiëren
-      navigate('/setup');
+      // Na betaling gaan we direct naar de uitnodigingspagina
+      navigate('/invite-partner');
     }, 2000);
   };
 
@@ -34,15 +34,15 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
             <span className="text-3xl font-black text-white italic">R</span>
           </div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Eénmalige Betaling</h1>
-          <p className="text-sm text-slate-500 font-medium">Krijg direct toegang tot de AI Mediator</p>
+          <p className="text-sm text-slate-500 font-medium">Betaling voor AI Mediation Dossier</p>
         </div>
 
         <Card className="p-0 overflow-hidden border-none shadow-2xl rounded-[32px] bg-white">
           <div className="bg-slate-900 text-white p-8">
             <div className="flex justify-between items-end">
               <div>
-                <h2 className="text-lg font-black mb-1">Nieuw Dossier</h2>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Full Mediation Service</p>
+                <h2 className="text-lg font-black mb-1 italic">Rsolve Access</h2>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Veilige Transactie</p>
               </div>
               <div className="text-3xl font-black text-blue-400">€3,99</div>
             </div>
@@ -50,13 +50,13 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
 
           <div className="p-8 space-y-6">
             <div className="space-y-4">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1 text-center">Kies je bank (iDEAL)</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1 text-center">Betaal met iDEAL</label>
               <select 
                 value={selectedBank}
                 onChange={(e) => setSelectedBank(e.target.value)}
                 className="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 font-bold text-slate-700 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
               >
-                <option value="" disabled>Selecteer je bank...</option>
+                <option value="" disabled>Kies je bank...</option>
                 {banks.map(bank => <option key={bank} value={bank}>{bank}</option>)}
               </select>
             </div>
@@ -72,7 +72,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
             </Button>
 
             <div className="flex items-center justify-center gap-2 pt-2 grayscale opacity-30">
-               <span className="text-[10px] font-black uppercase tracking-widest">Powered by Stripe</span>
+               <span className="text-[10px] font-black uppercase tracking-widest">Beveiligd door Stripe</span>
             </div>
           </div>
         </Card>
@@ -88,7 +88,9 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
       {isProcessing && (
         <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-in fade-in duration-300">
            <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-           <p className="font-black text-slate-900 uppercase tracking-widest animate-pulse">Betaling verwerken...</p>
+           <p className="font-black text-slate-900 uppercase tracking-widest animate-pulse text-center">
+             Betaling valideren...
+           </p>
         </div>
       )}
     </div>
