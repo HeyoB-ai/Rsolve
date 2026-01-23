@@ -10,29 +10,18 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
     { id: '2', text: `Welkom. Ik ben jullie AI Mediator. We gaan samen kijken hoe we tot een oplossing kunnen komen.`, isOwn: false, sender: "Mediator", timestamp: "Nu" },
   ]);
   const [inputValue, setInputValue] = useState('');
-  const [isRespondentJoined, setIsRespondentJoined] = useState(false);
+  // We zetten de status nu standaard op false voor de initiator, 
+  // en alleen op true als de gebruiker zelf de respondent is (via de invite link).
+  const [isRespondentJoined, setIsRespondentJoined] = useState(caseData.isRespondent || false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     
-    const timer = setTimeout(() => {
-      if (!caseData.isRespondent) {
-        setIsRespondentJoined(true);
-        setMessages(prev => [...prev, {
-          id: 'join-msg',
-          text: `${caseData.otherParty} heeft de uitnodiging geaccepteerd en neemt nu deel aan het gesprek.`,
-          isOwn: false,
-          sender: "Systeem",
-          timestamp: "Zojuist"
-        }]);
-      } else {
-        setIsRespondentJoined(true);
-      }
-    }, 7000);
-    
-    return () => clearTimeout(timer);
-  }, [caseData]);
+    // De automatische timer (setTimeout) die Henk 'online' haalde is verwijderd.
+    // In een productie-omgeving met een database (zoals Supabase) zou hier 
+    // een realtime listener komen die kijkt of de andere partij echt inlogt.
+  }, [messages]);
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
@@ -54,7 +43,7 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
           <div className="overflow-hidden">
             <h1 className="text-sm font-black text-slate-900 truncate max-w-[120px]">{caseData.title}</h1>
             <div className="flex items-center gap-2">
-               <div className={`w-1.5 h-1.5 rounded-full ${isRespondentJoined ? 'bg-emerald-500' : 'bg-amber-400 animate-pulse'}`} />
+               <div className={`w-1.5 h-1.5 rounded-full ${isRespondentJoined ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
                   {isRespondentJoined ? `${caseData.otherParty} is online` : `Wachten op ${caseData.otherParty}...`}
                </span>
@@ -68,6 +57,14 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
         {messages.map(m => (
           <ChatBubble key={m.id} text={m.text} isOwn={m.isOwn} sender={m.sender} timestamp={m.timestamp} />
         ))}
+        {!isRespondentJoined && (
+          <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl text-center animate-in fade-in duration-700">
+            <p className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-1">Status</p>
+            <p className="text-xs text-amber-800 font-medium">
+              Zodra {caseData.otherParty} op de uitnodigingslink klikt, verschijnt hij hier in het gesprek.
+            </p>
+          </div>
+        )}
         <div ref={scrollRef} />
       </div>
 
