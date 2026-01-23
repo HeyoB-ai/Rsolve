@@ -6,6 +6,8 @@ import { Button } from '../components/ui/Button';
 const Landing: React.FC = () => {
   const navigate = useNavigate();
 
+  const startFlow = () => navigate('/setup');
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-white text-center">
       <div className="w-20 h-20 bg-blue-600 rounded-[28px] flex items-center justify-center mb-10 shadow-2xl shadow-blue-100 animate-pulse-subtle">
@@ -21,7 +23,7 @@ const Landing: React.FC = () => {
       </p>
 
       <div className="w-full max-w-xs space-y-4">
-        <Button size="lg" className="w-full py-6 text-xl shadow-2xl shadow-blue-200" onClick={() => navigate('/setup')}>
+        <Button size="lg" className="w-full py-6 text-xl shadow-2xl shadow-blue-200" onClick={startFlow}>
           Start Mediation (€3,99)
         </Button>
         
@@ -42,14 +44,20 @@ const Landing: React.FC = () => {
         </p>
         
         <div className="flex justify-center items-center gap-3 pt-2">
-           <div className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 flex items-center gap-2">
+           <button 
+             onClick={startFlow}
+             className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 flex items-center gap-2 hover:bg-slate-100 transition-colors cursor-pointer"
+           >
               <div className="w-4 h-4 bg-[#ff0066] rounded-sm flex items-center justify-center text-[6px] text-white font-black italic">i</div>
               <span className="text-[10px] font-black text-slate-400">iDEAL</span>
-           </div>
-           <div className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 flex items-center gap-2">
+           </button>
+           <button 
+             onClick={startFlow}
+             className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 flex items-center gap-2 hover:bg-slate-100 transition-colors cursor-pointer"
+           >
               <div className="w-4 h-4 bg-slate-900 rounded-sm flex items-center justify-center text-[6px] text-white font-black italic">S</div>
               <span className="text-[10px] font-black text-slate-400">STRIPE</span>
-           </div>
+           </button>
         </div>
       </div>
 

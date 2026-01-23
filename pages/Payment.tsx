@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { ICONS } from '../constants';
-import { Badge } from '../components/ui/Badge';
 
 interface PaymentProps {
   data: any;
@@ -22,7 +21,6 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
     'ING', 'Rabobank', 'ABN AMRO', 'SNS Bank', 'ASN Bank', 'RegioBank', 'Triodos Bank', 'Knab', 'Bunq', 'Revolut'
   ];
 
-  // Zorg dat de view naar boven springt bij laden
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -30,7 +28,6 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
   const handlePayment = () => {
     if (selectedMethod === 'ideal' && !selectedBank) {
       setShowBankError(true);
-      // Scroll naar bankselectie als deze gemist is
       document.getElementById('bank-select')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
@@ -38,7 +35,8 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
     setIsProcessing(true);
     setTimeout(() => {
       onSuccess(data);
-      navigate('/mediation');
+      // Na betaling gaan we naar de uitnodigingspagina
+      navigate('/invite-partner');
     }, 2800);
   };
 
@@ -54,7 +52,6 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
         </header>
 
         <Card className="p-0 overflow-hidden border-none shadow-2xl rounded-[32px] bg-white">
-          {/* Order Summary Section */}
           <div className="bg-slate-900 text-white p-8 relative overflow-hidden">
              <div className="absolute -top-4 -right-4 opacity-10 rotate-12">
                 <ICONS.Credits className="w-32 h-32" />
@@ -76,17 +73,15 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
           </div>
 
           <div className="p-8 space-y-8 bg-white">
-            {/* Payment Selector */}
             <div className="space-y-4">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1">Betaalmethode</label>
-              
               <div className="grid grid-cols-2 gap-4">
                 <button 
                   onClick={() => setSelectedMethod('ideal')}
                   className={`relative flex flex-col items-center justify-center p-6 rounded-3xl border-2 transition-all gap-3 ${selectedMethod === 'ideal' ? 'border-blue-500 bg-blue-50' : 'border-slate-100 hover:border-slate-200 bg-slate-50/50'}`}
                 >
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${selectedMethod === 'ideal' ? 'bg-pink-600' : 'bg-slate-200'}`}>
-                    <span className="text-[10px] font-black text-white italic">iDEAL</span>
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${selectedMethod === 'ideal' ? 'bg-[#ff0066]' : 'bg-slate-200'}`}>
+                    <span className="text-[10px] font-black text-white italic uppercase tracking-tighter">iDEAL</span>
                   </div>
                   <span className={`text-xs font-black uppercase tracking-widest ${selectedMethod === 'ideal' ? 'text-blue-600' : 'text-slate-400'}`}>iDEAL</span>
                   {selectedMethod === 'ideal' && <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 shadow-lg border-2 border-white"><ICONS.Check className="w-3 h-3 text-white" /></div>}
@@ -104,9 +99,8 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
                 </button>
               </div>
 
-              {/* Specific Inputs */}
               <div className="pt-2" id="bank-select">
-                {selectedMethod === 'ideal' ? (
+                {selectedMethod === 'ideal' && (
                   <div className="animate-in slide-in-from-top-2 duration-300">
                     <select 
                       value={selectedBank}
@@ -123,30 +117,10 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
                     </select>
                     {showBankError && <p className="text-red-500 text-[10px] font-black mt-3 ml-1 uppercase tracking-widest animate-pulse">Selecteer een bank om door te gaan</p>}
                   </div>
-                ) : (
-                  <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
-                     <div className="p-5 rounded-2xl border-2 border-slate-100 bg-slate-50 flex flex-col gap-4">
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kaartgegevens</label>
-                          <div className="flex items-center justify-between text-slate-400">
-                             <span className="text-sm font-mono tracking-[0.2em]">•••• •••• •••• ••••</span>
-                             <div className="flex gap-2">
-                                <div className="w-6 h-4 bg-slate-200 rounded-sm"></div>
-                                <div className="w-6 h-4 bg-slate-200 rounded-sm"></div>
-                             </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-6 pt-3 border-t border-slate-200">
-                           <div className="flex-1 text-[10px] text-slate-400 font-bold uppercase tracking-widest">VERVALDATUM</div>
-                           <div className="w-12 text-[10px] text-slate-400 font-bold uppercase tracking-widest text-right">CVC</div>
-                        </div>
-                     </div>
-                  </div>
                 )}
               </div>
             </div>
 
-            {/* Action Section */}
             <div className="space-y-6">
               <Button 
                 size="lg" 
@@ -154,9 +128,7 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
                 onClick={handlePayment}
                 isLoading={isProcessing}
               >
-                {isProcessing ? 'Verwerken...' : 
-                 selectedMethod === 'ideal' && selectedBank ? `Betaal met ${selectedBank}` : 
-                 selectedMethod === 'card' ? 'Betaal €3,99' : 'Nu Afrekenen €3,99'}
+                {isProcessing ? 'Verwerken...' : `Betaal €3,99`}
               </Button>
 
               <div className="flex flex-col items-center gap-4 pt-4 border-t border-slate-100">
@@ -175,13 +147,8 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
             </div>
           </div>
         </Card>
-        
-        <p className="text-center text-[9px] text-slate-400 font-medium">
-          Rsolve B.V. • Beveiligde transactie via Stripe Connect
-        </p>
       </div>
 
-      {/* Real-time Processing Overlay */}
       {isProcessing && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl z-[100] flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
           <div className="bg-white rounded-[40px] p-12 max-w-sm w-full shadow-2xl space-y-8 animate-in zoom-in-95">
@@ -190,9 +157,9 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
               <div className="absolute inset-0 border-8 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-900">Verwerken...</h2>
+              <h2 className="text-2xl font-black text-slate-900">Betaling valideren</h2>
               <p className="text-slate-500 font-medium text-sm leading-relaxed">
-                We openen de beveiligde bankomgeving. Sluit dit venster niet.
+                Een ogenblik geduld terwijl we de betaling afronden.
               </p>
             </div>
           </div>

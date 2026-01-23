@@ -9,6 +9,7 @@ import Mediation from './pages/Mediation';
 import VSO from './pages/VSO';
 import Payment from './pages/Payment';
 import JoinCase from './pages/JoinCase';
+import InvitePartner from './pages/InvitePartner';
 
 const App: React.FC = () => {
   const [activeCase, setActiveCase] = useState<any>(() => {
@@ -52,12 +53,15 @@ const App: React.FC = () => {
               <Landing />
             } />
             <Route path="/setup" element={<Setup onComplete={(data) => setPendingCase(data)} />} />
+            <Route path="/invite-partner" element={
+              activeCase ? <InvitePartner caseData={activeCase} /> : <Navigate to="/" />
+            } />
             <Route path="/invite/:id" element={<JoinCase />} />
             <Route path="/payment" element={
               <Payment 
-                data={pendingCase || { title: 'Demo Conflict', description: 'Test dossier' }} 
+                data={pendingCase} 
                 onSuccess={(data) => {
-                  setActiveCase(data || { title: 'Demo Conflict', otherParty: 'Tegenpartij', goal: 'Oplossing' });
+                  setActiveCase(data);
                   setPendingCase(null);
                 }} 
               />
