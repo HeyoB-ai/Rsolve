@@ -26,13 +26,19 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center p-6 pt-12">
-      <div className="w-full max-w-md space-y-6 animate-in fade-in slide-in-from-bottom-6">
+      <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <img 
-            src="logo.png" 
+            src="/logo.png" 
             alt="Rsolve" 
-            className="w-24 h-24 mx-auto mb-6 drop-shadow-md"
-            onError={(e) => e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png'}
+            className="w-24 h-24 mx-auto mb-6"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (!target.dataset.tried) {
+                target.dataset.tried = 'true';
+                target.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png';
+              }
+            }}
           />
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Eénmalige Betaling</h1>
           <p className="text-sm text-slate-500 font-medium">Betaling voor AI Mediation Dossier</p>
@@ -64,7 +70,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
 
             <Button 
               size="lg" 
-              className="w-full rounded-2xl py-6 text-xl font-black shadow-2xl shadow-blue-100" 
+              className="w-full rounded-2xl py-6 text-xl font-black shadow-lg" 
               onClick={handlePayment}
               disabled={!selectedBank || isProcessing}
               isLoading={isProcessing}
@@ -87,7 +93,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
       </div>
 
       {isProcessing && (
-        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-in fade-in duration-300">
+        <div className="fixed inset-0 bg-white/95 z-50 flex flex-col items-center justify-center">
            <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
            <p className="font-black text-slate-900 uppercase tracking-widest text-center">
              Betaling valideren...

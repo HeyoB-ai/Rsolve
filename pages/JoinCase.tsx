@@ -25,10 +25,16 @@ const JoinCase: React.FC = () => {
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-md space-y-8 text-center">
         <img 
-          src="logo.png" 
+          src="/logo.png" 
           alt="Rsolve" 
-          className="w-24 h-24 mx-auto mb-4 drop-shadow-xl"
-          onError={(e) => e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png'}
+          className="w-24 h-24 mx-auto mb-4"
+          onError={(e) => {
+            const target = e.currentTarget;
+            if (!target.dataset.tried) {
+              target.dataset.tried = 'true';
+              target.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png';
+            }
+          }}
         />
         
         <div className="space-y-4">

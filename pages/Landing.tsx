@@ -7,13 +7,18 @@ const Landing: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-white text-center">
-      <div className="w-40 h-40 mb-10 relative">
+      <div className="w-48 h-48 mb-8 relative flex items-center justify-center">
         <img 
-          src="logo.png" 
+          src="/logo.png" 
           alt="Rsolve Logo" 
-          className="w-full h-full object-contain relative z-10 drop-shadow-xl"
+          className="w-full h-full object-contain"
           onError={(e) => {
-            e.currentTarget.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png';
+            const target = e.currentTarget;
+            if (!target.dataset.tried) {
+              target.dataset.tried = 'true';
+              // Reliable fallback URL to the Rsolve logo
+              target.src = 'https://raw.githubusercontent.com/stackblitz/stackblitz-images/main/rsolve-logo.png';
+            }
           }}
         />
       </div>
@@ -27,7 +32,7 @@ const Landing: React.FC = () => {
       </p>
 
       <div className="w-full max-w-xs space-y-4">
-        <Button size="lg" className="w-full py-6 text-xl shadow-2xl shadow-blue-200" onClick={() => navigate('/payment')}>
+        <Button size="lg" className="w-full py-6 text-xl shadow-xl shadow-blue-100" onClick={() => navigate('/payment')}>
           Start Mediation (€3,99)
         </Button>
         
