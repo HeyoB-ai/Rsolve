@@ -21,7 +21,10 @@ const Setup: React.FC<{ onComplete: (data: any) => void }> = ({ onComplete }) =>
   const handleNext = () => {
     if (step < steps.length - 1) {
       setStep(step + 1);
+      window.scrollTo(0, 0);
     } else {
+      // Sla op in localStorage voor robuustheid bij redirects
+      localStorage.setItem('rsolve_pending_case', JSON.stringify(formData));
       onComplete(formData);
       navigate('/payment');
     }
@@ -33,28 +36,28 @@ const Setup: React.FC<{ onComplete: (data: any) => void }> = ({ onComplete }) =>
         <button onClick={() => navigate('/')} className="p-2 -ml-2 text-slate-400">
            <ICONS.X />
         </button>
-        <h1 className="text-sm font-bold text-slate-900 uppercase tracking-widest">Nieuw Conflict</h1>
+        <h1 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Nieuw Dossier</h1>
         <div className="w-8" />
       </header>
 
       <Stepper steps={steps} currentStep={step} />
 
-      <div className="flex-1 space-y-8 animate-in fade-in slide-in-from-bottom-4">
+      <div className="flex-1 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         {step === 0 && (
           <div className="space-y-6">
-            <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-900">Wat is er aan de hand?</h2>
-              <p className="text-sm text-slate-500 font-medium">Geef je conflict een naam en beschrijf kort wat er is gebeurd.</p>
+            <div className="space-y-2 text-center">
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Wat is er gebeurd?</h2>
+              <p className="text-sm text-slate-500 font-medium">Geef je dossier een naam en omschrijf het conflict.</p>
             </div>
             <Input 
               label="Onderwerp"
-              placeholder="Bijv. Te hoge heg, onbetaalde huur..." 
+              placeholder="Bijv. Schade aan schutting" 
               value={formData.title} 
               onChange={e => setFormData({...formData, title: e.target.value})} 
             />
             <Textarea 
               label="Beschrijving"
-              placeholder="Vertel wat er is voorgevallen..." 
+              placeholder="Wat is de aanleiding van dit conflict?" 
               value={formData.description}
               onChange={e => setFormData({...formData, description: e.target.value})}
             />
@@ -63,13 +66,13 @@ const Setup: React.FC<{ onComplete: (data: any) => void }> = ({ onComplete }) =>
 
         {step === 1 && (
           <div className="space-y-6">
-            <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-900">Met wie heb je ruzie?</h2>
+            <div className="space-y-2 text-center">
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Met wie heb je ruzie?</h2>
               <p className="text-sm text-slate-500 font-medium">Vul de naam in van de persoon of het bedrijf.</p>
             </div>
             <Input 
               label="Naam tegenpartij"
-              placeholder="Bijv. Buurman Jan, Verhuurder de Vries..." 
+              placeholder="Bijv. Buurman Jan" 
               value={formData.otherParty}
               onChange={e => setFormData({...formData, otherParty: e.target.value})}
             />
@@ -78,13 +81,13 @@ const Setup: React.FC<{ onComplete: (data: any) => void }> = ({ onComplete }) =>
 
         {step === 2 && (
           <div className="space-y-6">
-            <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-900">Wat wil je bereiken?</h2>
-              <p className="text-sm text-slate-500 font-medium">Wat is voor jou een eerlijke oplossing?</p>
+            <div className="space-y-2 text-center">
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">De oplossing</h2>
+              <p className="text-sm text-slate-500 font-medium">Wat moet er gebeuren om dit op te lossen?</p>
             </div>
             <Textarea 
-              label="Jouw gewenste oplossing"
-              placeholder="Bijv. De heg moet naar 2 meter, of betaling van €500,- voor de 1e van de maand." 
+              label="Jouw voorstel"
+              placeholder="Bijv. Reparatie van de schutting voor 1 mei." 
               value={formData.goal}
               onChange={e => setFormData({...formData, goal: e.target.value})}
             />
@@ -93,8 +96,8 @@ const Setup: React.FC<{ onComplete: (data: any) => void }> = ({ onComplete }) =>
       </div>
 
       <div className="py-6 mt-auto">
-        <Button size="lg" className="w-full rounded-2xl shadow-lg" onClick={handleNext}>
-          {step === steps.length - 1 ? 'Ga naar betaling' : 'Volgende'}
+        <Button size="lg" className="w-full rounded-2xl shadow-xl py-5" onClick={handleNext}>
+          {step === steps.length - 1 ? 'Naar betaling (€3,99)' : 'Volgende stap'}
         </Button>
       </div>
     </div>
