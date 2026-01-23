@@ -20,7 +20,8 @@ const Landing: React.FC = () => {
       </p>
 
       <div className="w-full max-w-xs space-y-4">
-        <Button size="lg" className="w-full py-6 text-xl shadow-2xl shadow-blue-200" onClick={() => navigate('/setup')}>
+        {/* DIRECT NAAR BETALING */}
+        <Button size="lg" className="w-full py-6 text-xl shadow-2xl shadow-blue-200" onClick={() => navigate('/payment')}>
           Start Mediation (€3,99)
         </Button>
         

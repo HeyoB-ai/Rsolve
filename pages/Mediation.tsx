@@ -5,8 +5,8 @@ import { ICONS } from '../constants';
 
 const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({ caseData, onResolve }) => {
   const [messages, setMessages] = useState([
-    { id: '1', text: `Dossier "${caseData.title}" is nu geopend voor mediation.`, isOwn: false, sender: "Systeem", timestamp: "Nu" },
-    { id: '2', text: `Welkom. Ik ben jullie AI Mediator. We gaan samen op zoek naar een oplossing die voor beiden werkt.`, isOwn: false, sender: "Mediator", timestamp: "Nu" },
+    { id: '1', text: `Mediation voor "${caseData.title}" is gestart.`, isOwn: false, sender: "Systeem", timestamp: "Nu" },
+    { id: '2', text: `Welkom. Ik ben jullie AI Mediator. We gaan samen kijken hoe we tot een oplossing kunnen komen.`, isOwn: false, sender: "Mediator", timestamp: "Nu" },
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isRespondentJoined, setIsRespondentJoined] = useState(false);
@@ -15,22 +15,21 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     
-    // Demo simulatie: tegenpartij komt na 6 seconden online
+    // Simuleer check of tegenpartij er is na 7 seconden
     const timer = setTimeout(() => {
       if (!caseData.isRespondent) {
         setIsRespondentJoined(true);
         setMessages(prev => [...prev, {
-          id: 'system-join',
-          text: `${caseData.otherParty} is zojuist het gesprek binnengekomen via de uitnodigingslink.`,
+          id: 'join-msg',
+          text: `${caseData.otherParty} heeft de uitnodiging geaccepteerd en neemt nu deel aan het gesprek.`,
           isOwn: false,
           sender: "Systeem",
           timestamp: "Zojuist"
         }]);
       } else {
-        // Als je zelf de genodigde bent, is de initiator er al
         setIsRespondentJoined(true);
       }
-    }, 6000);
+    }, 7000);
     
     return () => clearTimeout(timer);
   }, [caseData]);
@@ -45,13 +44,6 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }]);
     setInputValue('');
-  };
-
-  const inviteLink = `https://rsolve.app/#/invite/${btoa(caseData.title || "dossier").substring(0, 8)}`;
-
-  const shareWhatsApp = () => {
-    const text = encodeURIComponent(`Hoi! Ik heb een dossier aangemaakt bij Rsolve om ons conflict "${caseData.title}" op te lossen: ${inviteLink}`);
-    window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
   return (
@@ -71,11 +63,7 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
             </div>
           </div>
         </div>
-        {!caseData.isRespondent && !isRespondentJoined && (
-          <Button variant="outline" size="sm" className="rounded-xl border-blue-100 text-blue-600 text-[10px] h-9" onClick={shareWhatsApp}>
-             WhatsApp Uitnodiging
-          </Button>
-        )}
+        <button className="text-slate-400 p-2"><ICONS.Settings className="w-5 h-5" /></button>
       </header>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">

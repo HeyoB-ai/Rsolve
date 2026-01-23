@@ -5,11 +5,10 @@ import { Card } from '../components/ui/Card';
 import { ICONS } from '../constants';
 
 interface PaymentProps {
-  data: any;
-  onSuccess: (data: any) => void;
+  onSuccess: () => void;
 }
 
-const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
+const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedBank, setSelectedBank] = useState('');
@@ -21,10 +20,10 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
     
     setIsProcessing(true);
     setTimeout(() => {
-      onSuccess(data);
-      // BELANGRIJK: Na betaling MOET je iemand uitnodigen
-      navigate('/invite-partner');
-    }, 2500);
+      onSuccess();
+      // Na betaling gaan we naar de Setup om het dossier te definiëren
+      navigate('/setup');
+    }, 2000);
   };
 
   return (
@@ -34,16 +33,16 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
           <div className="inline-flex w-16 h-16 bg-blue-600 rounded-[22px] items-center justify-center mb-6 shadow-xl shadow-blue-200">
             <span className="text-3xl font-black text-white italic">R</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Afrekenen</h1>
-          <p className="text-sm text-slate-500 font-medium">Betaal eenmalig voor je mediation dossier</p>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Eénmalige Betaling</h1>
+          <p className="text-sm text-slate-500 font-medium">Krijg direct toegang tot de AI Mediator</p>
         </div>
 
         <Card className="p-0 overflow-hidden border-none shadow-2xl rounded-[32px] bg-white">
           <div className="bg-slate-900 text-white p-8">
             <div className="flex justify-between items-end">
               <div>
-                <h2 className="text-lg font-black mb-1 truncate max-w-[200px]">{data?.title || 'Nieuw Dossier'}</h2>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Full AI Mediation Access</p>
+                <h2 className="text-lg font-black mb-1">Nieuw Dossier</h2>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Full Mediation Service</p>
               </div>
               <div className="text-3xl font-black text-blue-400">€3,99</div>
             </div>
@@ -51,7 +50,7 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
 
           <div className="p-8 space-y-6">
             <div className="space-y-4">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1">Kies je bank (iDEAL)</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1 text-center">Kies je bank (iDEAL)</label>
               <select 
                 value={selectedBank}
                 onChange={(e) => setSelectedBank(e.target.value)}
@@ -69,15 +68,29 @@ const Payment: React.FC<PaymentProps> = ({ data, onSuccess }) => {
               disabled={!selectedBank || isProcessing}
               isLoading={isProcessing}
             >
-              Betaal Nu
+              Betaal €3,99
             </Button>
 
-            <div className="text-center">
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Veilig betalen via Stripe</p>
+            <div className="flex items-center justify-center gap-2 pt-2 grayscale opacity-30">
+               <span className="text-[10px] font-black uppercase tracking-widest">Powered by Stripe</span>
             </div>
           </div>
         </Card>
+        
+        <button 
+          onClick={() => navigate('/')}
+          className="w-full text-center text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors"
+        >
+          Annuleren
+        </button>
       </div>
+
+      {isProcessing && (
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-in fade-in duration-300">
+           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+           <p className="font-black text-slate-900 uppercase tracking-widest animate-pulse">Betaling verwerken...</p>
+        </div>
+      )}
     </div>
   );
 };

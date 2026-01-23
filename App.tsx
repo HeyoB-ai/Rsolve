@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -17,9 +16,8 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : null;
   });
 
-  const [pendingCase, setPendingCase] = useState<any>(() => {
-    const saved = localStorage.getItem('rsolve_pending_case');
-    return saved ? JSON.parse(saved) : null;
+  const [hasPaid, setHasPaid] = useState<boolean>(() => {
+    return localStorage.getItem('rsolve_has_paid') === 'true';
   });
 
   const [finalVSO, setFinalVSO] = useState<any>(() => {
@@ -33,9 +31,8 @@ const App: React.FC = () => {
   }, [activeCase]);
 
   useEffect(() => {
-    if (pendingCase) localStorage.setItem('rsolve_pending_case', JSON.stringify(pendingCase));
-    else localStorage.removeItem('rsolve_pending_case');
-  }, [pendingCase]);
+    localStorage.setItem('rsolve_has_paid', hasPaid.toString());
+  }, [hasPaid]);
 
   useEffect(() => {
     if (finalVSO) localStorage.setItem('rsolve_final_vso', JSON.stringify(finalVSO));
@@ -52,34 +49,39 @@ const App: React.FC = () => {
               activeCase ? <Navigate to="/mediation" /> : 
               <Landing />
             } />
-            <Route path="/setup" element={<Setup onComplete={(data) => setPendingCase(data)} />} />
+            
+            <Route path="/payment" element={
+              <Payment onSuccess={() => setHasPaid(true)} />
+            } />
+
+            <Route path="/setup" element={
+              hasPaid ? <Setup onComplete={(data) => setActiveCase(data)} /> : <Navigate to="/payment" />
+            } />
+
             <Route path="/invite-partner" element={
               activeCase ? <InvitePartner caseData={activeCase} /> : <Navigate to="/" />
             } />
+
             <Route path="/invite/:id" element={<JoinCase />} />
-            <Route path="/payment" element={
-              <Payment 
-                data={pendingCase} 
-                onSuccess={(data) => {
-                  setActiveCase(data);
-                  setPendingCase(null);
-                }} 
-              />
-            } />
+
             <Route path="/mediation" element={
               activeCase ? <Mediation caseData={activeCase} onResolve={(vso) => {
                 setFinalVSO(vso);
                 setActiveCase(null);
+                setHasPaid(false);
               }} /> : <Navigate to="/" />
             } />
+
             <Route path="/vso" element={
               finalVSO ? <VSO data={finalVSO} onReset={() => {
                 setFinalVSO(null);
                 setActiveCase(null);
+                setHasPaid(false);
                 localStorage.clear();
                 window.location.href = '#/';
               }} /> : <Navigate to="/" />
             } />
+            
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>
