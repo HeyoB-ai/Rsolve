@@ -8,6 +8,7 @@ import Setup from './pages/Setup';
 import Mediation from './pages/Mediation';
 import VSO from './pages/VSO';
 import Payment from './pages/Payment';
+import JoinCase from './pages/JoinCase';
 
 const App: React.FC = () => {
   const [activeCase, setActiveCase] = useState<any>(() => {
@@ -51,6 +52,7 @@ const App: React.FC = () => {
               <Landing />
             } />
             <Route path="/setup" element={<Setup onComplete={(data) => setPendingCase(data)} />} />
+            <Route path="/invite/:id" element={<JoinCase />} />
             <Route path="/payment" element={
               <Payment 
                 data={pendingCase || { title: 'Demo Conflict', description: 'Test dossier' }} 

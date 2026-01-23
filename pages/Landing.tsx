@@ -21,18 +21,20 @@ const Landing: React.FC = () => {
       </p>
 
       <div className="w-full max-w-xs space-y-4">
-        <Button size="lg" className="w-full py-6 text-xl" onClick={() => navigate('/setup')}>
+        <Button size="lg" className="w-full py-6 text-xl shadow-2xl shadow-blue-100" onClick={() => navigate('/setup')}>
           Start Mediation (€3,99)
         </Button>
         
-        {/* DEBUG/PREVIEW KNOP OM DIRECT BETAALMOGELIJKHEID TE ZIEN */}
         <Button 
           variant="outline" 
           size="md" 
-          className="w-full border-dashed" 
-          onClick={() => navigate('/payment')}
+          className="w-full border-slate-200 text-slate-600" 
+          onClick={() => {
+            const code = prompt("Voer je dossier-code in:");
+            if (code) navigate(`/invite/${code}`);
+          }}
         >
-          Bekijk Betaalpagina (Demo)
+          Ik ben uitgenodigd
         </Button>
 
         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest pt-4">
