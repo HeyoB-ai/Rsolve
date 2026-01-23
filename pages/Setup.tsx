@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -23,9 +22,11 @@ const Setup: React.FC<{ onComplete: (data: any) => void }> = ({ onComplete }) =>
       setStep(step + 1);
       window.scrollTo(0, 0);
     } else {
-      // Sla op in localStorage voor robuustheid bij redirects
-      localStorage.setItem('rsolve_pending_case', JSON.stringify(formData));
-      onComplete(formData);
+      // Sla op in state en localStorage
+      const dataToSave = { ...formData, id: Math.random().toString(36).substr(2, 9) };
+      localStorage.setItem('rsolve_pending_case', JSON.stringify(dataToSave));
+      onComplete(dataToSave);
+      // Navigeer direct naar de betaalpagina
       navigate('/payment');
     }
   };
@@ -36,28 +37,28 @@ const Setup: React.FC<{ onComplete: (data: any) => void }> = ({ onComplete }) =>
         <button onClick={() => navigate('/')} className="p-2 -ml-2 text-slate-400">
            <ICONS.X />
         </button>
-        <h1 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Nieuw Dossier</h1>
+        <h1 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Dossier Opstarten</h1>
         <div className="w-8" />
       </header>
 
       <Stepper steps={steps} currentStep={step} />
 
-      <div className="flex-1 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex-1 space-y-8">
         {step === 0 && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
             <div className="space-y-2 text-center">
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Wat is er gebeurd?</h2>
-              <p className="text-sm text-slate-500 font-medium">Geef je dossier een naam en omschrijf het conflict.</p>
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Wat is de situatie?</h2>
+              <p className="text-sm text-slate-500 font-medium">Omschrijf kort waar het conflict over gaat.</p>
             </div>
             <Input 
               label="Onderwerp"
-              placeholder="Bijv. Schade aan schutting" 
+              placeholder="Bijv. Terugbetaling lening" 
               value={formData.title} 
               onChange={e => setFormData({...formData, title: e.target.value})} 
             />
             <Textarea 
               label="Beschrijving"
-              placeholder="Wat is de aanleiding van dit conflict?" 
+              placeholder="Wat is er gebeurd?" 
               value={formData.description}
               onChange={e => setFormData({...formData, description: e.target.value})}
             />
@@ -65,14 +66,14 @@ const Setup: React.FC<{ onComplete: (data: any) => void }> = ({ onComplete }) =>
         )}
 
         {step === 1 && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
             <div className="space-y-2 text-center">
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Met wie heb je ruzie?</h2>
-              <p className="text-sm text-slate-500 font-medium">Vul de naam in van de persoon of het bedrijf.</p>
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Wie is de tegenpartij?</h2>
+              <p className="text-sm text-slate-500 font-medium">Met wie wil je dit conflict oplossen?</p>
             </div>
             <Input 
               label="Naam tegenpartij"
-              placeholder="Bijv. Buurman Jan" 
+              placeholder="Naam van persoon of bedrijf" 
               value={formData.otherParty}
               onChange={e => setFormData({...formData, otherParty: e.target.value})}
             />
@@ -80,14 +81,14 @@ const Setup: React.FC<{ onComplete: (data: any) => void }> = ({ onComplete }) =>
         )}
 
         {step === 2 && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
             <div className="space-y-2 text-center">
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">De oplossing</h2>
-              <p className="text-sm text-slate-500 font-medium">Wat moet er gebeuren om dit op te lossen?</p>
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Wat is het doel?</h2>
+              <p className="text-sm text-slate-500 font-medium">Wanneer is het voor jou opgelost?</p>
             </div>
             <Textarea 
-              label="Jouw voorstel"
-              placeholder="Bijv. Reparatie van de schutting voor 1 mei." 
+              label="Gewenste oplossing"
+              placeholder="Bijv. Ik wil 500 euro terug voor 1 mei." 
               value={formData.goal}
               onChange={e => setFormData({...formData, goal: e.target.value})}
             />

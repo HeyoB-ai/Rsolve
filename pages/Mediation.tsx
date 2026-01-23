@@ -5,8 +5,8 @@ import { ICONS } from '../constants';
 
 const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({ caseData, onResolve }) => {
   const [messages, setMessages] = useState([
-    { id: '1', text: `Dossier "${caseData.title}" is aangemaakt.`, isOwn: false, sender: "Systeem", timestamp: "Nu" },
-    { id: '2', text: `Welkom bij Rsolve. Ik ben jullie AI Mediator. Ik help jullie stap voor stap naar een oplossing.`, isOwn: false, sender: "Mediator", timestamp: "Nu" },
+    { id: '1', text: `Dossier "${caseData.title}" is nu geopend voor mediation.`, isOwn: false, sender: "Systeem", timestamp: "Nu" },
+    { id: '2', text: `Welkom. Ik ben jullie AI Mediator. We gaan samen op zoek naar een oplossing die voor beiden werkt.`, isOwn: false, sender: "Mediator", timestamp: "Nu" },
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isRespondentJoined, setIsRespondentJoined] = useState(false);
@@ -15,22 +15,25 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     
-    // Simuleer check of tegenpartij er is na 5 seconden (voor demo doeleinden)
+    // Demo simulatie: tegenpartij komt na 6 seconden online
     const timer = setTimeout(() => {
       if (!caseData.isRespondent) {
         setIsRespondentJoined(true);
         setMessages(prev => [...prev, {
-          id: 'join-msg',
-          text: `${caseData.otherParty} is zojuist het gesprek binnengekomen.`,
+          id: 'system-join',
+          text: `${caseData.otherParty} is zojuist het gesprek binnengekomen via de uitnodigingslink.`,
           isOwn: false,
           sender: "Systeem",
           timestamp: "Zojuist"
         }]);
+      } else {
+        // Als je zelf de genodigde bent, is de initiator er al
+        setIsRespondentJoined(true);
       }
-    }, 5000);
+    }, 6000);
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [caseData]);
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
@@ -69,7 +72,7 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
           </div>
         </div>
         {!caseData.isRespondent && !isRespondentJoined && (
-          <Button variant="outline" size="sm" className="rounded-xl border-blue-100 text-blue-600 text-[10px]" onClick={shareWhatsApp}>
+          <Button variant="outline" size="sm" className="rounded-xl border-blue-100 text-blue-600 text-[10px] h-9" onClick={shareWhatsApp}>
              WhatsApp Uitnodiging
           </Button>
         )}
