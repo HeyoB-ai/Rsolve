@@ -6,9 +6,23 @@ import { Logo } from '../components/ui/Logo';
 import { geminiService } from '../services/geminiService';
 
 const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({ caseData, onResolve }) => {
+  // Gebruik de naam uit caseData voor het welkomstbericht
   const [messages, setMessages] = useState<any[]>([
-    { id: '1', text: `Mediation voor "${caseData.title}" is gestart.`, isOwn: false, sender: "Systeem", timestamp: "Nu", type: 'system' },
-    { id: '2', text: `Welkom. Ik ben jullie AI Mediator. Omar is uitgenodigd, maar we kunnen alvast beginnen. Vertel me gerust wat jouw kant van het verhaal is.`, isOwn: false, sender: "Mediator", timestamp: "Nu" },
+    { 
+      id: '1', 
+      text: `Mediation voor "${caseData.title}" is gestart.`, 
+      isOwn: false, 
+      sender: "Systeem", 
+      timestamp: "Nu", 
+      type: 'system' 
+    },
+    { 
+      id: '2', 
+      text: `Welkom. Ik ben jullie AI Mediator. ${caseData.otherParty} is uitgenodigd, maar we kunnen alvast beginnen. Vertel me gerust wat jouw kant van het verhaal is.`, 
+      isOwn: false, 
+      sender: "Mediator", 
+      timestamp: "Nu" 
+    },
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isRespondentJoined, setIsRespondentJoined] = useState(caseData.isRespondent || false);
@@ -19,17 +33,6 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  const addSystemMessage = (text: string) => {
-    setMessages(prev => [...prev, {
-      id: Date.now().toString(),
-      text,
-      isOwn: false,
-      sender: "Systeem",
-      timestamp: "Nu",
-      type: 'system'
-    }]);
-  };
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
@@ -52,11 +55,11 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
       if (detection.isNonDutch && !pendingLanguageApproval) {
         setPendingLanguageApproval(detection.language);
         
-        // Mediator stelt vraag aan de ANDERE partij (fictief in dit demo-scenario)
+        // Mediator stelt vraag
         setTimeout(() => {
           setMessages(prev => [...prev, {
             id: Date.now().toString(),
-            text: `Ik merk dat er in het ${detection.language} wordt gecommuniceerd. Is het goed als we in deze taal verdergaan, of zal ik vanaf nu alles automatisch vertalen?`,
+            text: `Ik merk dat er in het ${detection.language} wordt gecommuniceerd. Is het goed als we in deze taal verdergaan of zal ik vanaf nu alles automatisch vertalen?`,
             isOwn: false,
             sender: "Mediator",
             timestamp: "Zojuist",
@@ -100,7 +103,7 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
             </div>
           </div>
         </div>
-        <button className="text-slate-300 p-2"><ICONS.Settings className="w-5 h-5" /></button>
+        <div className="w-8" /> 
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -143,7 +146,7 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
           <div className="mx-auto max-w-xs bg-amber-50/80 backdrop-blur-sm border border-amber-100 p-3 rounded-2xl text-center shadow-sm">
             <p className="text-[9px] font-black text-amber-600 uppercase tracking-[0.2em] mb-0.5">Dossier Status</p>
             <p className="text-[10px] text-amber-800 font-semibold leading-tight">
-              Link is verstuurd. Je kunt de mediator alvast informeren in je eigen taal.
+              Link is verstuurd naar {caseData.otherParty}. Je kunt de mediator alvast informeren in je eigen taal.
             </p>
           </div>
         )}

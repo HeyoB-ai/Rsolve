@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { ICONS } from '../../constants';
 import { geminiService } from '../../services/geminiService';
 
 interface ChatBubbleProps {
@@ -17,14 +16,12 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
   useEffect(() => {
     if (autoTranslateTo && !isOwn) {
       handleTranslate(autoTranslateTo);
+    } else if (!autoTranslateTo) {
+      setTranslatedText(null);
     }
-  }, [autoTranslateTo]);
+  }, [autoTranslateTo, isOwn, text]);
 
   const handleTranslate = async (lang: string = 'Nederlands') => {
-    if (translatedText && !autoTranslateTo) {
-      setTranslatedText(null);
-      return;
-    }
     setIsTranslating(true);
     const result = await geminiService.translateText(text, lang);
     setTranslatedText(result);
@@ -57,22 +54,6 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
             </div>
           )}
         </div>
-        
-        {/* Handmatige vertaal-knop (alleen als auto-translate uit staat) */}
-        {!autoTranslateTo && (
-          <button 
-            onClick={() => handleTranslate('Nederlands')}
-            disabled={isTranslating}
-            className={`
-              mt-2 flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest
-              ${isOwn ? 'text-blue-100 hover:text-white' : 'text-slate-400 hover:text-blue-600'}
-              transition-colors
-            `}
-          >
-            <ICONS.Translate className="w-3 h-3" />
-            {translatedText ? 'Toon origineel' : 'Vertaal naar NL'}
-          </button>
-        )}
       </div>
       <span className="text-[9px] text-slate-300 mt-1 mx-2 font-bold uppercase tracking-tighter">{timestamp}</span>
     </div>
