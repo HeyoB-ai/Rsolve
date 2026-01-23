@@ -1,0 +1,8 @@
+{
+  "name": "Rsolve - Conflictbemiddeling",
+  "description": "Eenvoudige AI-gestuurde conflictbemiddeling voor particulieren. Bereik een rechtsgeldige Vaststellingsovereenkomst (VSO) zonder hoge kosten.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
