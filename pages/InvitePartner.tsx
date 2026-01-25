@@ -42,13 +42,14 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
     }]);
 
     if (!error) {
-      // Eerste welkomstbericht
+      // Uitgebreid welkomstbericht van de Mediator inclusief privacy waarschuwing
+      // We gebruiken type: 'text' en sender_id: 'mediator' zodat het als een echte chatbubble verschijnt
       await supabase.from('messages').insert([{
         case_id: newId,
-        sender_id: 'system',
+        sender_id: 'mediator',
         sender_name: 'Mediator',
-        content: `Welkom bij de mediation voor "${formData.title}". Ik ben jullie AI Mediator.`,
-        type: 'system'
+        content: `Welkom. Ik ben jullie AI Mediator. De tegenpartij is uitgenodigd, maar we kunnen alvast beginnen. Vertel me gerust wat jouw kant van het verhaal is en voeg eventueel bewijslast toe via de paperclip.\n\nLET OP: hoewel we ons best doen om alle data zo goed mogelijke te beschermen is het belangrijk om te voorkomen dat er informatie wordt gedeeld die de privacy van deelnemers schendt. Dus noem zo min mogelijk achternamen, adressen en woonplaatsen terwijl je de app gebruikt.`,
+        type: 'text'
       }]);
 
       setCaseId(newId);
