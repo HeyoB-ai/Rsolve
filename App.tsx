@@ -93,7 +93,7 @@ const App: React.FC = () => {
             } />
             <Route path="/payment" element={<Payment onSuccess={() => setHasPaid(true)} t={t} />} />
             <Route path="/invite-partner" element={hasPaid ? <InvitePartner onComplete={(data) => setActiveCase(data)} t={t} /> : <Navigate to="/payment" />} />
-            <Route path="/invite/:id" element={<JoinCase t={t} />} />
+            <Route path="/invite/:id" element={<JoinCase t={t} onJoin={(data) => setActiveCase(data)} />} />
             <Route path="/mediation" element={activeCase ? <Mediation caseData={activeCase} appLanguage={appLanguage} setAppLanguage={setAppLanguage} t={t} onResolve={(vso) => { setFinalVSO(vso); setActiveCase(null); setHasPaid(false); }} /> : <Navigate to="/" />} />
             <Route path="/vso" element={finalVSO ? <VSO data={finalVSO} t={t} onReset={() => { setFinalVSO(null); setActiveCase(null); setHasPaid(false); localStorage.clear(); window.location.href = '#/'; }} /> : <Navigate to="/" />} />
             <Route path="*" element={<Navigate to="/" />} />

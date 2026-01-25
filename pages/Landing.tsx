@@ -76,8 +76,8 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t }) => 
             size="md" 
             className="w-full border-slate-200 text-slate-600 rounded-2xl py-4 hover:bg-slate-50" 
             onClick={() => {
-              const code = prompt("Voer je dossier-code in:");
-              if (code) navigate(`/invite/${code}`);
+              const code = prompt("Voer je dossier-code in (bijv: a1b2c3d4e):");
+              if (code && code.trim()) navigate(`/invite/${code.trim()}`);
             }}
           >
             {t('invited_btn')}
