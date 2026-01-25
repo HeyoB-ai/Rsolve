@@ -11,9 +11,10 @@ interface LandingProps {
   appLanguage: string;
   setAppLanguage: (lang: string) => void;
   t: (key: string) => string;
+  setHasPaid: (val: boolean) => void;
 }
 
-const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t }) => {
+const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHasPaid }) => {
   const navigate = useNavigate();
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
@@ -45,11 +46,10 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t }) => 
         .update({ is_used: true, used_at: new Date().toISOString() })
         .eq('code', data.code);
 
-      // Succes! We zetten has_paid op true in localStorage en gaan naar de setup
+      // Succes! Update state en navigeer
+      setHasPaid(true);
       localStorage.setItem('rsolve_has_paid', 'true');
-      // We moeten ook de app state syncen, maar de Navigate in App.tsx kijkt naar de state.
-      // Echter, op deze manier navigeren we direct naar de invite-partner route die hasPaid checkt.
-      window.location.href = '#/invite-partner';
+      navigate('/invite-partner');
     } catch (err) {
       setPromoError("Fout bij valideren.");
     } finally {
@@ -58,13 +58,13 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t }) => 
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-white text-center overflow-hidden relative">
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8 bg-white text-center overflow-y-auto relative">
       {/* Language Selector Button - Top Right */}
       <button 
         onClick={() => setIsLangModalOpen(true)}
         className="absolute top-6 right-6 p-3 bg-slate-50 rounded-2xl text-slate-600 border border-slate-100 active:scale-95 transition-all shadow-sm z-50 flex items-center gap-2"
       >
-        <ICONS.Globe className="w-6 h-6" />
+        <ICONS.Globe className="w-5 h-5" />
         <span className="text-[10px] font-black uppercase tracking-widest">{UI_TRANSLATIONS[appLanguage].label}</span>
       </button>
 
@@ -111,6 +111,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t }) => 
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value)}
                 error={promoError || undefined}
+                autoFocus
               />
               <Button 
                 size="lg"
@@ -132,21 +133,21 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t }) => 
         </div>
       )}
 
-      <div className="mb-8 animate-in fade-in zoom-in duration-700">
-        <Logo className="w-56 h-56 md:w-64 md:h-64" showText={true} />
+      <div className="mb-4 animate-in fade-in zoom-in duration-700">
+        <Logo className="w-48 h-48 md:w-56 md:h-56" showText={true} />
       </div>
       
       <div className="animate-in slide-in-from-bottom-6 fade-in duration-700 delay-300 fill-mode-both w-full max-w-sm">
-        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-4 leading-tight">
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2 leading-tight">
           {t('tagline')} <br/><span className="text-blue-600 underline decoration-blue-100 underline-offset-8">{t('tagline_highlight')}</span>
         </h1>
         
-        <p className="text-slate-500 text-lg mb-10 max-w-xs mx-auto font-medium">
+        <p className="text-slate-500 text-base mb-8 max-w-[280px] mx-auto font-medium">
           {t('sub_tagline')}
         </p>
 
-        <div className="w-full space-y-4 mx-auto">
-          <Button size="lg" className="w-full py-6 text-xl shadow-2xl shadow-blue-100" onClick={() => navigate('/payment')}>
+        <div className="w-full space-y-3 mx-auto flex flex-col items-center">
+          <Button size="lg" className="w-full py-5 text-xl shadow-xl shadow-blue-100/50" onClick={() => navigate('/payment')}>
             {t('start_btn')}
           </Button>
           
@@ -164,14 +165,14 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t }) => 
 
           <button 
             onClick={() => setIsPromoModalOpen(true)}
-            className="w-full text-center text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] hover:text-blue-700 transition-colors py-2"
+            className="w-full text-center text-[11px] font-black text-blue-600 uppercase tracking-[0.15em] hover:text-blue-800 transition-all py-3 active:scale-95"
           >
             Ik heb een toegangscode
           </button>
         </div>
       </div>
 
-      <div className="mt-20 pt-8 border-t border-slate-50 w-full max-w-xs animate-in fade-in duration-1000 delay-700 fill-mode-both">
+      <div className="mt-12 pt-6 border-t border-slate-50 w-full max-w-xs animate-in fade-in duration-1000 delay-700 fill-mode-both">
         <div className="flex justify-center gap-4 opacity-40 items-center">
           <span className="text-[9px] font-black text-slate-400 tracking-widest uppercase">{t('legal_vso')}</span>
         </div>

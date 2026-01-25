@@ -89,7 +89,7 @@ const App: React.FC = () => {
             <Route path="/" element={
               finalVSO ? <Navigate to="/vso" /> : 
               activeCase ? <Navigate to="/mediation" /> : 
-              <Landing appLanguage={appLanguage} setAppLanguage={setAppLanguage} t={t} />
+              <Landing appLanguage={appLanguage} setAppLanguage={setAppLanguage} t={t} setHasPaid={setHasPaid} />
             } />
             <Route path="/payment" element={<Payment onSuccess={() => setHasPaid(true)} t={t} />} />
             <Route path="/invite-partner" element={hasPaid ? <InvitePartner onComplete={(data) => setActiveCase(data)} t={t} /> : <Navigate to="/payment" />} />
