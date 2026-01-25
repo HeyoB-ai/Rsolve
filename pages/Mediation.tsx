@@ -6,6 +6,7 @@ import { ICONS, UI_TRANSLATIONS } from '../constants';
 import { Logo } from '../components/ui/Logo';
 import { geminiService } from '../services/geminiService';
 import { supabase } from '../lib/supabase';
+import { Card } from '../components/ui/Card';
 
 interface MediationProps {
   caseData: any;
@@ -25,10 +26,14 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
+  // VSO Flow States
+  const [isVSOReviewOpen, setIsVSOReviewOpen] = useState(false);
+  const [vsoConcept, setVsoConcept] = useState<string | null>(null);
+  const [isGeneratingVSO, setIsGeneratingVSO] = useState(false);
+  
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 1. Initial Load
   useEffect(() => {
     const fetchMessages = async () => {
       const { data, error } = await supabase
@@ -53,7 +58,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     fetchMessages();
   }, [caseData.id]);
 
-  // 2. Real-time Subscription
   useEffect(() => {
     const channel = supabase
       .channel(`case_${caseData.id}`)
@@ -114,7 +118,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     const textToSend = inputValue;
     setInputValue('');
 
-    // 1. Voeg bericht toe aan Supabase
     const { data: userMsg, error } = await supabase.from('messages').insert([{
       case_id: caseData.id,
       sender_id: caseData.isRespondent ? 'respondent' : 'initiator',
@@ -125,18 +128,13 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
     if (error) return;
 
-    // 2. Trigger Mediator AI
     setIsAiThinking(true);
-    
-    // We pakken de laatste 10 berichten voor context
     const chatHistory = [...messages, { sender: caseData.isRespondent ? 'Respondent' : 'Initiator', text: textToSend }]
-      .slice(-10)
+      .slice(-15)
       .map(m => ({ sender: m.sender, text: m.text }));
 
     try {
       const aiResponse = await geminiService.generateMediatorResponse(chatHistory, caseData.title);
-      
-      // 3. Sla AI antwoord op in Supabase (zodat andere partij het ook ziet)
       await supabase.from('messages').insert([{
         case_id: caseData.id,
         sender_id: 'mediator',
@@ -149,6 +147,34 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     } finally {
       setIsAiThinking(false);
     }
+  };
+
+  const startVSOFlow = async () => {
+    setIsGeneratingVSO(true);
+    setIsVSOReviewOpen(true);
+    
+    const chatHistory = messages
+      .filter(m => m.type === 'text')
+      .map(m => ({ sender: m.sender, text: m.text }));
+
+    try {
+      const terms = await geminiService.generateVSOTerms(chatHistory, caseData.title);
+      setVsoConcept(terms);
+    } catch (e) {
+      setVsoConcept("Er kon geen automatische samenvatting gemaakt worden.");
+    } finally {
+      setIsGeneratingVSO(false);
+    }
+  };
+
+  const handleVSOPrefix = () => {
+    const vsoData = {
+      title: caseData.title,
+      parties: `${caseData.isRespondent ? 'Tegenpartij' : 'Jij'} en ${caseData.isRespondent ? 'Jij' : caseData.otherParty}`,
+      terms: vsoConcept,
+      date: new Date().toLocaleDateString('nl-NL')
+    };
+    onResolve(vsoData);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -173,6 +199,62 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   return (
     <div className="h-safe flex flex-col bg-slate-50 overflow-hidden relative">
+      {/* VSO Review Modal */}
+      {isVSOReviewOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300">
+           <Card className="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border-none">
+              <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2">
+                  <ICONS.Check className="w-5 h-5 text-emerald-500" />
+                  <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Controleer Afspraken</h2>
+                </div>
+                <button onClick={() => setIsVSOReviewOpen(false)} className="p-2 text-slate-400"><ICONS.X /></button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-8">
+                 {isGeneratingVSO ? (
+                    <div className="flex flex-col items-center justify-center py-12 gap-4">
+                       <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                       <p className="text-sm font-black text-slate-400 uppercase tracking-widest text-center animate-pulse">De AI stelt het document op...</p>
+                    </div>
+                 ) : (
+                    <div className="space-y-6">
+                       <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                          Op basis van jullie gesprek heeft de mediator de volgende afspraken geformuleerd. Lees ze goed door voordat je het document definitief maakt.
+                       </p>
+                       <div className="bg-slate-50 p-6 rounded-2xl border-l-4 border-blue-600 font-serif italic text-slate-700 leading-relaxed shadow-inner">
+                          {vsoConcept}
+                       </div>
+                       <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex gap-3">
+                          <ICONS.Check className="w-5 h-5 text-emerald-600 shrink-0" />
+                          <p className="text-[10px] text-emerald-800 font-bold leading-tight">
+                             Door te bevestigen wordt er een officieel VSO document gegenereerd dat als bewijs dient van jullie afspraken.
+                          </p>
+                       </div>
+                    </div>
+                 )}
+              </div>
+
+              <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex flex-col gap-3 shrink-0">
+                 <Button 
+                   size="lg" 
+                   className="w-full rounded-2xl py-4 shadow-xl shadow-blue-100" 
+                   disabled={isGeneratingVSO}
+                   onClick={handleVSOPrefix}
+                 >
+                    Bevestig & Maak VSO
+                 </Button>
+                 <button 
+                   onClick={() => setIsVSOReviewOpen(false)}
+                   className="text-xs font-black text-slate-400 uppercase tracking-widest py-2"
+                 >
+                    Terug naar gesprek
+                 </button>
+              </div>
+           </Card>
+        </div>
+      )}
+
       {/* Settings Modal */}
       {isSettingsOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
@@ -215,6 +297,14 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         </div>
         
         <div className="flex items-center gap-2">
+          {messages.length > 5 && isRespondentJoined && (
+            <button 
+              onClick={startVSOFlow}
+              className="px-3 py-2 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-100 active:scale-95 transition-all"
+            >
+              Rond af
+            </button>
+          )}
           <button onClick={() => setIsSettingsOpen(true)} className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all">
             <ICONS.Globe className="w-5 h-5" />
             <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{UI_TRANSLATIONS[appLanguage].label}</span>

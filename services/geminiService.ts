@@ -1,5 +1,5 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 
 export class GeminiService {
   private get ai() {
@@ -72,7 +72,33 @@ export class GeminiService {
     }
   }
 
-  // Fix: Added missing getMediatorSuggestion method to fix error in CaseDetails.tsx
+  // Nieuwe methode: Genereert de formele tekst voor de VSO
+  async generateVSOTerms(chatHistory: {sender: string, text: string}[], caseTitle: string): Promise<string> {
+    const client = this.ai;
+    if (!client) return "Geen afspraken kunnen genereren.";
+    
+    const historyString = chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n');
+    
+    try {
+      const response = await client.models.generateContent({
+        model: 'gemini-3-pro-preview',
+        contents: `Analyseer het volgende chatgesprek van een mediation sessie en stel een formele Vaststellingsovereenkomst (VSO) op. 
+        Formuleer de gemaakte afspraken in juridisch heldere, maar begrijpelijke taal.
+        
+        Titel van het geschil: ${caseTitle}
+        
+        Chatgeschiedenis:
+        ${historyString}
+        
+        Geef ENKEL de genummerde afspraken terug (bijv. 1. Partij A betaalt..., 2. De goederen worden...). Gebruik geen inleiding of afsluiting.`,
+      });
+      return response.text?.trim() || "Partijen hebben geen duidelijke afspraken gemaakt in de chat.";
+    } catch (error) {
+      console.error("VSO Generation error:", error);
+      return "Fout bij het genereren van de overeenkomst.";
+    }
+  }
+
   async getMediatorSuggestion(context: string): Promise<string> {
     const client = this.ai;
     if (!client) return "Focus on finding a constructive middle ground.";
