@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -58,15 +59,21 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
               </select>
             </div>
 
-            <Button 
-              size="lg" 
-              className="w-full rounded-2xl py-6 text-xl font-black shadow-lg" 
-              onClick={handlePayment}
-              disabled={!selectedBank || isProcessing}
-              isLoading={isProcessing}
-            >
-              Betaal €3,99
-            </Button>
+            <div className="space-y-4">
+              <Button 
+                size="lg" 
+                className="w-full rounded-2xl py-6 text-xl font-black shadow-lg" 
+                onClick={handlePayment}
+                disabled={!selectedBank || isProcessing}
+                isLoading={isProcessing}
+              >
+                Betaal €3,99
+              </Button>
+              
+              <p className="text-[10px] text-slate-400 text-center leading-tight px-4">
+                Door op 'Betaal' te klikken ga je akkoord met de <span className="underline cursor-pointer">Gebruiksvoorwaarden</span> en het <span className="underline cursor-pointer">Privacybeleid</span> van Rsolve.
+              </p>
+            </div>
 
             <div className="flex items-center justify-center gap-2 pt-2 grayscale opacity-30">
                <span className="text-[10px] font-black uppercase tracking-widest">Beveiligd door Stripe</span>
