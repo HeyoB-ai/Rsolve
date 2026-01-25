@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Logo } from '../components/ui/Logo';
+import { Input } from '../components/ui/Input';
 import { ICONS, UI_TRANSLATIONS } from '../constants';
+import { supabase } from '../lib/supabase';
 
 interface LandingProps {
   appLanguage: string;
@@ -14,6 +16,46 @@ interface LandingProps {
 const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t }) => {
   const navigate = useNavigate();
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
+  const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [promoError, setPromoError] = useState<string | null>(null);
+
+  const handleVerifyPromoCode = async () => {
+    if (!promoCode.trim()) return;
+    setIsVerifying(true);
+    setPromoError(null);
+
+    try {
+      const { data, error } = await supabase
+        .from('promo_codes')
+        .select('*')
+        .eq('code', promoCode.trim().toUpperCase())
+        .eq('is_used', false)
+        .single();
+
+      if (error || !data) {
+        setPromoError("Ongeldige of reeds gebruikte code.");
+        setIsVerifying(false);
+        return;
+      }
+
+      await supabase
+        .from('promo_codes')
+        .update({ is_used: true, used_at: new Date().toISOString() })
+        .eq('code', data.code);
+
+      // Succes! We zetten has_paid op true in localStorage en gaan naar de setup
+      localStorage.setItem('rsolve_has_paid', 'true');
+      // We moeten ook de app state syncen, maar de Navigate in App.tsx kijkt naar de state.
+      // Echter, op deze manier navigeren we direct naar de invite-partner route die hasPaid checkt.
+      window.location.href = '#/invite-partner';
+    } catch (err) {
+      setPromoError("Fout bij valideren.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-white text-center overflow-hidden relative">
@@ -53,6 +95,43 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t }) => 
         </div>
       )}
 
+      {/* Promo Code Modal */}
+      {isPromoModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden flex flex-col p-8 gap-6">
+            <div className="text-center space-y-2">
+              <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">Voer Toegangscode in</h2>
+              <p className="text-xs text-slate-500 font-medium italic">Heb je een code via je werkgever of verzekeraar?</p>
+            </div>
+            
+            <div className="space-y-4">
+              <Input 
+                placeholder="BIJV. RS-2024-XXXX" 
+                className="rounded-2xl border-2 uppercase font-mono tracking-wider text-center" 
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                error={promoError || undefined}
+              />
+              <Button 
+                size="lg"
+                className="w-full rounded-2xl py-4 shadow-xl" 
+                onClick={handleVerifyPromoCode}
+                isLoading={isVerifying}
+                disabled={!promoCode.trim()}
+              >
+                Valideer Code
+              </Button>
+              <button 
+                onClick={() => setIsPromoModalOpen(false)}
+                className="w-full text-center text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors py-2"
+              >
+                Annuleren
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mb-8 animate-in fade-in zoom-in duration-700">
         <Logo className="w-56 h-56 md:w-64 md:h-64" showText={true} />
       </div>
@@ -82,6 +161,13 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t }) => 
           >
             {t('invited_btn')}
           </Button>
+
+          <button 
+            onClick={() => setIsPromoModalOpen(true)}
+            className="w-full text-center text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] hover:text-blue-700 transition-colors py-2"
+          >
+            Ik heb een toegangscode
+          </button>
         </div>
       </div>
 
