@@ -22,7 +22,7 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
       },
       { 
         id: '2', 
-        text: `Welkom. Ik ben jullie AI Mediator. ${caseData.otherParty} is uitgenodigd, maar we kunnen alvast beginnen. Vertel me gerust wat jouw kant van het verhaal is en voeg eventueel bewijslast toe via de paperclip. LET OP; hoewel we ons best doen om alle data zo goed mogelijke te beschermen is het belangrijk om te voorkomen dat er geen informatie wordt gedeeld die de privacy van deelnemers schendt. Dus noem zo min mogelijk achternamen, adressen en woonplaatsen terwijl je de app gebruikt.`, 
+        text: `Welkom. Ik ben jullie AI Mediator. ${caseData.otherParty} is uitgenodigd, maar we kunnen alvast beginnen. Vertel me gerust wat jouw kant van het verhaal is en voeg eventueel bewijslast toe via de paperclip. LET OP; hoewel we ons best doen om alle data zo goed mogelijke te beschermen is het belangrijk om te voorkomen dat er informatie wordt gedeeld die de privacy van deelnemers schendt. Dus noem zo min mogelijk achternamen, adressen en woonplaatsen terwijl je de app gebruikt.`, 
         isOwn: false, 
         sender: "Mediator", 
         timestamp: "Nu" 
