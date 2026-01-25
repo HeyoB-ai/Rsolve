@@ -7,7 +7,8 @@ export default defineConfig({
   define: {
     'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
     'process.env.SUPABASE_URL': JSON.stringify(process.env.SUPABASE_URL),
-    'process.env.SUPABASE_ANON_KEY': JSON.stringify(process.env.SUPABASE_ANON_KEY),
+    'process.env.SUPABASE_ANON_KEY': JSON.stringify(process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_PUBLIC),
+    'process.env.SUPABASE_ANON_PUBLIC': JSON.stringify(process.env.SUPABASE_ANON_PUBLIC),
   },
   build: {
     outDir: 'dist',

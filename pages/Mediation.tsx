@@ -20,7 +20,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const [inputValue, setInputValue] = useState('');
   const [isRespondentJoined, setIsRespondentJoined] = useState(false);
   const [displayMode, setDisplayMode] = useState<'single' | 'dual'>('single');
-  const [pendingLanguageApproval, setPendingLanguageApproval] = useState<string | null>(null);
+  const [isAiThinking, setIsAiThinking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -28,7 +28,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 1. Initial Load van berichten uit Supabase
+  // 1. Initial Load
   useEffect(() => {
     const fetchMessages = async () => {
       const { data, error } = await supabase
@@ -53,9 +53,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     fetchMessages();
   }, [caseData.id]);
 
-  // 2. Real-time Subscription & Presence
+  // 2. Real-time Subscription
   useEffect(() => {
-    // Abonneer op nieuwe berichten
     const channel = supabase
       .channel(`case_${caseData.id}`)
       .on('postgres_changes', { 
@@ -80,7 +79,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       })
       .subscribe();
 
-    // Presence Tracking (wie is er online)
     const presenceChannel = supabase.channel(`presence_${caseData.id}`, {
       config: { presence: { key: caseData.isRespondent ? 'respondent' : 'initiator' } }
     });
@@ -105,22 +103,61 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isAiThinking]);
 
   const evidenceList = useMemo(() => {
     return messages.filter(m => m.attachment).map(m => ({ ...m.attachment, sender: m.sender, timestamp: m.timestamp }));
   }, [messages]);
 
+  const handleSend = async () => {
+    if (!inputValue.trim()) return;
+    const textToSend = inputValue;
+    setInputValue('');
+
+    // 1. Voeg bericht toe aan Supabase
+    const { data: userMsg, error } = await supabase.from('messages').insert([{
+      case_id: caseData.id,
+      sender_id: caseData.isRespondent ? 'respondent' : 'initiator',
+      sender_name: caseData.isRespondent ? (caseData.respondentName || 'Tegenpartij') : t('you'),
+      content: textToSend,
+      type: 'text'
+    }]).select().single();
+
+    if (error) return;
+
+    // 2. Trigger Mediator AI
+    setIsAiThinking(true);
+    
+    // We pakken de laatste 10 berichten voor context
+    const chatHistory = [...messages, { sender: caseData.isRespondent ? 'Respondent' : 'Initiator', text: textToSend }]
+      .slice(-10)
+      .map(m => ({ sender: m.sender, text: m.text }));
+
+    try {
+      const aiResponse = await geminiService.generateMediatorResponse(chatHistory, caseData.title);
+      
+      // 3. Sla AI antwoord op in Supabase (zodat andere partij het ook ziet)
+      await supabase.from('messages').insert([{
+        case_id: caseData.id,
+        sender_id: 'mediator',
+        sender_name: t('mediator'),
+        content: aiResponse,
+        type: 'text'
+      }]);
+    } catch (e) {
+      console.error("AI Error:", e);
+    } finally {
+      setIsAiThinking(false);
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setIsUploading(true);
-    // Voor demo doen we base64, in productie zou je supabase.storage gebruiken
     const reader = new FileReader();
     reader.onloadend = async () => {
       const base64String = reader.result as string;
-      
       await supabase.from('messages').insert([{
         case_id: caseData.id,
         sender_id: caseData.isRespondent ? 'respondent' : 'initiator',
@@ -129,43 +166,9 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         type: 'attachment',
         attachment_url: base64String
       }]);
-      
       setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
     };
     reader.readAsDataURL(file);
-  };
-
-  const handleSend = async () => {
-    if (!inputValue.trim()) return;
-    const textToSend = inputValue;
-    setInputValue('');
-
-    const { error } = await supabase.from('messages').insert([{
-      case_id: caseData.id,
-      sender_id: caseData.isRespondent ? 'respondent' : 'initiator',
-      sender_name: caseData.isRespondent ? (caseData.respondentName || 'Tegenpartij') : t('you'),
-      content: textToSend,
-      type: 'text'
-    }]);
-
-    if (error) console.error("Fout bij verzenden:", error);
-
-    // AI Detectie (lokaal getriggerd door zender)
-    if (displayMode === 'single') {
-      const detection = await geminiService.detectNonDutch(textToSend);
-      if (detection.isNonDutch && !pendingLanguageApproval) {
-        setPendingLanguageApproval(detection.language);
-        // Systeem bericht toevoegen aan Supabase
-        await supabase.from('messages').insert([{
-          case_id: caseData.id,
-          sender_id: 'system',
-          sender_name: t('mediator'),
-          content: `Ik merk dat er in het ${detection.language} wordt gecommuniceerd. Is het goed als we in deze taal verdergaan?`,
-          type: 'text'
-        }]);
-      }
-    }
   };
 
   return (
@@ -242,15 +245,26 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             />
           );
         })}
+        
+        {isAiThinking && (
+          <div className="flex flex-col items-start max-w-[85%] self-start animate-in fade-in slide-in-from-left-2">
+            <span className="text-[10px] font-black text-slate-400 mb-1 ml-2 uppercase tracking-widest">{t('mediator')} is aan het typen...</span>
+            <div className="bg-white border border-slate-100 px-4 py-3 rounded-[20px] rounded-bl-none shadow-sm flex gap-1">
+              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce" />
+            </div>
+          </div>
+        )}
         <div ref={scrollRef} className="h-4" />
       </div>
 
       <div className="bg-white border-t border-slate-100 px-4 pt-3 pb-safe shrink-0 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
         <div className="flex gap-2 max-w-2xl mx-auto w-full items-end pb-2">
           <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*,video/*,.pdf,.doc,.docx" />
-          <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="p-3 rounded-2xl bg-slate-100 text-slate-500 shrink-0 mb-0.5"><ICONS.Paperclip className="w-5 h-5" /></button>
+          <button onClick={() => fileInputRef.current?.click()} disabled={isUploading || isAiThinking} className="p-3 rounded-2xl bg-slate-100 text-slate-500 shrink-0 mb-0.5"><ICONS.Paperclip className="w-5 h-5" /></button>
           <textarea className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 font-medium resize-none max-h-32" placeholder={t('placeholder')} rows={1} value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }} />
-          <Button size="icon" className="rounded-2xl w-12 h-12 shadow-lg shadow-blue-100 shrink-0" onClick={handleSend} disabled={!inputValue.trim()}><svg className="w-5 h-5 -rotate-45" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></Button>
+          <Button size="icon" className="rounded-2xl w-12 h-12 shadow-lg shadow-blue-100 shrink-0" onClick={handleSend} disabled={!inputValue.trim() || isAiThinking}><svg className="w-5 h-5 -rotate-45" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></Button>
         </div>
       </div>
     </div>
