@@ -1,20 +1,29 @@
+
 import React, { useState, useEffect } from 'react';
 import { geminiService } from '../../services/geminiService';
+import { ICONS } from '../../constants';
+
+interface Attachment {
+  name: string;
+  type: string;
+  url: string; // Base64 or Blob URL
+}
 
 interface ChatBubbleProps {
-  text: string;
+  text?: string;
   isOwn: boolean;
   sender: string;
   timestamp: string;
+  attachment?: Attachment;
   autoTranslateTo?: string | null;
 }
 
-export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, timestamp, autoTranslateTo }) => {
+export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, timestamp, attachment, autoTranslateTo }) => {
   const [translatedText, setTranslatedText] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
 
   useEffect(() => {
-    if (autoTranslateTo && !isOwn) {
+    if (autoTranslateTo && !isOwn && text) {
       handleTranslate(autoTranslateTo);
     } else if (!autoTranslateTo) {
       setTranslatedText(null);
@@ -22,10 +31,61 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
   }, [autoTranslateTo, isOwn, text]);
 
   const handleTranslate = async (lang: string = 'Nederlands') => {
+    if (!text) return;
     setIsTranslating(true);
     const result = await geminiService.translateText(text, lang);
     setTranslatedText(result);
     setIsTranslating(false);
+  };
+
+  const renderAttachment = () => {
+    if (!attachment) return null;
+
+    const isImage = attachment.type.startsWith('image/');
+    const isVideo = attachment.type.startsWith('video/');
+
+    if (isImage) {
+      return (
+        <div className="mt-2 rounded-xl overflow-hidden border border-slate-100 shadow-sm bg-slate-50">
+          <img src={attachment.url} alt={attachment.name} className="max-w-full h-auto block" />
+          <div className="px-3 py-2 bg-white/80 backdrop-blur-sm border-t border-slate-100 flex items-center justify-between">
+            <span className="text-[10px] font-bold text-slate-500 truncate">{attachment.name}</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (isVideo) {
+      return (
+        <div className="mt-2 rounded-xl overflow-hidden border border-slate-100 shadow-sm bg-slate-900">
+          <video controls className="w-full block">
+            <source src={attachment.url} type={attachment.type} />
+          </video>
+          <div className="px-3 py-2 bg-slate-800 flex items-center justify-between">
+            <span className="text-[10px] font-bold text-slate-300 truncate">{attachment.name}</span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <a 
+        href={attachment.url} 
+        download={attachment.name}
+        className={`
+          mt-2 flex items-center gap-3 p-3 rounded-xl border transition-colors
+          ${isOwn ? 'bg-blue-700 border-blue-500 text-white' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}
+        `}
+      >
+        <div className={`p-2 rounded-lg ${isOwn ? 'bg-blue-800' : 'bg-white'}`}>
+          <ICONS.File className="w-5 h-5" />
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <p className="text-xs font-bold truncate">{attachment.name}</p>
+          <p className={`text-[9px] uppercase tracking-widest font-black opacity-60`}>Bijlage • Download</p>
+        </div>
+      </a>
+    );
   };
 
   return (
@@ -35,8 +95,10 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
         relative px-4 py-3 rounded-[20px] shadow-sm transition-all duration-300
         ${isOwn ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border border-slate-100 text-slate-800 rounded-bl-none'}
       `}>
-        <div className="flex flex-col gap-2">
-          <p className="text-sm leading-relaxed">{text}</p>
+        <div className="flex flex-col gap-1">
+          {text && <p className="text-sm leading-relaxed">{text}</p>}
+          
+          {renderAttachment()}
           
           {(translatedText || isTranslating) && (
             <div className={`pt-2 mt-2 border-t ${isOwn ? 'border-blue-500' : 'border-slate-100 animate-in fade-in slide-in-from-top-1'}`}>

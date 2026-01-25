@@ -1,38 +1,86 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChatBubble } from '../components/ui/ChatBubble';
 import { Button } from '../components/ui/Button';
-import { ICONS } from '../constants';
+import { ICONS, TOKENS } from '../constants';
 import { Logo } from '../components/ui/Logo';
 import { geminiService } from '../services/geminiService';
 
 const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({ caseData, onResolve }) => {
-  // Gebruik de naam uit caseData voor het welkomstbericht
-  const [messages, setMessages] = useState<any[]>([
-    { 
-      id: '1', 
-      text: `Mediation voor "${caseData.title}" is gestart.`, 
-      isOwn: false, 
-      sender: "Systeem", 
-      timestamp: "Nu", 
-      type: 'system' 
-    },
-    { 
-      id: '2', 
-      text: `Welkom. Ik ben jullie AI Mediator. ${caseData.otherParty} is uitgenodigd, maar we kunnen alvast beginnen. Vertel me gerust wat jouw kant van het verhaal is.`, 
-      isOwn: false, 
-      sender: "Mediator", 
-      timestamp: "Nu" 
-    },
-  ]);
+  const [messages, setMessages] = useState<any[]>(() => {
+    const saved = localStorage.getItem(`rsolve_chat_${caseData.id}`);
+    if (saved) return JSON.parse(saved);
+    
+    return [
+      { 
+        id: '1', 
+        text: `Mediation voor "${caseData.title}" is gestart.`, 
+        isOwn: false, 
+        sender: "Systeem", 
+        timestamp: "Nu", 
+        type: 'system' 
+      },
+      { 
+        id: '2', 
+        text: `Welkom. Ik ben jullie AI Mediator. ${caseData.otherParty} is uitgenodigd, maar we kunnen alvast beginnen. Vertel me gerust wat jouw kant van het verhaal is en voeg eventueel bewijslast toe via de paperclip.`, 
+        isOwn: false, 
+        sender: "Mediator", 
+        timestamp: "Nu" 
+      },
+    ];
+  });
+
   const [inputValue, setInputValue] = useState('');
   const [isRespondentJoined, setIsRespondentJoined] = useState(caseData.isRespondent || false);
   const [displayMode, setDisplayMode] = useState<'single' | 'dual'>('single');
   const [pendingLanguageApproval, setPendingLanguageApproval] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDossierOpen, setIsDossierOpen] = useState(false);
+  
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Collect all attachments for the dossier
+  const evidenceList = useMemo(() => {
+    return messages
+      .filter(m => m.attachment)
+      .map(m => ({
+        ...m.attachment,
+        sender: m.sender,
+        timestamp: m.timestamp
+      }));
+  }, [messages]);
 
   useEffect(() => {
+    localStorage.setItem(`rsolve_chat_${caseData.id}`, JSON.stringify(messages));
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, caseData.id]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      const newMessage = {
+        id: Date.now().toString(),
+        isOwn: true,
+        sender: "Jij",
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        attachment: {
+          name: file.name,
+          type: file.type,
+          url: base64String
+        }
+      };
+      setMessages(prev => [...prev, newMessage]);
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
@@ -49,13 +97,11 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
     setMessages(prev => [...prev, newMessage]);
     setInputValue('');
 
-    // Check voor vreemde taal
     if (displayMode === 'single') {
       const detection = await geminiService.detectNonDutch(textToSend);
       if (detection.isNonDutch && !pendingLanguageApproval) {
         setPendingLanguageApproval(detection.language);
         
-        // Mediator stelt vraag
         setTimeout(() => {
           setMessages(prev => [...prev, {
             id: Date.now().toString(),
@@ -87,7 +133,64 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
   };
 
   return (
-    <div className="h-safe flex flex-col bg-slate-50 overflow-hidden">
+    <div className="h-safe flex flex-col bg-slate-50 overflow-hidden relative">
+      {/* Dossier Sidebar / Slide-over */}
+      <div className={`
+        fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300
+        ${isDossierOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+      `} onClick={() => setIsDossierOpen(false)}>
+        <div 
+          className={`
+            absolute top-0 right-0 h-full w-[85%] max-w-sm bg-white shadow-2xl transition-transform duration-300 transform
+            ${isDossierOpen ? 'translate-x-0' : 'translate-x-full'}
+          `}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="flex flex-col h-full">
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Bewijs Dossier</h2>
+                <p className="text-[10px] text-slate-400 font-bold uppercase">{evidenceList.length} items verzameld</p>
+              </div>
+              <button onClick={() => setIsDossierOpen(false)} className="p-2 text-slate-400">
+                <ICONS.X />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {evidenceList.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full opacity-30 text-center space-y-4">
+                  <ICONS.Folder className="w-16 h-16" />
+                  <p className="text-xs font-bold uppercase tracking-widest leading-relaxed">Nog geen bewijsmateriaal<br/>geüpload.</p>
+                </div>
+              ) : (
+                evidenceList.map((item, idx) => (
+                  <div key={idx} className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                        {item.type.startsWith('image/') ? <ICONS.Camera className="w-4 h-4" /> : <ICONS.File className="w-4 h-4" />}
+                      </div>
+                      <div className="flex-1 overflow-hidden">
+                        <p className="text-xs font-bold text-slate-900 truncate">{item.name}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Van {item.sender} • {item.timestamp}</p>
+                      </div>
+                    </div>
+                    
+                    {item.type.startsWith('image/') && (
+                      <img src={item.url} alt={item.name} className="w-full h-32 object-cover rounded-xl border border-slate-200" />
+                    )}
+                    
+                    <a href={item.url} download={item.name} className="mt-3 block w-full py-2 bg-white border border-slate-200 rounded-xl text-center text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                      Bekijken / Download
+                    </a>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <header className="px-5 py-3 bg-white border-b border-slate-100 flex items-center justify-between z-30 shadow-sm shrink-0">
         <div className="flex items-center gap-3">
           <Logo className="w-8 h-8" />
@@ -103,7 +206,18 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
             </div>
           </div>
         </div>
-        <div className="w-8" /> 
+        
+        <button 
+          onClick={() => setIsDossierOpen(true)}
+          className="relative p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-transform"
+        >
+          <ICONS.Folder className="w-5 h-5" />
+          {evidenceList.length > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white text-[8px] font-black rounded-full flex items-center justify-center">
+              {evidenceList.length}
+            </span>
+          )}
+        </button>
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -137,6 +251,7 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
               isOwn={m.isOwn} 
               sender={m.sender} 
               timestamp={m.timestamp} 
+              attachment={m.attachment}
               autoTranslateTo={displayMode === 'dual' ? 'Nederlands' : null}
             />
           );
@@ -146,7 +261,7 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
           <div className="mx-auto max-w-xs bg-amber-50/80 backdrop-blur-sm border border-amber-100 p-3 rounded-2xl text-center shadow-sm">
             <p className="text-[9px] font-black text-amber-600 uppercase tracking-[0.2em] mb-0.5">Dossier Status</p>
             <p className="text-[10px] text-amber-800 font-semibold leading-tight">
-              Link is verstuurd naar {caseData.otherParty}. Je kunt de mediator alvast informeren in je eigen taal.
+              Link is verstuurd naar {caseData.otherParty}. Je kunt de mediator alvast informeren en bewijs uploaden.
             </p>
           </div>
         )}
@@ -154,10 +269,29 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
       </div>
 
       <div className="bg-white border-t border-slate-100 px-4 pt-3 pb-safe shrink-0 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
-        <div className="flex gap-2 max-w-2xl mx-auto w-full items-end">
+        <div className="flex gap-2 max-w-2xl mx-auto w-full items-end pb-2">
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileUpload} 
+            className="hidden" 
+            accept="image/*,video/*,.pdf,.doc,.docx"
+          />
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className={`
+              p-3 rounded-2xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors shrink-0 mb-0.5
+              ${isUploading ? 'animate-pulse' : ''}
+            `}
+            title="Voeg bewijsmateriaal toe"
+          >
+            <ICONS.Paperclip className="w-5 h-5" />
+          </button>
+          
           <textarea 
             className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 font-medium resize-none max-h-32"
-            placeholder="Bericht..."
+            placeholder="Schrijf een bericht..."
             rows={1}
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
