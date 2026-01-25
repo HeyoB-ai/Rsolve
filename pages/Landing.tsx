@@ -18,7 +18,7 @@ const Landing: React.FC = () => {
         </h1>
         
         <p className="text-slate-500 text-lg mb-10 max-w-xs mx-auto font-medium">
-          Bereik samen een eerlijke Vaststellingsovereenkomst (VSO) met hulp van AI mediation.
+          Bereik samen een eerlijke oplossing met hulp van AI mediation.
         </p>
 
         <div className="w-full max-w-xs space-y-4 mx-auto">
