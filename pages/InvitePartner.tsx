@@ -6,10 +6,10 @@ import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { ICONS } from '../constants';
 import { Logo } from '../components/ui/Logo';
+import { supabase } from '../lib/supabase';
 
 interface InvitePartnerProps {
   onComplete: (data: any) => void;
-  // Added t prop for translations to match usage in App.tsx
   t: (key: string, params?: any) => string;
 }
 
@@ -19,14 +19,44 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
     title: '',
     otherParty: ''
   });
+  const [caseId, setCaseId] = useState<string | null>(null);
   const [showInvite, setShowInvite] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const inviteLink = `${window.location.origin}/#/invite/${btoa(formData.title || "dossier").substring(0, 8)}`;
+  const inviteLink = `${window.location.origin}/#/invite/${caseId}`;
 
-  const handleSetupComplete = () => {
+  const handleSetupComplete = async () => {
     if (!formData.title || !formData.otherParty) return;
-    setShowInvite(true);
+    
+    setIsSaving(true);
+    const newId = Math.random().toString(36).substr(2, 9);
+    
+    // Opslaan in Supabase
+    const { error } = await supabase.from('cases').insert([{
+      id: newId,
+      title: formData.title,
+      other_party: formData.otherParty,
+      initiator_id: 'local-user', // In echt zou dit een Auth ID zijn
+      respondent_joined: false
+    }]);
+
+    if (!error) {
+      // Eerste welkomstbericht
+      await supabase.from('messages').insert([{
+        case_id: newId,
+        sender_id: 'system',
+        sender_name: 'Mediator',
+        content: `Welkom bij de mediation voor "${formData.title}". Ik ben jullie AI Mediator.`,
+        type: 'system'
+      }]);
+
+      setCaseId(newId);
+      setShowInvite(true);
+    } else {
+      alert("Er ging iets mis bij het aanmaken van het dossier.");
+    }
+    setIsSaving(false);
   };
 
   const copyInviteLink = () => {
@@ -35,13 +65,13 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
     setTimeout(() => setHasCopied(false), 2000);
   };
 
-  const shareWhatsApp = () => {
-    const text = encodeURIComponent(`Hoi! Ik heb een dossier aangemaakt bij Rsolve om ons conflict "${formData.title}" op te lossen. Jouw deelname is gratis en helpt ons om snel een rechtsgeldige overeenkomst (VSO) op te stellen. Doe je mee? Klik hier: ${inviteLink}`);
-    window.open(`https://wa.me/?text=${text}`, '_blank');
-  };
-
   const handleStartMediation = () => {
-    const dataToSave = { ...formData, id: Math.random().toString(36).substr(2, 9), isRespondent: false };
+    const dataToSave = { 
+      id: caseId,
+      title: formData.title,
+      otherParty: formData.otherParty,
+      isRespondent: false 
+    };
     onComplete(dataToSave);
     navigate('/mediation');
   };
@@ -51,7 +81,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
       <div className="w-full max-w-md space-y-8">
         {!showInvite ? (
           <div className="space-y-8 text-center">
-            <div className="inline-flex w-20 h-20 bg-emerald-500 rounded-[32px] items-center justify-center shadow-lg mb-2">
+            <div className="inline-flex w-20 h-20 bg-emerald-500 rounded-[32px] items-center justify-center shadow-lg">
                <ICONS.Check className="w-10 h-10 text-white" />
             </div>
             <div className="space-y-2">
@@ -76,7 +106,8 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
                 size="lg" 
                 className="w-full rounded-2xl py-5 shadow-lg" 
                 onClick={handleSetupComplete}
-                disabled={!formData.title || !formData.otherParty}
+                disabled={!formData.title || !formData.otherParty || isSaving}
+                isLoading={isSaving}
               >
                 Opslaan & Uitnodiging Maken
               </Button>
@@ -93,16 +124,15 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
             <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">
                <div className="space-y-4">
                   <Button 
-                    onClick={shareWhatsApp}
-                    className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-6 rounded-2xl font-black flex items-center justify-center gap-4 transition-all shadow-lg active:scale-95"
+                    onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Hoi! Ik heb een dossier aangemaakt bij Rsolve om ons conflict "${formData.title}" op te lossen. Jouw deelname is gratis. Klik hier: ${inviteLink}`)}`, '_blank')}
+                    className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-6 rounded-2xl font-black flex items-center justify-center gap-4 transition-all shadow-lg"
                   >
-                    <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.432 5.631 1.433h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                     WhatsApp Uitnodiging
                   </Button>
 
                   <button 
                     onClick={copyInviteLink}
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between hover:bg-white transition-colors"
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between"
                   >
                     <code className="text-[10px] text-slate-400 font-mono truncate mr-2">{inviteLink}</code>
                     <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 shrink-0">
