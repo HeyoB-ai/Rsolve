@@ -1,10 +1,16 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Logo } from '../components/ui/Logo';
 
-const JoinCase: React.FC = () => {
+// Added interface to fix prop error in App.tsx
+interface JoinCaseProps {
+  t: (key: string, params?: any) => string;
+}
+
+const JoinCase: React.FC<JoinCaseProps> = ({ t }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isJoining, setIsJoining] = useState(false);

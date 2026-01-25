@@ -1,9 +1,17 @@
+
 import React from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Logo } from '../components/ui/Logo';
 
-const VSO: React.FC<{ data: any, onReset: () => void }> = ({ data, onReset }) => {
+// Define VSOProps to resolve type error in App.tsx
+interface VSOProps {
+  data: any;
+  t: (key: string, params?: any) => string;
+  onReset: () => void;
+}
+
+const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
   return (
     <div className="min-h-screen bg-slate-100 p-6 md:p-12 flex flex-col items-center animate-in fade-in duration-700">
       <div className="w-full max-w-3xl space-y-8">

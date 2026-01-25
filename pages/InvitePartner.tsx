@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -8,9 +9,11 @@ import { Logo } from '../components/ui/Logo';
 
 interface InvitePartnerProps {
   onComplete: (data: any) => void;
+  // Added t prop for translations to match usage in App.tsx
+  t: (key: string, params?: any) => string;
 }
 
-const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete }) => {
+const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',

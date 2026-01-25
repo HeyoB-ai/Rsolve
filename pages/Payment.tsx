@@ -7,9 +7,10 @@ import { Logo } from '../components/ui/Logo';
 
 interface PaymentProps {
   onSuccess: () => void;
+  t: (key: string) => string;
 }
 
-const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
+const Payment: React.FC<PaymentProps> = ({ onSuccess, t }) => {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedBank, setSelectedBank] = useState('');
@@ -31,7 +32,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <Logo className="w-20 h-20 mx-auto mb-6" />
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Eénmalige Betaling</h1>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">{t('payment_title')}</h1>
           <p className="text-sm text-slate-500 font-medium">Betaling voor AI Mediation Dossier</p>
         </div>
 
@@ -48,13 +49,13 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
 
           <div className="p-8 space-y-6">
             <div className="space-y-4">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1 text-center">Betaal met iDEAL</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1 text-center">iDEAL</label>
               <select 
                 value={selectedBank}
                 onChange={(e) => setSelectedBank(e.target.value)}
                 className="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 font-bold text-slate-700 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
               >
-                <option value="" disabled>Kies je bank...</option>
+                <option value="" disabled>{t('choosing_bank')}</option>
                 {banks.map(bank => <option key={bank} value={bank}>{bank}</option>)}
               </select>
             </div>
@@ -67,7 +68,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess }) => {
                 disabled={!selectedBank || isProcessing}
                 isLoading={isProcessing}
               >
-                Betaal €3,99
+                {t('pay_btn')}
               </Button>
               
               <p className="text-[10px] text-slate-400 text-center leading-tight px-4">

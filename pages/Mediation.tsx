@@ -2,41 +2,19 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChatBubble } from '../components/ui/ChatBubble';
 import { Button } from '../components/ui/Button';
-import { ICONS, TOKENS } from '../constants';
+import { ICONS, UI_TRANSLATIONS } from '../constants';
 import { Logo } from '../components/ui/Logo';
 import { geminiService } from '../services/geminiService';
 
-// Uitgebreide dictionary voor UI vertalingen
-const UI_TRANSLATIONS: Record<string, any> = {
-  nl: { label: "Nederlands", dossier: "Bewijs Dossier", items_collected: "items verzameld", no_evidence: "Nog geen bewijsmateriaal geüpload.", view_download: "Bekijken / Download", online: "is online", waiting: "Wachten op", placeholder: "Schrijf een bericht...", settings: "Taalinstellingen", app_lang: "App Taal", close: "Sluiten", dossier_status: "Dossier Status", invitation_sent: "Link is verstuurd naar {name}. Je kunt de mediator alvast informeren.", mediator: "Mediator", you: "Jij", system: "Systeem" },
-  en: { label: "English", dossier: "Evidence File", items_collected: "items collected", no_evidence: "No evidence uploaded yet.", view_download: "View / Download", online: "is online", waiting: "Waiting for", placeholder: "Write a message...", settings: "Language Settings", app_lang: "App Language", close: "Close", dossier_status: "Case Status", invitation_sent: "Link sent to {name}. You can start informing the mediator.", mediator: "Mediator", you: "You", system: "System" },
-  tr: { label: "Türkçe", dossier: "Kanıt Dosyası", items_collected: "öğe toplandı", no_evidence: "Henüz kanıt yüklenmedi.", view_download: "Görüntüle / İndir", online: "çevrimiçi", waiting: "Bekleniyor:", placeholder: "Bir mesaj yazın...", settings: "Dil Ayarları", app_lang: "Uygulama Dili", close: "Kapat", dossier_status: "Dosya Durumu", invitation_sent: "Bağlantı {name} kişisine gönderildi. Arabulucuyu bilgilendirmeye başlayabilirsiniz.", mediator: "Arabulucu", you: "Sen", system: "Sistem" },
-  ar: { label: "العربية", dossier: "ملف الأدلة", items_collected: "تم جمع العناصر", no_evidence: "لم يتم تحميل أي أدلة بعد.", view_download: "عرض / تحميل", online: "متصل", waiting: "في انتظار", placeholder: "اكتب رسالة...", settings: "إعدادات اللغة", app_lang: "لغة التطبيق", close: "إغلاق", dossier_status: "حالة القضية", invitation_sent: "تم إرسال الرابط إلى {name}. يمكنك البدء في إبلاغ الوسيط.", mediator: "الوسيط", you: "أنت", system: "النظام" },
-  es: { label: "Español", dossier: "Expediente de Pruebas", items_collected: "elementos recogidos", no_evidence: "Aún no se han subido pruebas.", view_download: "Ver / Descargar", online: "en línea", waiting: "Esperando a", placeholder: "Escribe un mensaje...", settings: "Ajustes de Idioma", app_lang: "Idioma de la App", close: "Cerrar", dossier_status: "Estado del Caso", invitation_sent: "Enlace enviado a {name}. Ya puedes informar al mediador.", mediator: "Mediador", you: "Tú", system: "Sistema" },
-  fr: { label: "Français", dossier: "Dossier de Preuves", items_collected: "éléments collectés", no_evidence: "Aucune preuve téléchargée.", view_download: "Voir / Télécharger", online: "en ligne", waiting: "En attente de", placeholder: "Écrire un message...", settings: "Langue de l'application", app_lang: "Langue", close: "Fermer", dossier_status: "Statut du Dossier", invitation_sent: "Lien envoyé à {name}. Vous pouvez commencer à informer le médiateur.", mediator: "Médiateur", you: "Vous", system: "Système" },
-  de: { label: "Deutsch", dossier: "Beweisakte", items_collected: "Elemente gesammelt", no_evidence: "Noch keine Beweise hochgeladen.", view_download: "Ansehen / Download", online: "ist online", waiting: "Warten auf", placeholder: "Nachricht schreiben...", settings: "Spracheinstellungen", app_lang: "App-Sprache", close: "Schließen", dossier_status: "Fallstatus", invitation_sent: "Link an {name} gesendet. Sie können den Mediator bereits informieren.", mediator: "Mediator", you: "Du", system: "System" },
-  pl: { label: "Polski", dossier: "Akta Dowodowe", items_collected: "elementy zebrane", no_evidence: "Nie przesłano jeszcze dowodów.", view_download: "Zobacz / Pobierz", online: "jest online", waiting: "Oczekiwanie na", placeholder: "Napisz wiadomość...", settings: "Ustawienia Języka", app_lang: "Język Aplikacji", close: "Zamknij", dossier_status: "Status Sprawy", invitation_sent: "Link wysłany do {name}. Możesz już poinformować mediatora.", mediator: "Mediator", you: "Ty", system: "System" },
-  ua: { label: "Українська", dossier: "Досьє доказів", items_collected: "елементів зібрано", no_evidence: "Докази ще не завантажені.", view_download: "Переглянути / Завантажити", online: "в мережі", waiting: "Очікування на", placeholder: "Напишіть повідомлення...", settings: "Налаштування мови", app_lang: "Мова додатка", close: "Закрити", dossier_status: "Статус справи", invitation_sent: "Посилання надіслано {name}. Ви вже можете поінформувати медіатора.", mediator: "Медіатор", you: "Ви", system: "Система" },
-  it: { label: "Italiano", dossier: "Fascicolo Prove", items_collected: "elementi raccolti", no_evidence: "Nessuna prova ancora caricata.", view_download: "Visualizza / Scarica", online: "è online", waiting: "In attesa di", placeholder: "Scrivi un messaggio...", settings: "Impostazioni Lingua", app_lang: "Lingua App", close: "Chiudi", dossier_status: "Stato del Caso", invitation_sent: "Link inviato a {name}. Puoi già informare il mediatore.", mediator: "Mediatore", you: "Tu", system: "Sistema" },
-  pt: { label: "Português", dossier: "Dossiê de Provas", items_collected: "itens recolhidos", no_evidence: "Nenhuma prova enviada ainda.", view_download: "Ver / Download", online: "está online", waiting: "Aguardando", placeholder: "Escreva uma mensagem...", settings: "Configurações de Idioma", app_lang: "Idioma da App", close: "Fechar", dossier_status: "Status do Caso", invitation_sent: "Link enviado para {name}. Você já pode informar o mediador.", mediator: "Mediador", you: "Você", system: "Sistema" },
-  ro: { label: "Română", dossier: "Dosar de Probe", items_collected: "elemente colectate", no_evidence: "Nu s-au încărcat încă probe.", view_download: "Vezi / Descarcă", online: "este online", waiting: "Se așteaptă", placeholder: "Scrie un mesaj...", settings: "Setări Limbă", app_lang: "Limba Aplicației", close: "Închide", dossier_status: "Status Caz", invitation_sent: "Link trimis către {name}. Îl poți informa deja pe mediator.", mediator: "Mediator", you: "Tu", system: "Sistem" }
-};
+interface MediationProps {
+  caseData: any;
+  appLanguage: string;
+  setAppLanguage: (lang: string) => void;
+  t: (key: string, params?: any) => string;
+  onResolve: (vso: any) => void;
+}
 
-const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({ caseData, onResolve }) => {
-  const [appLanguage, setAppLanguage] = useState<string>(() => {
-    return localStorage.getItem('rsolve_app_lang') || 'nl';
-  });
-
-  const t = (key: string, params?: any) => {
-    let text = UI_TRANSLATIONS[appLanguage]?.[key] || UI_TRANSLATIONS['nl'][key] || key;
-    if (params) {
-      Object.keys(params).forEach(k => {
-        text = text.replace(`{${k}}`, params[k]);
-      });
-    }
-    return text;
-  };
-
+const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLanguage, t, onResolve }) => {
   const [messages, setMessages] = useState<any[]>(() => {
     const saved = localStorage.getItem(`rsolve_chat_${caseData.id}`);
     if (saved) return JSON.parse(saved);
@@ -66,10 +44,6 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
     localStorage.setItem(`rsolve_chat_${caseData.id}`, JSON.stringify(messages));
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, caseData.id]);
-
-  useEffect(() => {
-    localStorage.setItem('rsolve_app_lang', appLanguage);
-  }, [appLanguage]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -170,37 +144,32 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
         </div>
       </div>
 
-      {/* Settings Sidebar */}
-      <div className={`fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${isSettingsOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSettingsOpen(false)}>
-        <div className={`absolute top-0 right-0 h-full w-[85%] max-w-sm bg-white shadow-2xl transition-transform duration-300 transform ${isSettingsOpen ? 'translate-x-0' : 'translate-x-full'}`} onClick={e => e.stopPropagation()}>
-          <div className="flex flex-col h-full">
-            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+      {/* Settings Sidebar (Modal Style for better iOS view) */}
+      {isSettingsOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
               <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">{t('settings')}</h2>
               <button onClick={() => setIsSettingsOpen(false)} className="p-2 text-slate-400"><ICONS.X /></button>
             </div>
-            <div className="p-4 space-y-6 overflow-y-auto">
-               <div className="space-y-4">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{t('app_lang')}</p>
-                  <div className="grid grid-cols-1 gap-2">
-                    {Object.keys(UI_TRANSLATIONS).map(langKey => (
-                      <button 
-                        key={langKey}
-                        onClick={() => { setAppLanguage(langKey); setIsSettingsOpen(false); }}
-                        className={`w-full p-4 rounded-2xl border text-left flex items-center justify-between transition-all ${appLanguage === langKey ? 'border-blue-600 bg-blue-50 text-blue-900 font-bold shadow-sm' : 'border-slate-100 text-slate-600 hover:bg-slate-50'}`}
-                      >
-                        <span className="text-sm">{UI_TRANSLATIONS[langKey].label}</span>
-                        {appLanguage === langKey && <ICONS.Check className="w-4 h-4 text-blue-600" />}
-                      </button>
-                    ))}
-                  </div>
-               </div>
+            <div className="flex-1 overflow-y-auto p-4 grid grid-cols-1 gap-2">
+              {Object.keys(UI_TRANSLATIONS).map(langKey => (
+                <button 
+                  key={langKey}
+                  onClick={() => { setAppLanguage(langKey); setIsSettingsOpen(false); }}
+                  className={`w-full p-4 rounded-2xl border text-left flex items-center justify-between transition-all ${appLanguage === langKey ? 'border-blue-600 bg-blue-50 text-blue-900 font-bold shadow-sm' : 'border-slate-100 text-slate-600 hover:bg-slate-50'}`}
+                >
+                  <span className="text-sm">{UI_TRANSLATIONS[langKey].label}</span>
+                  {appLanguage === langKey && <ICONS.Check className="w-4 h-4 text-blue-600" />}
+                </button>
+              ))}
             </div>
-            <div className="mt-auto p-6 border-t border-slate-100">
-               <Button variant="outline" className="w-full rounded-xl" onClick={() => setIsSettingsOpen(false)}>{t('close')}</Button>
+            <div className="p-6 border-t border-slate-100 shrink-0">
+              <Button variant="primary" className="w-full rounded-2xl" onClick={() => setIsSettingsOpen(false)}>{t('close')}</Button>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <header className="px-5 py-3 bg-white border-b border-slate-100 flex items-center justify-between z-30 shadow-sm shrink-0">
         <div className="flex items-center gap-3">
@@ -219,7 +188,7 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
         <div className="flex items-center gap-2">
           <button onClick={() => setIsSettingsOpen(true)} className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all hover:bg-white hover:shadow-sm">
             <ICONS.Globe className="w-5 h-5" />
-            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{UI_TRANSLATIONS[appLanguage]?.label || "Taal"}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{UI_TRANSLATIONS[appLanguage].label}</span>
           </button>
           <button onClick={() => setIsDossierOpen(true)} className="relative p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all hover:bg-white hover:shadow-sm">
             <ICONS.Folder className="w-5 h-5" />
@@ -248,8 +217,8 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
               sender={m.sender} 
               timestamp={m.timestamp} 
               attachment={m.attachment} 
-              autoTranslateTo={displayMode === 'dual' ? (UI_TRANSLATIONS[appLanguage]?.label || 'Nederlands') : null} 
-              targetLanguageName={UI_TRANSLATIONS[appLanguage]?.label || 'Nederlands'}
+              autoTranslateTo={displayMode === 'dual' ? UI_TRANSLATIONS[appLanguage].label : null} 
+              targetLanguageName={UI_TRANSLATIONS[appLanguage].label}
             />
           );
         })}
