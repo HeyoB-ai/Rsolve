@@ -32,3 +32,10 @@ export type DbMessage = {
   attachment_url?: string;
   created_at: string;
 };
+
+export type DbPromoCode = {
+  code: string;
+  is_used: boolean;
+  used_at?: string;
+  case_id?: string;
+};
