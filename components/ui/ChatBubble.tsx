@@ -92,7 +92,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
     <div className={`flex flex-col max-w-[85%] ${isOwn ? 'self-end items-end' : 'self-start items-start'} mb-1`}>
       {!isOwn && <span className="text-[10px] font-black text-slate-400 mb-1 ml-2 uppercase tracking-widest">{sender}</span>}
       <div className={`
-        relative px-4 py-3 rounded-[20px] shadow-sm transition-all duration-300
+        relative px-4 py-3 rounded-[20px] shadow-sm transition-all duration-300 group
         ${isOwn ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border border-slate-100 text-slate-800 rounded-bl-none'}
       `}>
         <div className="flex flex-col gap-1">
@@ -114,6 +114,17 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
                 </p>
               )}
             </div>
+          )}
+
+          {/* Manual Translate Button for received messages */}
+          {!isOwn && text && !translatedText && !isTranslating && (
+            <button 
+              onClick={() => handleTranslate()}
+              className="absolute -right-2 -bottom-2 bg-white shadow-md border border-slate-100 rounded-full p-1.5 text-slate-400 hover:text-blue-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+              title="Vertaal bericht"
+            >
+              <ICONS.Translate className="w-3.5 h-3.5" />
+            </button>
           )}
         </div>
       </div>

@@ -308,10 +308,17 @@ const Mediation: React.FC<{ caseData: any, onResolve: (vso: any) => void }> = ({
         </div>
         
         <div className="flex items-center gap-2">
-          <button onClick={() => setIsSettingsOpen(true)} className="p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-transform">
+          <button 
+            onClick={() => setIsSettingsOpen(true)} 
+            className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all hover:bg-white hover:shadow-sm"
+          >
             <ICONS.Globe className="w-5 h-5" />
+            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Vertaal App</span>
           </button>
-          <button onClick={() => setIsDossierOpen(true)} className="relative p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-transform">
+          <button 
+            onClick={() => setIsDossierOpen(true)} 
+            className="relative p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all hover:bg-white hover:shadow-sm"
+          >
             <ICONS.Folder className="w-5 h-5" />
             {evidenceList.length > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white text-[8px] font-black rounded-full flex items-center justify-center">{evidenceList.length}</span>}
           </button>
