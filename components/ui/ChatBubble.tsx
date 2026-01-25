@@ -16,9 +16,10 @@ interface ChatBubbleProps {
   timestamp: string;
   attachment?: Attachment;
   autoTranslateTo?: string | null;
+  targetLanguageName?: string; // Nieuwe prop voor de doeltaal
 }
 
-export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, timestamp, attachment, autoTranslateTo }) => {
+export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, timestamp, attachment, autoTranslateTo, targetLanguageName = 'Nederlands' }) => {
   const [translatedText, setTranslatedText] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
 
@@ -30,7 +31,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
     }
   }, [autoTranslateTo, isOwn, text]);
 
-  const handleTranslate = async (lang: string = 'Nederlands') => {
+  const handleTranslate = async (lang: string = targetLanguageName) => {
     if (!text) return;
     setIsTranslating(true);
     const result = await geminiService.translateText(text, lang);
@@ -106,7 +107,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
                 <div className="flex items-center gap-2 text-[10px] opacity-70">
                   <div className="w-1 h-1 bg-current rounded-full animate-bounce" />
                   <div className="w-1 h-1 bg-current rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <span>Vertaalt...</span>
+                  <span>Vertaalt naar {targetLanguageName}...</span>
                 </div>
               ) : (
                 <p className={`text-xs italic leading-relaxed ${isOwn ? 'text-blue-100' : 'text-slate-500'}`}>
@@ -121,7 +122,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
             <button 
               onClick={() => handleTranslate()}
               className="absolute -right-2 -bottom-2 bg-white shadow-md border border-slate-100 rounded-full p-1.5 text-slate-400 hover:text-blue-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-              title="Vertaal bericht"
+              title={`Vertaal naar ${targetLanguageName}`}
             >
               <ICONS.Translate className="w-3.5 h-3.5" />
             </button>
