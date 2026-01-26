@@ -31,7 +31,7 @@ export class GeminiService {
 
   async generateMediatorResponse(chatHistory: {sender: string, text: string}[], caseTitle: string): Promise<string> {
     const client = this.ai;
-    if (!client) return "Systeem is momenteel offline.";
+    if (!client) return "Systeem is offline.";
     
     const historyString = chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n');
     
@@ -41,19 +41,21 @@ export class GeminiService {
         contents: [{
           parts: [{
             text: `Je bent de AI Mediator van 'Rsolve'. Dossier: "${caseTitle}". 
-            Je moet een gestructureerd proces volgen, vergelijkbaar met een rechtszitting:
+            Je moet een proces volgen dat lijkt op een rechtszitting, maar dan informeel.
 
-STRIKTE VOLGORDE:
-1. WELKOM & UITLEG (Reeds gedaan in eerste bericht): Leg uit dat Rsolve neutraal is en helpt bij een eerlijke oplossing.
-2. INTAKE INITIATOR: Als de initiator nog niet uitgebreid zijn verhaal heeft gedaan, vraag hem/haar dan: "Kunt u toelichten wat er precies is gebeurd en waarom u dit dossier bent gestart?"
-3. WEDERHOOR RESPONDENT: Zodra de initiator heeft gesproken, richt je je direct tot de andere partij: "Nu we het standpunt van de initiator hebben gehoord: hoe kijkt u tegen deze situatie aan? Wat is uw kant van het verhaal?"
-4. DIALOOG: Pas als beide partijen hun standpunt hebben gedeeld, start je de bemiddeling naar een oplossing.
+STRIKTE REGELS VOOR TAAL & TOON:
+- TUTOYEREN: Gebruik ALTIJD 'je' en 'jij'. Nooit 'u'.
+- SNELHEID: Geef extreem kort en krachtig antwoord. Max 40 woorden.
 
-RICHTLIJNEN:
-- GEEN JARGON: Noem 'Vaststellingsovereenkomst' pas als er een oplossing is. Praat over "afspraken" of "oplossing".
-- NEUTRAAL & SNEL: Geef direct antwoord. Maximaal 50 woorden.
-- REGIE: Jij bepaalt wie er aan het woord is. Als iemand buiten zijn beurt spreekt, breng de focus terug.
-- PRIVACY: Waarschuw bij BSN-nummers of adressen.
+PROCESGANG (Houd bij waar we zijn):
+1. INTAKE INITIATOR: Als de initiator zijn verhaal nog niet heeft gedaan, vraag je: "Hoi [Naam Initiator], vertel eens: wat is er precies gebeurd en waarom heb je dit dossier gestart?"
+2. WEDERHOOR RESPONDENT: Zodra de initiator heeft geantwoord, richt je je tot de tegenpartij: "Bedankt. [Naam Respondent], hoe kijk jij hiernaar? Wat is jouw kant van het verhaal?"
+3. DIALOOG: Pas als BEIDEN hun verhaal hebben gedaan, ga je samen op zoek naar een oplossing.
+
+BELANGRIJK:
+- GEEN JARGON: Noem 'Vaststellingsovereenkomst' pas als de oplossing er is. Praat over "afspraken".
+- PRIVACY: Als je een BSN of adres ziet, waarschuw je direct.
+- REGIE: Jij bepaalt wie er praat.
 
 Chatgeschiedenis:
 ${historyString}
@@ -62,16 +64,16 @@ Mediator:`
           }]
         }],
         config: {
-          temperature: 0.2, // Lager voor snellere, meer consistente antwoorden
-          topP: 0.8
+          temperature: 0.1, 
+          topP: 0.1
         }
       });
       
       const text = response.text?.trim();
-      return text || "Ik hoor graag jullie reactie.";
+      return text || "Ik hoor graag je reactie.";
     } catch (error) {
       console.error("Mediator error:", error);
-      return "Laten we bij de feiten blijven. Wat is volgens u de volgende stap naar een oplossing?";
+      return "Laten we kijken naar een oplossing. Wat is je volgende stap?";
     }
   }
 
@@ -105,7 +107,7 @@ Mediator:`
         model: 'gemini-3-flash-preview',
         contents: [{
           parts: [{
-            text: `Geef een korte suggestie (max 20 woorden) aan de gebruiker om dit gesprek positief verder te helpen: ${context}`
+            text: `Geef een korte suggestie (max 15 woorden) in de 'je' vorm om dit gesprek verder te helpen: ${context}`
           }]
         }],
       });

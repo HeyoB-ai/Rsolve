@@ -17,7 +17,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',
-    yourName: '', // Nieuw veld
+    yourName: '',
     otherParty: ''
   });
   const [caseId, setCaseId] = useState<string | null>(null);
@@ -37,30 +37,27 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
     const { error } = await supabase.from('cases').insert([{
       id: newId,
       title: formData.title,
-      initiator_name: formData.yourName, // Sla eigen naam op
+      initiator_name: formData.yourName,
       other_party: formData.otherParty,
       initiator_id: 'local-user', 
       respondent_joined: false
     }]);
 
     if (!error) {
-      // Welkomstbericht van de Mediator - Nu meer procesgericht
-      const welcomeMsg = `Welkom ${formData.yourName}. Ik ben de AI Mediator van Rsolve. 
+      // DIT IS HET ALLEREERSTE BERICHT: Alleen welkom en privacy.
+      const firstWelcome = `Hoi! Welkom bij Rsolve. Ik ben je AI mediator. 
 
-Mijn rol is om als onafhankelijke en neutrale partij jullie te helpen bij het vinden van een eerlijke oplossing voor het conflict: "${formData.title}".
+Ik ben volledig neutraal en help jullie om samen tot een eerlijke oplossing te komen voor het dossier: "${formData.title}". Dit doen we zonder gedoe en zonder dure advocaten.
 
-We volgen een vaste procedure:
-1. Ik vraag eerst u (de initiator) om een toelichting op de situatie.
-2. Daarna vraag ik de tegenpartij (${formData.otherParty}) om zijn of haar kant van het verhaal.
-3. Vervolgens zoeken we samen naar afspraken waar beiden achter staan.
+BELANGRIJK: Deel voor je eigen veiligheid nooit privacygevoelige gegevens zoals BSN-nummers of volledige adressen in deze chat. 
 
-${formData.yourName}, kunt u beginnen met een toelichting op wat er precies is gebeurd?`;
+Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
 
       await supabase.from('messages').insert([{
         case_id: newId,
         sender_id: 'mediator',
         sender_name: 'Mediator',
-        content: welcomeMsg,
+        content: firstWelcome,
         type: 'text'
       }]);
 
@@ -82,7 +79,7 @@ ${formData.yourName}, kunt u beginnen met een toelichting op wat er precies is g
     const dataToSave = { 
       id: caseId,
       title: formData.title,
-      initiatorName: formData.yourName, // Geef naam door aan de app state
+      initiatorName: formData.yourName,
       otherParty: formData.otherParty,
       isRespondent: false 
     };
@@ -106,7 +103,7 @@ ${formData.yourName}, kunt u beginnen met een toelichting op wat er precies is g
             <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">
               <Input 
                 label="Jouw naam"
-                placeholder="Bijv. Mark de Vries"
+                placeholder="Bijv. Mark"
                 value={formData.yourName}
                 onChange={e => setFormData({...formData, yourName: e.target.value})}
               />
@@ -144,7 +141,7 @@ ${formData.yourName}, kunt u beginnen met een toelichting op wat er precies is g
             <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">
                <div className="space-y-4">
                   <Button 
-                    onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Hallo, om ons conflict "${formData.title}" op te lossen heb ik een online mediator van Rsolve ingeschakeld. Hij helpt ons via een beveiligde chat om tot een eerlijke oplossing te komen zonder advocaten. Deelname is gratis voor jou. Klik hier: ${inviteLink}`)}`, '_blank')}
+                    onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Hoi, om ons conflict "${formData.title}" op te lossen heb ik een online mediator van Rsolve ingeschakeld. Hij helpt ons via een beveiligde chat om tot een eerlijke oplossing te komen zonder advocaten. Deelname is gratis voor jou. Klik hier: ${inviteLink}`)}`, '_blank')}
                     className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-6 rounded-2xl font-black flex items-center justify-center gap-4 transition-all shadow-lg"
                   >
                     WhatsApp Uitnodiging
