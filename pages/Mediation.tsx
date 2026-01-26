@@ -152,10 +152,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       const contextTitle = `${caseData.title}`;
       let aiResponse = await geminiService.generateMediatorResponse(chatHistory, contextTitle);
       
-      // Check voor de automatische VSO trigger
       const hasActionTrigger = aiResponse.includes('[ACTION:GENERATE_VSO]');
-      
-      // Verwijder de trigger uit de tekst voor de gebruiker
       const cleanResponse = aiResponse.replace('[ACTION:GENERATE_VSO]', '').trim();
 
       await supabase.from('messages').insert([{
@@ -167,7 +164,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       }]);
 
       if (hasActionTrigger) {
-        // Start de VSO flow automatisch na een kleine vertraging voor UX
         setTimeout(() => startVSOFlow(), 1500);
       }
     } catch (e) {
@@ -377,8 +373,13 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           );
         })}
         {isAiThinking && (
-          <div className="flex flex-col items-start max-w-[85%] self-start animate-pulse">
-            <span className="text-[10px] font-black text-slate-400 mb-1 ml-2 uppercase tracking-widest">{t('mediator')} is bezig...</span>
+          <div className="flex flex-col items-start max-w-[85%] self-start p-2 animate-in fade-in slide-in-from-left-2">
+             <div className="flex items-center gap-2 mb-2">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" />
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+             </div>
+             <span className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em] animate-pulse">Mediator analyseert het gesprek...</span>
           </div>
         )}
         <div ref={scrollRef} className="h-4" />

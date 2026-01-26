@@ -36,22 +36,21 @@ export class GeminiService {
     const historyString = chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n');
     
     try {
-      // Gebruik gemini-3-pro-preview voor complexe mediation met thinking budget
       const response = await client.models.generateContent({
         model: 'gemini-3-pro-preview',
         contents: [{
           parts: [{
             text: `Je bent de Senior AI Mediator van 'Rsolve'. Dossier: "${caseTitle}". 
             
-JOUW ROL:
-Je bent een menselijke, empathische bemiddelaar. Je observeert het gesprek en grijpt in als dat nodig is.
+JOUW OPDRACHT:
+Help deze mensen hun conflict op te lossen. Je bent intelligenter, empathischer en scherper dan een standaard chatbot.
 
-STRIKTE RICHTLIJNEN:
-1. TAALBARRIÈRE: Als een partij aangeeft de andere partij niet te begrijpen (bijv. door taal), stop dan onmiddellijk met het proces. Vat het laatste voorstel van de andere partij samen in de taal van de ontvanger. Wees de tolk.
-2. EMPATHIE: Reageer op de emotie. Als iemand gefrustreerd is over de traagheid of de communicatie, erken dat dan eerst ("Ik begrijp dat dit lastig is...").
-3. GEEN ROBOT-ANTWOORDEN: Vermijd zinnen als "Ik help je graag verder" of "Wat is je volgende stap". Praat zoals een menselijke coach.
-4. VSO TRIGGER: Voeg enkel "[ACTION:GENERATE_VSO]" toe als er een kristalhelder, tweezijdig akkoord is op alle punten. Doe dit NOOIT als er nog verwarring of onbegrip is.
-5. TAALGEBRUIK: Reageer in de taal waarin je wordt aangesproken. Als het gesprek gemengd is (NL/EN), reageer dan tweetalig om iedereen aan boord te houden.
+STRIKTE PRIORITEITEN:
+1. COMMUNICATIECHECK: Als de laatste spreker aangeeft iets niet te begrijpen of een andere taal spreekt, dan is jouw ENIGE taak om die barrière te doorbreken. Vertaal de essentie van het laatste voorstel/bericht naar de taal van de ontvanger.
+2. ADRESSEER DE LAATSTE ZIN: Begin je antwoord ALTIJD met een directe reactie op wat er net gezegd is. Geen algemene inleidingen.
+3. WEES MENSELIJK: Gebruik geen mediation-clichés. Praat als een ervaren coach. Tutoyeer (jij/je).
+4. VSO LOGICA: Alleen als er een onbetwistbaar akkoord is, voeg je "[ACTION:GENERATE_VSO]" toe. Als er taalverwarring is, is een VSO verboden.
+5. TAAL: Antwoord in de taal van de vrager. Bij een gemengd gesprek reageer je tweetalig (bijv. NL boven, EN onder).
 
 Chatgeschiedenis:
 ${historyString}
@@ -60,17 +59,17 @@ Mediator:`
           }]
         }],
         config: {
-          thinkingConfig: { thinkingBudget: 4000 }, // Geef de AI ruimte om de situatie te analyseren
-          temperature: 0.7, // lets meer creativiteit voor menselijke antwoorden
-          topP: 0.9
+          thinkingConfig: { thinkingBudget: 4000 },
+          temperature: 0.6,
+          topP: 0.8
         }
       });
       
       const text = response.text?.trim();
-      return text || "Ik zie dat we er even niet uitkomen. Zullen we stap voor stap kijken waar de verwarring zit?";
+      return text || "Ik merk dat de communicatie stroef loopt. Zullen we even pas op de plaats maken? Waar gaat het mis?";
     } catch (error) {
       console.error("Mediator error:", error);
-      return "Mijn excuses, ik had even een technisch probleem. Laten we teruggaan naar de kern: wat is er op dit moment nodig om verder te komen?";
+      return "Ik zie dat de verbinding even hapert. Laten we teruggaan naar de kern van jullie afspraak.";
     }
   }
 
@@ -90,7 +89,7 @@ Mediator:`
           }]
         }],
         config: {
-          thinkingConfig: { thinkingBudget: 8000 } // Grondige analyse voor juridische tekst
+          thinkingConfig: { thinkingBudget: 8000 }
         }
       });
       return response.text?.trim() || "Kon geen VSO opstellen.";
@@ -107,7 +106,7 @@ Mediator:`
         model: 'gemini-3-flash-preview',
         contents: [{
           parts: [{
-            text: `Geef een korte suggestie (max 15 woorden) in de 'je' vorm om dit gesprek verder te helpen: ${context}`
+            text: `Geef een korte suggestie (max 15 words) in the user's language to help move this conversation forward: ${context}`
           }]
         }],
       });
