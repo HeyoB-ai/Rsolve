@@ -67,7 +67,14 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                 <p className="text-center md:text-left text-xs text-slate-400 font-medium">Volledig vertrouwelijk • Juridisch onderbouwd</p>
               </div>
             </div>
-            <div className="w-full aspect-[4/3] md:aspect-[21/9] bg-center bg-no-repeat bg-cover rounded-3xl soft-card-shadow border border-white" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDQprhhdYTTBKlk-K-d8CSqdmj4bTS6Y84-bgApcJyqYlyGc_A0yW24iQls5wGQoknHyqgPGsV41xhnfSylp5leUOrMG9YuBAFpOJDT4g9gyzNkdBXfH8Y8AkmBiWrJ0dhWMDd8jlpN0sxJjkbhWJyOUUsBeLwSYSWY8YbUGRcF52sx6HmByZLTpuMoZGYn8shxkYKzixsPI_muPARmwFEM5RgGL9zblAeFlRbYd-nZZ-sWMqSIOJcyMLodG4R4pt6OB8xcTX-Gnrfa")' }}>
+            {/* Updated Hero Image: Warm professional mediation scene */}
+            <div 
+              className="w-full aspect-[4/3] md:aspect-[21/9] bg-center bg-no-repeat bg-cover rounded-3xl soft-card-shadow border border-white transition-all duration-700 hover:scale-[1.01]" 
+              style={{ 
+                backgroundImage: 'url("https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=2000&auto=format&fit=crop")',
+                backgroundPosition: 'center 20%'
+              }}
+            >
             </div>
           </div>
         </section>
