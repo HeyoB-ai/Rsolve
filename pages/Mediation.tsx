@@ -28,7 +28,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const [isLeavingLoading, setIsLeavingLoading] = useState(false);
   
-  // VSO Flow States
   const [isVSOReviewOpen, setIsVSOReviewOpen] = useState(false);
   const [vsoConcept, setVsoConcept] = useState<string | null>(null);
   const [isGeneratingVSO, setIsGeneratingVSO] = useState(false);
@@ -227,6 +226,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   return (
     <div className="h-safe flex flex-col bg-slate-50 overflow-hidden relative">
+      {/* Dossier Modal */}
       {isDossierOpen && (
         <div className="fixed inset-0 z-[115] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
           <Card className="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border-none">
@@ -270,6 +270,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         </div>
       )}
 
+      {/* Exit Modal */}
       {isExitModalOpen && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-xl animate-in fade-in duration-300">
            <Card className="bg-white w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden flex flex-col p-8 border-none text-center gap-6">
@@ -286,6 +287,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         </div>
       )}
 
+      {/* VSO Review Modal */}
       {isVSOReviewOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300">
            <Card className="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border-none">
@@ -312,28 +314,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                  <Button size="lg" className="w-full rounded-2xl py-4 shadow-xl" disabled={isGeneratingVSO} onClick={handleVSOPrefix}>Deze Afspraken Bevestigen</Button>
               </div>
            </Card>
-        </div>
-      )}
-
-      {isSettingsOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
-              <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">{t('settings')}</h2>
-              <button onClick={() => setIsSettingsOpen(false)} className="p-2 text-slate-400"><ICONS.X /></button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 grid grid-cols-1 gap-2">
-              {Object.keys(UI_TRANSLATIONS).map(langKey => (
-                <button key={langKey} onClick={() => { setAppLanguage(langKey); setIsSettingsOpen(false); }} className={`w-full p-4 rounded-2xl border text-left flex items-center justify-between transition-all ${appLanguage === langKey ? 'border-blue-600 bg-blue-50 text-blue-900 font-bold' : 'border-slate-100 text-slate-600'}`}>
-                  <span className="text-sm">{UI_TRANSLATIONS[langKey].label}</span>
-                  {appLanguage === langKey && <ICONS.Check className="w-4 h-4 text-blue-600" />}
-                </button>
-              ))}
-            </div>
-            <div className="p-6 border-t border-slate-100 shrink-0">
-              <Button variant="primary" className="w-full rounded-2xl" onClick={() => setIsSettingsOpen(false)}>{t('close')}</Button>
-            </div>
-          </div>
         </div>
       )}
 
