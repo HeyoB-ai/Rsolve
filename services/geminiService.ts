@@ -9,11 +9,27 @@ export interface ChatRoleConfig {
 export class GeminiService {
   private get ai() {
     const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-      console.warn("Gemini API Key ontbreekt in process.env.API_KEY");
-      return null;
-    }
+    if (!apiKey) return null;
     return new GoogleGenAI({ apiKey });
+  }
+
+  // Added missing getMediatorSuggestion method for CaseDetails.tsx
+  async getMediatorSuggestion(context: string): Promise<string> {
+    const client = this.ai;
+    if (!client) return "Blijf constructief in het gesprek.";
+    try {
+      const response = await client.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Je bent een neutrale AI mediator. Geef een korte, behulpzame suggestie (maximaal 2 zinnen) om het gesprek constructief te houden op basis van de volgende chatgeschiedenis:\n\n${context}\n\nSuggestie:`,
+        config: {
+          temperature: 0.7,
+        }
+      });
+      // Accessing .text property directly
+      return response.text?.trim() || "Blijf luisteren naar de behoeften van de ander.";
+    } catch {
+      return "Probeer de situatie vanuit het perspectief van de ander te bekijken.";
+    }
   }
 
   async translateText(text: string, targetLanguage: string = 'Nederlands'): Promise<string> {
@@ -22,122 +38,80 @@ export class GeminiService {
     try {
       const response = await client.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: [{ 
-          parts: [{ 
-            text: `Vertaal de volgende tekst naar het ${targetLanguage}. Geef ENKEL de vertaling terug.\n\nTekst: "${text}"` 
-          }] 
-        }],
+        contents: `Vertaal enkel de tekst naar ${targetLanguage}: "${text}"`,
       });
+      // Accessing .text property directly
       return response.text?.trim() || text;
-    } catch (error) {
-      return text;
-    }
+    } catch { return text; }
   }
 
   async generateMediatorResponse(
-    chatHistory: {sender: string, text: string}[], 
+    chatHistory: {sender: string, text: string, role: string}[], 
     caseTitle: string,
     roles: ChatRoleConfig
   ): Promise<string> {
     const client = this.ai;
-    if (!client) return "Ik ben even de verbinding kwijt. Blijf constructief.";
+    if (!client) return "Verbinding verbroken.";
     
-    const historyString = chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n');
+    // We formatteren de geschiedenis zeer strikt zodat de AI geen rollen verwisselt
+    const formattedHistory = chatHistory.map(m => `[${m.role.toUpperCase()}] ${m.sender}: ${m.text}`).join('\n');
     
     try {
       const response = await client.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: [{
-          parts: [{
-            text: `Je bent de Senior AI Mediator van 'Rsolve'. 
-Dossier: "${caseTitle}".
+        contents: `SYSTEEM INSTRUCTIE VOOR RSOLVE AI MEDIATOR:
+Dossier: "${caseTitle}"
 
-DEELNEMERS:
-- Initiator (heeft de zaak gestart): ${roles.initiator}
-- Respondent (is uitgenodigd): ${roles.respondent}
+IDENTITEITEN (STRIKT VOLGEN):
+- INITIATOR (Starter): ${roles.initiator}
+- RESPONDENT (Genodigde): ${roles.respondent}
 
-JOUW OPDRACHT:
-Begeleid dit gesprek naar een oplossing. Wees neutraal, sturend en empathisch.
+JOUW DOEL:
+Begeleid dit conflict naar een oplossing.
 
-CRUCIALE REGELS:
-1. De Initiator (${roles.initiator}) heeft dit dossier geopend. Als de Respondent (${roles.respondent}) vraagt wat de bedoeling is, vraag dan aan de INITIATOR om de situatie en het probleem eerst kort uit te leggen.
-2. Wanneer er een duidelijke oplossing of akkoord is bereikt:
-   - Leg EERST uit dat je nu een 'Vaststellingsovereenkomst' (VSO) gaat opstellen.
-   - Vertel dat dit een juridisch document is waarin de gemaakte afspraken officieel worden vastgelegd om toekomstige discussies te voorkomen.
-   - Voeg PAS DAARNA exact deze tekst toe aan het einde: "[ACTION:GENERATE_VSO]".
-3. Gebruik geen juridisch jargon, maar praat menselijk.
+PROTOCOL VOOR AFRONDING:
+1. Als er een akkoord lijkt te zijn, vat je dit samen.
+2. Leg uit wat een Vaststellingsovereenkomst (VSO) is: "Dit is een officieel juridisch document dat jullie afspraken bindend vastlegt."
+3. VRAAG expliciet of ze willen dat je de VSO nu opstelt.
+4. Voeg PAS wanneer beide partijen akkoord zijn de code [TRIGGER:VSO] toe aan je bericht. Doe dit nooit ongevraagd.
 
-Chatgeschiedenis:
-${historyString}
+PROTOCOL VOOR VRAGEN:
+- Als de Respondent vraagt wat de bedoeling is, vraag dan aan de Initiator (${roles.initiator}) om de situatie toe te lichten.
 
-Mediator:`
-          }]
-        }],
+HUIDIG GESPREK:
+${formattedHistory}
+
+Mediator:`,
         config: {
-          temperature: 0.7,
+          temperature: 0.3, // Lager voor meer logische consistentie
         }
       });
       
-      const text = response.text?.trim();
-      return text || `Ik begrijp het. Laten we kijken hoe we hier samen uitkomen.`;
+      // Accessing .text property directly
+      return response.text?.trim() || "Ik luister. Hoe kan ik helpen?";
     } catch (error) {
-      console.error("Mediator error:", error);
-      return "Ik zie dat de verbinding even hapert. Laten we teruggaan naar de kern van jullie afspraak.";
+      return "Ik ervaar een korte storing in mijn analyse. Laten we bij de kern blijven.";
     }
   }
 
   async generateVSOTerms(chatHistory: {sender: string, text: string}[], caseTitle: string): Promise<string> {
     const client = this.ai;
-    if (!client) return "Geen afspraken kunnen genereren wegens ontbrekende configuratie.";
+    if (!client) throw new Error("No client");
     
-    try {
-      // Gebruik Flash voor VSO generatie voor maximale stabiliteit en snelheid
-      const response = await client.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: [{
-          parts: [{
-            text: `Stel een formele Vaststellingsovereenkomst (VSO) op op basis van dit mediation gesprek. 
-            Onderwerp: ${caseTitle}
-            Gesprek:
-            ${chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n')}
-            
-            EISEN:
-            - Gebruik juridisch correct Nederlands (Art. 7:900 BW).
-            - Formuleer heldere, genummerde artikelen.
-            - Zorg voor een artikel over finale kwijting.
-            - Geef ENKEL de artikelen terug.`
-          }]
-        }],
-        config: {
-          temperature: 0.1, // Lager voor meer consistentie in juridische teksten
-        }
-      });
-      
-      const result = response.text?.trim();
-      if (!result) throw new Error("Lege respons van AI");
-      return result;
-    } catch (error) {
-      console.error("VSO Generation Error:", error);
-      throw error;
-    }
-  }
-
-  async getMediatorSuggestion(context: string): Promise<string> {
-    const client = this.ai;
-    if (!client) return "Focus op een oplossing.";
-    try {
-      const response = await client.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: [{
-          parts: [{
-            text: `Geef een korte suggestie (max 15 woorden) om dit gesprek vooruit te helpen: ${context}`
-          }]
-        }],
-      });
-      return response.text?.trim() || "Vraag wat de ander nodig heeft.";
-    } catch (error) {
-      return "Blijf constructief.";
-    }
+    // Drafting a VSO is a complex reasoning task, using gemini-3-pro-preview per guidelines
+    const response = await client.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: `Stel een formele Vaststellingsovereenkomst (VSO) op (Art. 7:900 BW) gebaseerd op dit mediation gesprek:
+          Onderwerp: ${caseTitle}
+          Gesprek:
+          ${chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n')}
+          
+          Geef ENKEL de genummerde artikelen in juridisch correct Nederlands. Geef geen inleiding of slot.`,
+      config: { temperature: 0.1 }
+    });
+    
+    // Accessing .text property directly
+    return response.text?.trim() || "Kon geen VSO opstellen.";
   }
 }
 

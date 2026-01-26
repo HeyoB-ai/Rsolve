@@ -130,16 +130,17 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     if (error) return;
 
     setIsAiThinking(true);
-    const chatHistory = [...messages, { sender: myName, text: textToSend }]
+    // Stuur de rollen expliciet mee naar de AI service
+    const chatHistoryForAi = [...messages, { sender: myName, text: textToSend, role: caseData.isRespondent ? 'respondent' : 'initiator' }]
       .slice(-15)
-      .map(m => ({ sender: m.sender, text: m.text }));
+      .map(m => ({ sender: m.sender, text: m.text, role: m.senderId }));
 
     try {
       const contextTitle = `${caseData.title}`;
-      let aiResponse = await geminiService.generateMediatorResponse(chatHistory, contextTitle, rolesConfig);
+      let aiResponse = await geminiService.generateMediatorResponse(chatHistoryForAi as any, contextTitle, rolesConfig);
       
-      const hasActionTrigger = aiResponse.includes('[ACTION:GENERATE_VSO]');
-      const cleanResponse = aiResponse.replace('[ACTION:GENERATE_VSO]', '').trim();
+      const hasActionTrigger = aiResponse.includes('[TRIGGER:VSO]');
+      const cleanResponse = aiResponse.replace('[TRIGGER:VSO]', '').trim();
 
       await supabase.from('messages').insert([{
         case_id: caseData.id,
@@ -150,13 +151,32 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       }]);
 
       if (hasActionTrigger) {
-        // We geven de AI de kans om eerst de uitleg te laten zien voordat de modal popt
-        setTimeout(() => startVSOFlow(), 3000);
+        setTimeout(() => startVSOFlow(), 1000);
       }
     } catch (e) {
       console.error("AI Error:", e);
     } finally {
       setIsAiThinking(false);
+    }
+  };
+
+  const startVSOFlow = async () => {
+    setVsoError(null);
+    setVsoConcept(null);
+    setIsGeneratingVSO(true);
+    setIsVSOReviewOpen(true);
+    
+    const textMessagesOnly = messages
+      .filter(m => m.type === 'text')
+      .map(m => ({ sender: m.sender, text: m.text }));
+      
+    try {
+      const terms = await geminiService.generateVSOTerms(textMessagesOnly, caseData.title);
+      setVsoConcept(terms);
+    } catch (e) {
+      setVsoError("Er is een probleem bij het opstellen van het document. Probeer het opnieuw.");
+    } finally {
+      setIsGeneratingVSO(false);
     }
   };
 
@@ -171,27 +191,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     } catch (err) { onAbandon(); } finally {
       setIsLeavingLoading(false);
       setIsExitModalOpen(false);
-    }
-  };
-
-  const startVSOFlow = async () => {
-    setVsoError(null);
-    setIsGeneratingVSO(true);
-    setIsVSOReviewOpen(true);
-    
-    // Alleen de tekstuele berichten meesturen voor de overeenkomst
-    const chatHistory = messages
-      .filter(m => m.type === 'text')
-      .map(m => ({ sender: m.sender, text: m.text }));
-      
-    try {
-      const terms = await geminiService.generateVSOTerms(chatHistory, caseData.title);
-      setVsoConcept(terms);
-    } catch (e) {
-      console.error("VSO error:", e);
-      setVsoError("Er is een probleem bij het opstellen van het document. Probeer het opnieuw.");
-    } finally {
-      setIsGeneratingVSO(false);
     }
   };
 
@@ -302,9 +301,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                     </div>
                  ) : vsoError ? (
                     <div className="flex flex-col items-center justify-center py-12 gap-6 text-center">
-                       <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center">
-                          <ICONS.X className="w-8 h-8" />
-                       </div>
+                       <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center"><ICONS.X className="w-8 h-8" /></div>
                        <p className="text-sm font-bold text-slate-600">{vsoError}</p>
                        <Button variant="outline" className="rounded-2xl" onClick={startVSOFlow}>Opnieuw Proberen</Button>
                     </div>
@@ -333,7 +330,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {messages.length > 3 && isRespondentJoined && (
+          {messages.length > 2 && isRespondentJoined && (
             <button onClick={startVSOFlow} className="px-3 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">Afronden</button>
           )}
           <button onClick={() => setIsExitModalOpen(true)} className="px-3 py-2 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-100 active:scale-95 transition-all">Verlaat</button>
