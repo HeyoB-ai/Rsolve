@@ -41,17 +41,15 @@ export class GeminiService {
         contents: [{
           parts: [{
             text: `Je bent de AI Mediator van 'Rsolve'. Dossier: "${caseTitle}". 
-            Je leidt een gestructureerd proces naar een oplossing.
-
-STRIKTE GEDRAGSREGELS:
-1. HERKEN CONSENSUS: Als partijen zeggen "prima", "akkoord", "is goed", of een concreet voorstel accepteren, reageer dan enthousiast en vat de afspraak kort samen. 
-2. INTRODUCEER VSO: Zodra er een akkoord is, zeg je: "Mooi dat jullie eruit zijn! Zal ik deze afspraken nu officieel vastleggen in een document? Dat noemen we een Vaststellingsovereenkomst (VSO). Daarmee is de zaak juridisch afgehandeld."
-3. PROCESFASE:
-   - Intake: Vraag de initiator om zijn verhaal (als dat er nog niet is).
-   - Wederhoor: Vraag de tegenpartij om zijn kant (na de intake).
-   - Dialoog: Help ze bij het onderhandelen over bedragen of tijden.
-4. TOON: Tutoyeer altijd (jij/je). Wees empathisch maar zakelijk. 
-5. KORT: Maximaal 45 woorden. Geen herhaling van clichés.
+            
+STRIKTE INSTRUCTIES VOOR DE FINALE FASE:
+1. HERKEN AKKOORD: Als partijen 'ja', 'akkoord', 'prima' zeggen op een concreet voorstel, OF als jij zojuist hebt gezegd dat je de VSO gaat maken:
+   - STOP met het stellen van vragen als "Wat vind je ervan?".
+   - VAT de afspraak kort samen (bijv. "Helder: aanstaande donderdag de overdracht van de stereo voor 200 euro").
+   - VOEG ALTIJD de tekst "[ACTION:GENERATE_VSO]" toe aan het einde van je bericht.
+2. VERMIJD FALLBACKS: Geef nooit een antwoord als "Ik heb je begrepen. Wat is je volgende stap?" als er al een akkoord is of als de sfeer positief is naar een oplossing.
+3. TOON: Tutoyeer altijd (jij/je). Blijf resultaatgericht.
+4. LENGTE: Maximaal 40 woorden.
 
 Chatgeschiedenis:
 ${historyString}
@@ -60,16 +58,16 @@ Mediator:`
           }]
         }],
         config: {
-          temperature: 0.4, 
-          topP: 0.8
+          temperature: 0.2, // Lager voor meer consistentie
+          topP: 0.5
         }
       });
       
       const text = response.text?.trim();
-      return text || "Ik heb je begrepen. Wat vind jij van dit voorstel?";
+      return text || "Ik help jullie graag verder. Laten we de afspraak nu concreet maken.";
     } catch (error) {
       console.error("Mediator error:", error);
-      return "Ik hoor dat jullie stappen zetten richting een oplossing. Hoe kunnen we dit nu concreet maken?";
+      return "Ik zie dat jullie er bijna uit zijn. Zullen we de afspraak nu definitief vastleggen?";
     }
   }
 
@@ -85,7 +83,7 @@ Mediator:`
             Onderwerp: ${caseTitle}
             Gesprek:
             ${chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n')}
-            Geef enkel de genummerde artikelen terug.`
+            Geef enkel de genummerde artikelen terug in juridisch correct Nederlands.`
           }]
         }],
       });
