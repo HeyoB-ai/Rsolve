@@ -18,6 +18,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
   const navigate = useNavigate();
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
+  const [isDisclaimerOpen, setIsDisclaimerOpen] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [promoError, setPromoError] = useState<string | null>(null);
@@ -57,6 +58,15 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
     }
   };
 
+  const handleStartProcess = () => {
+    setIsDisclaimerOpen(true);
+  };
+
+  const handleAcceptDisclaimer = () => {
+    setIsDisclaimerOpen(false);
+    navigate('/payment');
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8 bg-white text-center overflow-y-auto relative">
       {/* Language Selector Button - Top Right */}
@@ -90,6 +100,40 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             </div>
             <div className="p-6 border-t border-slate-100 shrink-0">
               <Button variant="primary" className="w-full rounded-2xl" onClick={() => setIsLangModalOpen(false)}>{t('close')}</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Disclaimer Modal */}
+      {isDisclaimerOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-xl animate-in fade-in duration-300 px-6">
+          <div className="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden flex flex-col p-8 gap-6 border border-slate-100">
+            <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto">
+              <ICONS.Shield className="w-8 h-8" />
+            </div>
+            
+            <div className="text-center space-y-3">
+              <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('disclaimer_title')}</h2>
+              <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                {t('disclaimer_body')}
+              </p>
+            </div>
+            
+            <div className="space-y-3 pt-2">
+              <Button 
+                size="lg"
+                className="w-full rounded-2xl py-5 shadow-xl shadow-blue-100" 
+                onClick={handleAcceptDisclaimer}
+              >
+                {t('disclaimer_agree')}
+              </Button>
+              <button 
+                onClick={() => setIsDisclaimerOpen(false)}
+                className="w-full text-center text-[10px] font-black text-slate-400 uppercase tracking-widest py-2"
+              >
+                {t('close')}
+              </button>
             </div>
           </div>
         </div>
@@ -147,7 +191,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
         </p>
 
         <div className="w-full space-y-3 mx-auto flex flex-col items-center">
-          <Button size="lg" className="w-full py-5 text-xl shadow-xl shadow-blue-100/50" onClick={() => navigate('/payment')}>
+          <Button size="lg" className="w-full py-5 text-xl shadow-xl shadow-blue-100/50" onClick={handleStartProcess}>
             {t('start_btn')}
           </Button>
           
