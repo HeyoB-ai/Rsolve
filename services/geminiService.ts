@@ -31,7 +31,7 @@ export class GeminiService {
 
   async generateMediatorResponse(chatHistory: {sender: string, text: string}[], caseTitle: string): Promise<string> {
     const client = this.ai;
-    if (!client) return "Systeem is offline.";
+    if (!client) return "Ik ben even de verbinding kwijt. Blijf constructief.";
     
     const historyString = chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n');
     
@@ -41,21 +41,17 @@ export class GeminiService {
         contents: [{
           parts: [{
             text: `Je bent de AI Mediator van 'Rsolve'. Dossier: "${caseTitle}". 
-            Je moet een proces volgen dat lijkt op een rechtszitting, maar dan informeel.
+            Je leidt een gestructureerd proces naar een oplossing.
 
-STRIKTE REGELS VOOR TAAL & TOON:
-- TUTOYEREN: Gebruik ALTIJD 'je' en 'jij'. Nooit 'u'.
-- SNELHEID: Geef extreem kort en krachtig antwoord. Max 40 woorden.
-
-PROCESGANG (Houd bij waar we zijn):
-1. INTAKE INITIATOR: Als de initiator zijn verhaal nog niet heeft gedaan, vraag je: "Hoi [Naam Initiator], vertel eens: wat is er precies gebeurd en waarom heb je dit dossier gestart?"
-2. WEDERHOOR RESPONDENT: Zodra de initiator heeft geantwoord, richt je je tot de tegenpartij: "Bedankt. [Naam Respondent], hoe kijk jij hiernaar? Wat is jouw kant van het verhaal?"
-3. DIALOOG: Pas als BEIDEN hun verhaal hebben gedaan, ga je samen op zoek naar een oplossing.
-
-BELANGRIJK:
-- GEEN JARGON: Noem 'Vaststellingsovereenkomst' pas als de oplossing er is. Praat over "afspraken".
-- PRIVACY: Als je een BSN of adres ziet, waarschuw je direct.
-- REGIE: Jij bepaalt wie er praat.
+STRIKTE GEDRAGSREGELS:
+1. HERKEN CONSENSUS: Als partijen zeggen "prima", "akkoord", "is goed", of een concreet voorstel accepteren, reageer dan enthousiast en vat de afspraak kort samen. 
+2. INTRODUCEER VSO: Zodra er een akkoord is, zeg je: "Mooi dat jullie eruit zijn! Zal ik deze afspraken nu officieel vastleggen in een document? Dat noemen we een Vaststellingsovereenkomst (VSO). Daarmee is de zaak juridisch afgehandeld."
+3. PROCESFASE:
+   - Intake: Vraag de initiator om zijn verhaal (als dat er nog niet is).
+   - Wederhoor: Vraag de tegenpartij om zijn kant (na de intake).
+   - Dialoog: Help ze bij het onderhandelen over bedragen of tijden.
+4. TOON: Tutoyeer altijd (jij/je). Wees empathisch maar zakelijk. 
+5. KORT: Maximaal 45 woorden. Geen herhaling van clichés.
 
 Chatgeschiedenis:
 ${historyString}
@@ -64,16 +60,16 @@ Mediator:`
           }]
         }],
         config: {
-          temperature: 0.1, 
-          topP: 0.1
+          temperature: 0.4, 
+          topP: 0.8
         }
       });
       
       const text = response.text?.trim();
-      return text || "Ik hoor graag je reactie.";
+      return text || "Ik heb je begrepen. Wat vind jij van dit voorstel?";
     } catch (error) {
       console.error("Mediator error:", error);
-      return "Laten we kijken naar een oplossing. Wat is je volgende stap?";
+      return "Ik hoor dat jullie stappen zetten richting een oplossing. Hoe kunnen we dit nu concreet maken?";
     }
   }
 
