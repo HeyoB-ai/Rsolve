@@ -36,20 +36,22 @@ export class GeminiService {
     const historyString = chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n');
     
     try {
+      // Gebruik gemini-3-pro-preview voor complexe mediation met thinking budget
       const response = await client.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3-pro-preview',
         contents: [{
           parts: [{
-            text: `Je bent de AI Mediator van 'Rsolve'. Dossier: "${caseTitle}". 
+            text: `Je bent de Senior AI Mediator van 'Rsolve'. Dossier: "${caseTitle}". 
             
-STRIKTE INSTRUCTIES VOOR DE FINALE FASE:
-1. HERKEN AKKOORD: Als partijen 'ja', 'akkoord', 'prima' zeggen op een concreet voorstel, OF als jij zojuist hebt gezegd dat je de VSO gaat maken:
-   - STOP met het stellen van vragen als "Wat vind je ervan?".
-   - VAT de afspraak kort samen (bijv. "Helder: aanstaande donderdag de overdracht van de stereo voor 200 euro").
-   - VOEG ALTIJD de tekst "[ACTION:GENERATE_VSO]" toe aan het einde van je bericht.
-2. VERMIJD FALLBACKS: Geef nooit een antwoord als "Ik heb je begrepen. Wat is je volgende stap?" als er al een akkoord is of als de sfeer positief is naar een oplossing.
-3. TOON: Tutoyeer altijd (jij/je). Blijf resultaatgericht.
-4. LENGTE: Maximaal 40 woorden.
+JOUW ROL:
+Je bent een menselijke, empathische bemiddelaar. Je observeert het gesprek en grijpt in als dat nodig is.
+
+STRIKTE RICHTLIJNEN:
+1. TAALBARRIÈRE: Als een partij aangeeft de andere partij niet te begrijpen (bijv. door taal), stop dan onmiddellijk met het proces. Vat het laatste voorstel van de andere partij samen in de taal van de ontvanger. Wees de tolk.
+2. EMPATHIE: Reageer op de emotie. Als iemand gefrustreerd is over de traagheid of de communicatie, erken dat dan eerst ("Ik begrijp dat dit lastig is...").
+3. GEEN ROBOT-ANTWOORDEN: Vermijd zinnen als "Ik help je graag verder" of "Wat is je volgende stap". Praat zoals een menselijke coach.
+4. VSO TRIGGER: Voeg enkel "[ACTION:GENERATE_VSO]" toe als er een kristalhelder, tweezijdig akkoord is op alle punten. Doe dit NOOIT als er nog verwarring of onbegrip is.
+5. TAALGEBRUIK: Reageer in de taal waarin je wordt aangesproken. Als het gesprek gemengd is (NL/EN), reageer dan tweetalig om iedereen aan boord te houden.
 
 Chatgeschiedenis:
 ${historyString}
@@ -58,16 +60,17 @@ Mediator:`
           }]
         }],
         config: {
-          temperature: 0.2, // Lager voor meer consistentie
-          topP: 0.5
+          thinkingConfig: { thinkingBudget: 4000 }, // Geef de AI ruimte om de situatie te analyseren
+          temperature: 0.7, // lets meer creativiteit voor menselijke antwoorden
+          topP: 0.9
         }
       });
       
       const text = response.text?.trim();
-      return text || "Ik help jullie graag verder. Laten we de afspraak nu concreet maken.";
+      return text || "Ik zie dat we er even niet uitkomen. Zullen we stap voor stap kijken waar de verwarring zit?";
     } catch (error) {
       console.error("Mediator error:", error);
-      return "Ik zie dat jullie er bijna uit zijn. Zullen we de afspraak nu definitief vastleggen?";
+      return "Mijn excuses, ik had even een technisch probleem. Laten we teruggaan naar de kern: wat is er op dit moment nodig om verder te komen?";
     }
   }
 
@@ -86,6 +89,9 @@ Mediator:`
             Geef enkel de genummerde artikelen terug in juridisch correct Nederlands.`
           }]
         }],
+        config: {
+          thinkingConfig: { thinkingBudget: 8000 } // Grondige analyse voor juridische tekst
+        }
       });
       return response.text?.trim() || "Kon geen VSO opstellen.";
     } catch (error) {
