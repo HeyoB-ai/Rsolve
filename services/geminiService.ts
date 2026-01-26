@@ -4,7 +4,10 @@ import { GoogleGenAI, Type } from "@google/genai";
 export class GeminiService {
   private get ai() {
     const apiKey = process.env.API_KEY;
-    if (!apiKey) return null;
+    if (!apiKey) {
+      console.warn("Gemini API Key ontbreekt in process.env.API_KEY");
+      return null;
+    }
     return new GoogleGenAI({ apiKey });
   }
 
@@ -15,7 +18,11 @@ export class GeminiService {
     try {
       const response = await client.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: `Vertaal de volgende tekst naar het ${targetLanguage}. Houd de toon hetzelfde als het origineel. Geef ENKEL de vertaling terug, zonder extra uitleg.\n\nTekst: "${text}"`,
+        contents: [{ 
+          parts: [{ 
+            text: `Vertaal de volgende tekst naar het ${targetLanguage}. Houd de toon hetzelfde als het origineel. Geef ENKEL de vertaling terug, zonder extra uitleg.\n\nTekst: "${text}"` 
+          }] 
+        }],
       });
       return response.text?.trim() || text;
     } catch (error) {
@@ -31,7 +38,11 @@ export class GeminiService {
     try {
       const response = await client.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: `Analyseer of de volgende tekst in het Nederlands is. Zo niet, welke taal is het? Antwoord in JSON formaat: {"isNonDutch": boolean, "language": string}.\n\nTekst: "${text}"`,
+        contents: [{ 
+          parts: [{ 
+            text: `Analyseer of de volgende tekst in het Nederlands is. Zo niet, welke taal is het? Antwoord in JSON formaat: {"isNonDutch": boolean, "language": string}.\n\nTekst: "${text}"` 
+          }] 
+        }],
         config: { responseMimeType: "application/json" }
       });
       const jsonStr = response.text || '{"isNonDutch": false}';
@@ -49,30 +60,47 @@ export class GeminiService {
     const historyString = chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n');
     
     try {
+      // Gebruik gemini-3-flash-preview voor snellere interactie en minder latency issues
       const response = await client.models.generateContent({
-        model: 'gemini-3-pro-preview',
-        contents: `Je bent een wereldklasse mediator voor de app Rsolve. 
-        Context: Twee partijen proberen een conflict op te lossen genaamd "${caseTitle}".
-        Jouw taak: Observeer het gesprek, blijf neutraal, wees empathisch en stuur aan op een concrete oplossing (VSO). 
-        Regels:
-        - Antwoord in de taal waarin de partijen spreken (meestal Nederlands).
-        - Houd het kort en krachtig (max 60 woorden).
-        - Stel verhelderende vragen of doe suggesties voor een compromis.
-        - Als partijen akkoord lijken, vat de afspraken dan samen.
-        
-        Recent gesprek:
-        ${historyString}
-        
-        Mediator:`,
+        model: 'gemini-3-flash-preview',
+        contents: [{
+          parts: [{
+            text: `Je bent een ervaren en neutrale AI mediator voor de app Rsolve. 
+            Context: Het conflict gaat over "${caseTitle}".
+            Jouw doel: Help partijen om tot een gezamenlijke oplossing te komen die ze kunnen vastleggen in een VSO.
+            
+            Richtlijnen:
+            - Antwoord altijd in de taal van de gebruikers (meestal Nederlands).
+            - Wees kort, empathisch en zakelijk (max 50 woorden).
+            - Vat standpunten samen als dat helpt en stel gerichte vragen.
+            - Focus op de toekomst en oplossingen, niet op schuldvragen.
+            - Als partijen er bijna uit zijn, suggereer dan een samenvatting van de afspraken.
+            
+            Chatgeschiedenis:
+            ${historyString}
+            
+            Mediator:`
+          }]
+        }],
       });
-      return response.text?.trim() || "Hoe kunnen we tot een oplossing komen die voor beiden werkt?";
+      
+      const text = response.text?.trim();
+      if (!text) throw new Error("Lege response van model");
+      return text;
     } catch (error) {
       console.error("Mediator response error:", error);
-      return "Laten we focussen op de feiten en wat jullie nodig hebben om dit af te sluiten.";
+      // Gevarieerde fallback om herhaling te voorkomen
+      const fallbacks = [
+        "Ik hoor wat je zegt. Hoe kunnen we dit ombuigen naar een oplossing waar jullie beiden achter staan?",
+        "Laten we kijken naar wat er nu nodig is om een stapje dichter bij een afspraak te komen.",
+        "Dat is een duidelijk standpunt. Wat zou voor de ander een acceptabel compromis kunnen zijn?",
+        "Begrepen. Laten we focussen op de feiten en wat jullie nodig hebben om dit dossier positief af te sluiten."
+      ];
+      return fallbacks[Math.floor(Math.random() * fallbacks.length)];
     }
   }
 
-  // Nieuwe methode: Genereert de formele tekst voor de VSO
+  // Genereert de formele tekst voor de VSO
   async generateVSOTerms(chatHistory: {sender: string, text: string}[], caseTitle: string): Promise<string> {
     const client = this.ai;
     if (!client) return "Geen afspraken kunnen genereren.";
@@ -80,43 +108,52 @@ export class GeminiService {
     const historyString = chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n');
     
     try {
+      // Pro model voor complexe juridische formulering
       const response = await client.models.generateContent({
         model: 'gemini-3-pro-preview',
-        contents: `Analyseer het volgende chatgesprek van een mediation sessie en stel een formele Vaststellingsovereenkomst (VSO) op. 
-        Formuleer de gemaakte afspraken in juridisch heldere, maar begrijpelijke taal.
-        
-        Titel van het geschil: ${caseTitle}
-        
-        Chatgeschiedenis:
-        ${historyString}
-        
-        Geef ENKEL de genummerde afspraken terug (bijv. 1. Partij A betaalt..., 2. De goederen worden...). Gebruik geen inleiding of afsluiting.`,
+        contents: [{
+          parts: [{
+            text: `Analyseer dit mediation gesprek en stel een formele Vaststellingsovereenkomst (VSO) op. 
+            Formuleer de afspraken juridisch correct maar in begrijpelijke taal.
+            
+            Onderwerp: ${caseTitle}
+            
+            Gesprek:
+            ${historyString}
+            
+            Geef ENKEL de genummerde afspraken terug. Geen inleiding of extra tekst.`
+          }]
+        }],
       });
       return response.text?.trim() || "Partijen hebben geen duidelijke afspraken gemaakt in de chat.";
     } catch (error) {
       console.error("VSO Generation error:", error);
-      return "Fout bij het genereren van de overeenkomst.";
+      return "Er is momenteel een probleem bij het opstellen van het document. Probeer het over een moment opnieuw.";
     }
   }
 
   async getMediatorSuggestion(context: string): Promise<string> {
     const client = this.ai;
-    if (!client) return "Focus on finding a constructive middle ground.";
+    if (!client) return "Focus op een constructieve oplossing.";
     
     try {
       const response = await client.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: `You are an AI Mediator assistant. Based on the conversation history below, provide a short, helpful suggestion (max 40 words) for the user to help move the dispute towards a resolution.
-        
-        History:
-        ${context}
-        
-        Assistant Suggestion:`,
+        contents: [{
+          parts: [{
+            text: `Je bent een AI Mediator assistent. Geef op basis van onderstaand gesprek een korte suggestie (max 30 woorden) aan de gebruiker om het gesprek vlot te trekken.
+            
+            Gesprek:
+            ${context}
+            
+            Suggestie:`
+          }]
+        }],
       });
-      return response.text?.trim() || "Consider asking for specific evidence to clarify the situation.";
+      return response.text?.trim() || "Probeer de ander te vragen wat zij als een eerlijke oplossing zien.";
     } catch (error) {
       console.error("Mediator suggestion error:", error);
-      return "Focus on finding an outcome that works for both sides.";
+      return "Blijf focussen op een resultaat dat voor beide partijen acceptabel is.";
     }
   }
 }
