@@ -20,12 +20,12 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
     navigate('/payment');
   };
 
-  // De exacte foto van de gebruiker (nu met een fallback mecanisme)
+  // De exacte foto van de gebruiker
   const heroImageUrl = "https://replicate.delivery/yhqm/f0d8f99e-3e5a-497d-8e42-1e967364b6f7/out-0.png"; 
 
   return (
     <div className="bg-white text-[#1e293b] font-display antialiased min-h-screen">
-      {/* Header - EXACT MATCH */}
+      {/* Header */}
       <header className="sticky top-0 z-50 flex items-center bg-white/95 backdrop-blur-md px-8 py-5 justify-between max-w-[1440px] mx-auto w-full">
         <Logo showText={true} />
         <div className="flex items-center gap-6">
@@ -45,10 +45,9 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
       </header>
 
       <main>
-        {/* Hero Section - EXACT MATCH MET SCREENSHOT */}
+        {/* Hero Section */}
         <section className="relative px-8 py-12 md:py-20 max-w-[1440px] mx-auto overflow-visible">
           <div className="flex flex-col lg:flex-row gap-16 items-start">
-            
             {/* Left Content */}
             <div className="flex flex-col gap-10 text-left lg:max-w-2xl animate-in fade-in slide-in-from-left-8 duration-700">
               <div className="inline-flex items-center gap-2 py-2 px-5 bg-blue-50 border border-blue-100 rounded-full w-fit shadow-sm">
@@ -87,27 +86,20 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
               </div>
             </div>
             
-            {/* Right Content - De Foto Container */}
+            {/* Right Content - Image */}
             <div className="relative w-full lg:flex-1 animate-in fade-in zoom-in-95 duration-1000 delay-200 mt-12 lg:mt-0">
               <div className="relative w-full aspect-[1.1] bg-slate-50 rounded-[5rem] shadow-2xl border-[16px] border-white overflow-hidden group">
-                {/* De afbeelding zelf */}
                 <img 
                   src={heroImageUrl} 
                   alt="Rsolve Mediation Session" 
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=1000"; // Fallback als de link stuk is
-                  }}
                 />
 
-                {/* Badge Overlay */}
                 <div className="absolute top-10 left-10 bg-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-100/50">
                   <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.8)]"></div>
                   <span className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-600">Nu Online</span>
                 </div>
 
-                {/* AI Mediator Bubble Overlay - EXACT MATCH */}
                 <div className="absolute bottom-10 right-10 bg-white/95 backdrop-blur-xl p-10 rounded-[3.5rem] shadow-2xl border border-white/50 max-w-[340px] transform hover:translate-y-[-10px] transition-transform duration-500">
                   <div className="flex items-center gap-4 mb-5">
                     <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
@@ -122,8 +114,93 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
           </div>
         </section>
 
-        {/* Features - Stitch Style */}
-        <section className="bg-white py-32 px-8 max-w-[1440px] mx-auto border-t border-slate-50">
+        {/* Article Section - Mediation: conflicten oplossen zonder strijd */}
+        <section className="bg-slate-50/50 py-32 px-8 border-y border-slate-100">
+          <div className="max-w-4xl mx-auto space-y-12">
+            <header className="space-y-6 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 py-1.5 px-4 bg-white border border-slate-200 rounded-full w-fit shadow-sm">
+                <span className="material-symbols-outlined text-primary text-sm">auto_stories</span>
+                <span className="text-primary font-black text-[10px] tracking-widest uppercase">Kennisbank</span>
+              </div>
+              <h2 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tighter leading-none">
+                Mediation: conflicten oplossen zonder strijd
+              </h2>
+            </header>
+
+            <div className="prose prose-slate prose-xl max-w-none text-slate-600 font-medium leading-relaxed space-y-8">
+              <p>
+                Conflicten zijn onvermijdelijk. Op het werk, thuis, met buren of in zakelijke relaties: waar mensen samenwerken of samenleven, ontstaan soms spanningen. Toch belanden veel conflicten nog steeds snel bij advocaten of in de rechtszaal.
+              </p>
+              
+              <p className="text-slate-900 font-bold text-2xl tracking-tight">Dat is zelden de beste oplossing.</p>
+              
+              <p>
+                Een juridische procedure kost vaak veel geld, tijd en energie. Bovendien eindigt een rechtszaak bijna altijd met een winnaar en een verliezer. De onderliggende relatie is daarna vaak beschadigd of zelfs definitief kapot.
+              </p>
+
+              <div className="bg-white p-12 rounded-[3.5rem] border border-slate-100 shadow-xl shadow-blue-500/5 space-y-8">
+                <h3 className="text-3xl font-black text-slate-900 tracking-tight">Wat is mediation?</h3>
+                <p>
+                  Mediation is een manier om conflicten op te lossen waarbij beide partijen, onder begeleiding van een neutrale mediator, met elkaar in gesprek gaan. Het doel is niet om te winnen, maar om samen tot afspraken te komen die voor beide acceptabel zijn.
+                </p>
+
+                <div className="space-y-4">
+                  <p className="font-black text-slate-900 uppercase tracking-widest text-xs">Bij mediation:</p>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 list-none p-0">
+                    {[
+                      "behouden beide partijen controle over de uitkomst",
+                      "is er ruimte voor emoties én rationele oplossingen",
+                      "staat samenwerking centraal",
+                      "blijven relaties vaker intact"
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-3 bg-slate-50 p-5 rounded-2xl border border-slate-100 font-bold text-slate-700">
+                        <span className="material-symbols-outlined text-primary">check_circle</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <p className="text-lg font-bold text-primary italic">
+                  Het proces is doorgaans sneller en aanzienlijk goedkoper dan een juridische procedure.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <h3 className="text-3xl font-black text-slate-900 tracking-tight">Wanneer werkt mediation goed?</h3>
+                <p>
+                  Mediation werkt vooral goed wanneer beide partijen bereid zijn om te communiceren en openstaan voor een oplossing. Dat hoeft niet te betekenen dat iedereen het meteen met elkaar eens is — juist bij stevige conflicten kan mediation verrassend effectief zijn.
+                </p>
+                <p className="text-slate-900 font-bold text-xl underline decoration-primary/30 decoration-4 underline-offset-8">
+                  Het belangrijkste is de bereidheid om te praten.
+                </p>
+              </div>
+
+              <div className="space-y-6 pt-6">
+                <h3 className="text-3xl font-black text-slate-900 tracking-tight">Waarom steeds meer mensen kiezen voor mediation</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {[
+                    { title: "Escalatie voorkomt", desc: "Zet een punt achter de ruzie voordat het te laat is." },
+                    { title: "Stress vermindert", desc: "Geen jarenlange procedures maar snelle duidelijkheid." },
+                    { title: "Praktische oplossingen", desc: "Afspraken die in het echt ook werken." },
+                    { title: "Toekomstgericht", desc: "Niet blijven hangen in het verleden." }
+                  ].map((benefit, i) => (
+                    <div key={i} className="space-y-2">
+                      <h4 className="text-xl font-black text-slate-900">{benefit.title}</h4>
+                      <p className="text-base text-slate-500">{benefit.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-2xl font-black text-slate-900 leading-tight pt-10 border-t border-slate-100">
+                In plaats van terug te kijken naar wie er “gelijk had”, richt mediation zich op: <span className="text-primary italic">hoe gaan we verder?</span>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="bg-white py-32 px-8 max-w-[1440px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
             {[
               { icon: 'bolt', title: 'Snelheid', desc: 'Binnen enkele dagen een definitieve oplossing, zonder de maandenlange wachttijden.' },
