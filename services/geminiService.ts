@@ -19,7 +19,7 @@ export class GeminiService {
         model: 'gemini-3-flash-preview',
         contents: [{ 
           parts: [{ 
-            text: `Vertaal de volgende tekst naar het ${targetLanguage}. Houd de toon hetzelfde als het origineel. Geef ENKEL de vertaling terug.\n\nTekst: "${text}"` 
+            text: `Vertaal de volgende tekst naar het ${targetLanguage}. Geef ENKEL de vertaling terug.\n\nTekst: "${text}"` 
           }] 
         }],
       });
@@ -37,20 +37,19 @@ export class GeminiService {
     
     try {
       const response = await client.models.generateContent({
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-3-flash-preview', // Gewijzigd naar Flash voor snelheid
         contents: [{
           parts: [{
             text: `Je bent de Senior AI Mediator van 'Rsolve'. Dossier: "${caseTitle}". 
             
 JOUW OPDRACHT:
-Help deze mensen hun conflict op te lossen. Je bent intelligenter, empathischer en scherper dan een standaard chatbot.
+Help deze mensen hun conflict op te lossen. Reageer direct, menselijk en constructief.
 
-STRIKTE PRIORITEITEN:
-1. COMMUNICATIECHECK: Als de laatste spreker aangeeft iets niet te begrijpen of een andere taal spreekt, dan is jouw ENIGE taak om die barrière te doorbreken. Vertaal de essentie van het laatste voorstel/bericht naar de taal van de ontvanger.
-2. ADRESSEER DE LAATSTE ZIN: Begin je antwoord ALTIJD met een directe reactie op wat er net gezegd is. Geen algemene inleidingen.
-3. WEES MENSELIJK: Gebruik geen mediation-clichés. Praat als een ervaren coach. Tutoyeer (jij/je).
-4. VSO LOGICA: Alleen als er een onbetwistbaar akkoord is, voeg je "[ACTION:GENERATE_VSO]" toe. Als er taalverwarring is, is een VSO verboden.
-5. TAAL: Antwoord in de taal van de vrager. Bij een gemengd gesprek reageer je tweetalig (bijv. NL boven, EN onder).
+REGELS:
+1. Reageer ALTIJD eerst kort op de laatste zin van de gebruiker.
+2. Gebruik geen mediation-clichés. Praat als een coach.
+3. Bij een akkoord voeg je "[ACTION:GENERATE_VSO]" toe aan je bericht.
+4. Antwoord in de taal van de vrager.
 
 Chatgeschiedenis:
 ${historyString}
@@ -59,14 +58,13 @@ Mediator:`
           }]
         }],
         config: {
-          thinkingConfig: { thinkingBudget: 4000 },
-          temperature: 0.6,
-          topP: 0.8
+          // Thinking budget verwijderd voor minimale latency in chat
+          temperature: 0.7,
         }
       });
       
       const text = response.text?.trim();
-      return text || "Ik merk dat de communicatie stroef loopt. Zullen we even pas op de plaats maken? Waar gaat het mis?";
+      return text || "Ik hoor wat je zegt. Hoe kijkt de andere partij hiernaar?";
     } catch (error) {
       console.error("Mediator error:", error);
       return "Ik zie dat de verbinding even hapert. Laten we teruggaan naar de kern van jullie afspraak.";
@@ -77,6 +75,7 @@ Mediator:`
     const client = this.ai;
     if (!client) return "Geen afspraken kunnen genereren.";
     try {
+      // Voor de VSO gebruiken we wel het krachtigere Pro model omdat nauwkeurigheid hier cruciaal is
       const response = await client.models.generateContent({
         model: 'gemini-3-pro-preview',
         contents: [{
@@ -106,7 +105,7 @@ Mediator:`
         model: 'gemini-3-flash-preview',
         contents: [{
           parts: [{
-            text: `Geef een korte suggestie (max 15 words) in the user's language to help move this conversation forward: ${context}`
+            text: `Geef een korte suggestie (max 15 woorden) om dit gesprek vooruit te helpen: ${context}`
           }]
         }],
       });
