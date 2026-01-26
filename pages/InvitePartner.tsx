@@ -17,6 +17,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',
+    yourName: '', // Nieuw veld
     otherParty: ''
   });
   const [caseId, setCaseId] = useState<string | null>(null);
@@ -27,7 +28,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
   const inviteLink = `${window.location.origin}/#/invite/${caseId}`;
 
   const handleSetupComplete = async () => {
-    if (!formData.title || !formData.otherParty) return;
+    if (!formData.title || !formData.otherParty || !formData.yourName) return;
     
     setIsSaving(true);
     const newId = Math.random().toString(36).substr(2, 9);
@@ -36,19 +37,19 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
     const { error } = await supabase.from('cases').insert([{
       id: newId,
       title: formData.title,
+      initiator_name: formData.yourName, // Sla eigen naam op
       other_party: formData.otherParty,
-      initiator_id: 'local-user', // In echt zou dit een Auth ID zijn
+      initiator_id: 'local-user', 
       respondent_joined: false
     }]);
 
     if (!error) {
-      // Uitgebreid welkomstbericht van de Mediator inclusief privacy waarschuwing
-      // We gebruiken type: 'text' en sender_id: 'mediator' zodat het als een echte chatbubble verschijnt
+      // Welkomstbericht van de Mediator
       await supabase.from('messages').insert([{
         case_id: newId,
         sender_id: 'mediator',
         sender_name: 'Mediator',
-        content: `Welkom. Ik ben jullie AI Mediator. De tegenpartij is uitgenodigd, maar we kunnen alvast beginnen. Vertel me gerust wat jouw kant van het verhaal is en voeg eventueel bewijslast toe via de paperclip.\n\nLET OP: hoewel we ons best doen om alle data zo goed mogelijke te beschermen is het belangrijk om te voorkomen dat er informatie wordt gedeeld die de privacy van deelnemers schendt. Dus noem zo min mogelijk achternamen, adressen en woonplaatsen terwijl je de app gebruikt.`,
+        content: `Welkom ${formData.yourName}. Ik ben jullie AI Mediator. De tegenpartij (${formData.otherParty}) is uitgenodigd, maar we kunnen alvast beginnen. Vertel me gerust wat jouw kant van het verhaal is.\n\nLET OP: deel geen gevoelige privégegevens zoals adressen of burgerservicenummers in deze chat.`,
         type: 'text'
       }]);
 
@@ -70,6 +71,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
     const dataToSave = { 
       id: caseId,
       title: formData.title,
+      initiatorName: formData.yourName, // Geef naam door aan de app state
       otherParty: formData.otherParty,
       isRespondent: false 
     };
@@ -87,10 +89,16 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
             </div>
             <div className="space-y-2">
               <h1 className="text-3xl font-black text-slate-900 tracking-tight">Betaling Ontvangen!</h1>
-              <p className="text-slate-500 font-medium">Laten we het dossier kort omschrijven.</p>
+              <p className="text-slate-500 font-medium">Laten we het dossier opstarten.</p>
             </div>
 
             <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">
+              <Input 
+                label="Jouw naam"
+                placeholder="Bijv. Mark de Vries"
+                value={formData.yourName}
+                onChange={e => setFormData({...formData, yourName: e.target.value})}
+              />
               <Input 
                 label="Onderwerp van het conflict"
                 placeholder="Bijv. Terugbetaling lening"
@@ -107,7 +115,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
                 size="lg" 
                 className="w-full rounded-2xl py-5 shadow-lg" 
                 onClick={handleSetupComplete}
-                disabled={!formData.title || !formData.otherParty || isSaving}
+                disabled={!formData.title || !formData.otherParty || !formData.yourName || isSaving}
                 isLoading={isSaving}
               >
                 Opslaan & Uitnodiging Maken
@@ -119,7 +127,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
             <div className="space-y-4">
               <Logo className="w-20 h-20 mx-auto mb-2" />
               <h1 className="text-3xl font-black tracking-tight text-slate-900 leading-tight">Nodig {formData.otherParty} uit</h1>
-              <p className="text-slate-500 font-medium px-4">Deel deze link via WhatsApp. Pas na het uitnodigen start het gesprek met de mediator.</p>
+              <p className="text-slate-500 font-medium px-4">Deel deze link via WhatsApp om het proces officieel te starten.</p>
             </div>
 
             <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">

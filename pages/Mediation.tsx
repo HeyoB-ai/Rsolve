@@ -34,13 +34,9 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Check of de mediator heeft aangegeven dat het tijd is voor de VSO
-  const showFinalizePrompt = useMemo(() => {
-    if (messages.length < 4) return false;
-    const lastMediatorMsgs = messages.filter(m => m.senderId === 'mediator').slice(-2);
-    const keywords = ['vso', 'overeenkomst', 'akkoord', 'onderteken', 'afronden', 'vastleggen'];
-    return lastMediatorMsgs.some(m => keywords.some(k => m.text.toLowerCase().includes(k)));
-  }, [messages]);
+  // Namen ophalen uit caseData
+  const myName = caseData.isRespondent ? (caseData.respondentName || 'Tegenpartij') : (caseData.initiatorName || 'Initiator');
+  const otherPartyName = caseData.isRespondent ? (caseData.initiatorName || 'Initiator') : caseData.otherParty;
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -115,11 +111,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isAiThinking, showFinalizePrompt]);
-
-  const evidenceList = useMemo(() => {
-    return messages.filter(m => m.attachment).map(m => ({ ...m.attachment, sender: m.sender, timestamp: m.timestamp }));
-  }, [messages]);
+  }, [messages, isAiThinking]);
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
@@ -129,7 +121,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     const { data: userMsg, error } = await supabase.from('messages').insert([{
       case_id: caseData.id,
       sender_id: caseData.isRespondent ? 'respondent' : 'initiator',
-      sender_name: caseData.isRespondent ? (caseData.respondentName || 'Tegenpartij') : t('you'),
+      sender_name: myName, // Gebruik de eigen naam
       content: textToSend,
       type: 'text'
     }]).select().single();
@@ -137,12 +129,14 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     if (error) return;
 
     setIsAiThinking(true);
-    const chatHistory = [...messages, { sender: caseData.isRespondent ? 'Respondent' : 'Initiator', text: textToSend }]
+    const chatHistory = [...messages, { sender: myName, text: textToSend }]
       .slice(-15)
       .map(m => ({ sender: m.sender, text: m.text }));
 
     try {
-      const aiResponse = await geminiService.generateMediatorResponse(chatHistory, caseData.title);
+      // De AI krijgt nu de context van wie wie is
+      const contextTitle = `${caseData.title} (Partijen: ${caseData.initiatorName || 'Initiator'} vs ${caseData.otherParty})`;
+      const aiResponse = await geminiService.generateMediatorResponse(chatHistory, contextTitle);
       await supabase.from('messages').insert([{
         case_id: caseData.id,
         sender_id: 'mediator',
@@ -178,7 +172,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const handleVSOPrefix = () => {
     const vsoData = {
       title: caseData.title,
-      parties: `${caseData.isRespondent ? 'Tegenpartij' : 'Jij'} en ${caseData.isRespondent ? 'Jij' : caseData.otherParty}`,
+      parties: `${caseData.initiatorName} en ${caseData.otherParty}`,
       terms: vsoConcept,
       date: new Date().toLocaleDateString('nl-NL')
     };
@@ -195,7 +189,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       await supabase.from('messages').insert([{
         case_id: caseData.id,
         sender_id: caseData.isRespondent ? 'respondent' : 'initiator',
-        sender_name: caseData.isRespondent ? (caseData.respondentName || 'Tegenpartij') : t('you'),
+        sender_name: myName,
         content: `Heeft een bijlage gestuurd: ${file.name}`,
         type: 'attachment',
         attachment_url: base64String
@@ -228,16 +222,10 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                  ) : (
                     <div className="space-y-6">
                        <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                          Op basis van jullie gesprek heeft de mediator de volgende afspraken geformuleerd. Lees ze goed door voordat je het document definitief maakt.
+                          Op basis van jullie gesprek heeft de mediator de volgende afspraken geformuleerd.
                        </p>
                        <div className="bg-slate-50 p-6 rounded-2xl border-l-4 border-blue-600 font-serif italic text-slate-700 leading-relaxed shadow-inner whitespace-pre-wrap">
                           {vsoConcept}
-                       </div>
-                       <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex gap-3">
-                          <ICONS.Check className="w-5 h-5 text-emerald-600 shrink-0" />
-                          <p className="text-[10px] text-emerald-800 font-bold leading-tight">
-                             Door te bevestigen wordt er een officieel VSO document gegenereerd dat als bewijs dient van jullie afspraken.
-                          </p>
                        </div>
                     </div>
                  )}
@@ -246,18 +234,12 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
               <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex flex-col gap-3 shrink-0">
                  <Button 
                    size="lg" 
-                   className="w-full rounded-2xl py-4 shadow-xl shadow-blue-100" 
+                   className="w-full rounded-2xl py-4 shadow-xl" 
                    disabled={isGeneratingVSO}
                    onClick={handleVSOPrefix}
                  >
                     Bevestig & Naar Ondertekening
                  </Button>
-                 <button 
-                   onClick={() => setIsVSOReviewOpen(false)}
-                   className="text-xs font-black text-slate-400 uppercase tracking-widest py-2"
-                 >
-                    Terug naar gesprek
-                 </button>
               </div>
            </Card>
         </div>
@@ -296,9 +278,9 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           <div className="overflow-hidden">
             <h1 className="text-xs font-black text-slate-900 truncate max-w-[120px] uppercase tracking-tight">{caseData.title}</h1>
             <div className="flex items-center gap-1.5">
-               <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${isRespondentJoined ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-400 animate-pulse'}`} />
+               <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${isRespondentJoined ? 'bg-emerald-500' : 'bg-amber-400 animate-pulse'}`} />
                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
-                  {caseData.isRespondent ? 'Initiator' : caseData.otherParty} {isRespondentJoined ? t('online') : `${t('waiting')}...`}
+                  {otherPartyName} {isRespondentJoined ? t('online') : `${t('waiting')}...`}
                </span>
             </div>
           </div>
@@ -308,18 +290,16 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           {messages.length > 5 && isRespondentJoined && (
             <button 
               onClick={startVSOFlow}
-              className={`px-3 py-2 ${showFinalizePrompt ? 'bg-emerald-500 animate-bounce' : 'bg-slate-900'} text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all`}
+              className="px-3 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all"
             >
               Rond af
             </button>
           )}
           <button onClick={() => setIsSettingsOpen(true)} className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all">
             <ICONS.Globe className="w-5 h-5" />
-            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{UI_TRANSLATIONS[appLanguage].label}</span>
           </button>
           <button onClick={() => setIsDossierOpen(true)} className="relative p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all">
             <ICONS.Folder className="w-5 h-5" />
-            {evidenceList.length > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white text-[8px] font-black rounded-full flex items-center justify-center">{evidenceList.length}</span>}
           </button>
         </div>
       </header>
@@ -338,42 +318,14 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
               sender={m.sender} 
               timestamp={m.timestamp} 
               attachment={m.attachment} 
-              autoTranslateTo={displayMode === 'dual' ? UI_TRANSLATIONS[appLanguage].label : null} 
               targetLanguageName={UI_TRANSLATIONS[appLanguage].label}
             />
           );
         })}
         
         {isAiThinking && (
-          <div className="flex flex-col items-start max-w-[85%] self-start animate-in fade-in slide-in-from-left-2">
+          <div className="flex flex-col items-start max-w-[85%] self-start">
             <span className="text-[10px] font-black text-slate-400 mb-1 ml-2 uppercase tracking-widest">{t('mediator')} is aan het typen...</span>
-            <div className="bg-white border border-slate-100 px-4 py-3 rounded-[20px] rounded-bl-none shadow-sm flex gap-1">
-              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
-              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
-              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce" />
-            </div>
-          </div>
-        )}
-
-        {/* Afronding Prompt in Chat */}
-        {showFinalizePrompt && (
-          <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 delay-300">
-            <Card className="bg-emerald-50 border-emerald-200 border-2 p-6 rounded-[32px] text-center space-y-4 shadow-xl shadow-emerald-100/50">
-               <div className="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto shadow-lg">
-                  <ICONS.Check className="w-6 h-6" />
-               </div>
-               <div className="space-y-1">
-                  <h3 className="text-sm font-black text-emerald-900 uppercase tracking-widest">Akkoord gedetecteerd</h3>
-                  <p className="text-xs text-emerald-700 font-medium">De mediator heeft de afspraken samengevat. Klik hieronder om de officiële VSO te genereren en te ondertekenen.</p>
-               </div>
-               <Button 
-                  onClick={startVSOFlow}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl shadow-xl shadow-emerald-200 flex items-center justify-center gap-2 group"
-               >
-                  <span>Bekijk & Onderteken VSO</span>
-                  <ICONS.ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-               </Button>
-            </Card>
           </div>
         )}
 
@@ -384,8 +336,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         <div className="flex gap-2 max-w-2xl mx-auto w-full items-end pb-2">
           <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*,video/*,.pdf,.doc,.docx" />
           <button onClick={() => fileInputRef.current?.click()} disabled={isUploading || isAiThinking} className="p-3 rounded-2xl bg-slate-100 text-slate-500 shrink-0 mb-0.5"><ICONS.Paperclip className="w-5 h-5" /></button>
-          <textarea className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 font-medium resize-none max-h-32" placeholder={t('placeholder')} rows={1} value={inputValue} onChange={e => setInputValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }} />
-          <Button size="icon" className="rounded-2xl w-12 h-12 shadow-lg shadow-blue-100 shrink-0" onClick={handleSend} disabled={!inputValue.trim() || isAiThinking}><svg className="w-5 h-5 -rotate-45" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></Button>
+          <textarea className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 font-medium resize-none max-h-32" placeholder={t('placeholder')} rows={1} value={inputValue} onChange={e => setInputValue(e.target.value)} />
+          <Button size="icon" className="rounded-2xl w-12 h-12 shadow-lg" onClick={handleSend} disabled={!inputValue.trim() || isAiThinking}><svg className="w-5 h-5 -rotate-45" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></Button>
         </div>
       </div>
     </div>

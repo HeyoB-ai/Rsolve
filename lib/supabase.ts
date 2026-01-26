@@ -18,6 +18,7 @@ export type DbCase = {
   title: string;
   other_party: string;
   initiator_id: string;
+  initiator_name: string; // Nieuw veld
   respondent_joined: boolean;
   created_at: string;
 };
