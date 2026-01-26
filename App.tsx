@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { UI_TRANSLATIONS } from './constants';
-import { isDemoMode } from './lib/supabase';
+import { isConfigured } from './lib/supabase';
 
 // Pagina's
 import Landing from './pages/Landing';
@@ -78,9 +78,9 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       <div className="flex flex-col min-h-screen bg-slate-50 relative">
-        {isDemoMode && (
-          <div className="bg-amber-500 text-white text-[8px] font-black uppercase tracking-[0.3em] py-1 px-4 text-center z-[200]">
-            Demo Modus Actief &bull; Lokale Opslag &bull; Geen Database Verbinding
+        {!isConfigured && (
+          <div className="bg-red-600 text-white text-[10px] font-black py-2 px-4 text-center z-[200] uppercase tracking-widest">
+            Configuratiefout: Supabase URL/Key ontbreekt in deze omgeving
           </div>
         )}
         <main className="flex-1">
