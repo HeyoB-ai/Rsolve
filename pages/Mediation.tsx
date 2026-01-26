@@ -29,6 +29,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   
   const [isVSOReviewOpen, setIsVSOReviewOpen] = useState(false);
   const [vsoConcept, setVsoConcept] = useState<string | null>(null);
+  const [vsoError, setVsoError] = useState<string | null>(null);
   const [isGeneratingVSO, setIsGeneratingVSO] = useState(false);
   
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -41,7 +42,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const myName = caseData.isRespondent ? (caseData.respondentName || 'Tegenpartij') : (caseData.initiatorName || 'Initiator');
   const otherPartyName = caseData.isRespondent ? (caseData.initiatorName || 'Initiator') : caseData.otherParty;
 
-  // Rollen config voor de AI
   const rolesConfig = {
     initiator: caseData.isRespondent ? caseData.otherParty : myName,
     respondent: caseData.isRespondent ? myName : caseData.otherParty
@@ -150,7 +150,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       }]);
 
       if (hasActionTrigger) {
-        setTimeout(() => startVSOFlow(), 1500);
+        // We geven de AI de kans om eerst de uitleg te laten zien voordat de modal popt
+        setTimeout(() => startVSOFlow(), 3000);
       }
     } catch (e) {
       console.error("AI Error:", e);
@@ -174,20 +175,28 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   };
 
   const startVSOFlow = async () => {
+    setVsoError(null);
     setIsGeneratingVSO(true);
     setIsVSOReviewOpen(true);
-    const chatHistory = messages.filter(m => m.type === 'text').map(m => ({ sender: m.sender, text: m.text }));
+    
+    // Alleen de tekstuele berichten meesturen voor de overeenkomst
+    const chatHistory = messages
+      .filter(m => m.type === 'text')
+      .map(m => ({ sender: m.sender, text: m.text }));
+      
     try {
       const terms = await geminiService.generateVSOTerms(chatHistory, caseData.title);
       setVsoConcept(terms);
     } catch (e) {
-      setVsoConcept("Fout bij opstellen. Probeer het opnieuw.");
+      console.error("VSO error:", e);
+      setVsoError("Er is een probleem bij het opstellen van het document. Probeer het opnieuw.");
     } finally {
       setIsGeneratingVSO(false);
     }
   };
 
   const handleVSOPrefix = () => {
+    if (!vsoConcept) return;
     onResolve({
       caseId: caseData.id, title: caseData.title,
       parties: `${rolesConfig.initiator} en ${rolesConfig.respondent}`,
@@ -280,7 +289,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
            <Card className="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border-none">
               <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
-                  <ICONS.Check className="w-5 h-5 text-emerald-500" />
+                  <ICONS.Check className={`w-5 h-5 ${vsoError ? 'text-red-500' : 'text-emerald-500'}`} />
                   <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Controleer Afspraken</h2>
                 </div>
                 <button onClick={() => setIsVSOReviewOpen(false)} className="p-2 text-slate-400"><ICONS.X /></button>
@@ -291,14 +300,22 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                        <p className="text-sm font-black text-slate-400 uppercase tracking-widest text-center animate-pulse">VSO Wordt Opgesteld...</p>
                     </div>
+                 ) : vsoError ? (
+                    <div className="flex flex-col items-center justify-center py-12 gap-6 text-center">
+                       <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center">
+                          <ICONS.X className="w-8 h-8" />
+                       </div>
+                       <p className="text-sm font-bold text-slate-600">{vsoError}</p>
+                       <Button variant="outline" className="rounded-2xl" onClick={startVSOFlow}>Opnieuw Proberen</Button>
+                    </div>
                  ) : (
-                    <div className="space-y-6">
+                    <div className="space-y-6 animate-in fade-in duration-500">
                        <div className="bg-slate-50 p-6 rounded-2xl border-l-4 border-blue-600 font-serif italic text-slate-700 leading-relaxed shadow-inner whitespace-pre-wrap">{vsoConcept}</div>
                     </div>
                  )}
               </div>
               <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex flex-col gap-3 shrink-0">
-                 <Button size="lg" className="w-full rounded-2xl py-4 shadow-xl" disabled={isGeneratingVSO} onClick={handleVSOPrefix}>Deze Afspraken Bevestigen</Button>
+                 <Button size="lg" className="w-full rounded-2xl py-4 shadow-xl" disabled={isGeneratingVSO || !!vsoError} onClick={handleVSOPrefix}>Deze Afspraken Bevestigen</Button>
               </div>
            </Card>
         </div>
