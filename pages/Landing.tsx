@@ -20,18 +20,19 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
     navigate('/payment');
   };
 
-  // De specifieke mediator foto uit de instructies
-  const heroImageUrl = "https://replicate.delivery/yhqm/f0d8f99e-3e5a-497d-8e42-1e967364b6f7/out-0.png"; 
+  // Primaire URL en een zeer stabiele Unsplash fallback
+  const primaryHeroUrl = "https://replicate.delivery/yhqm/f0d8f99e-3e5a-497d-8e42-1e967364b6f7/out-0.png";
+  const fallbackHeroUrl = "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=1200";
 
   return (
     <div className="bg-white text-[#1e293b] font-display antialiased min-h-screen">
       {/* Header conform screenshot */}
-      <header className="sticky top-0 z-50 flex items-center bg-white/95 backdrop-blur-md px-8 py-5 justify-between max-w-[1440px] mx-auto w-full">
+      <header className="sticky top-0 z-50 flex items-center bg-white/95 backdrop-blur-md px-8 py-6 justify-between max-w-[1440px] mx-auto w-full">
         <Logo showText={true} className="w-10 h-10" />
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-8">
           <button 
             onClick={handleStartProcess}
-            className="bg-[#0b50da] text-white px-10 py-3 rounded-full text-sm font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95"
+            className="bg-[#0b50da] text-white px-10 py-3.5 rounded-full text-sm font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95"
           >
             Start
           </button>
@@ -39,18 +40,18 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             onClick={() => setIsLangModalOpen(true)}
             className="p-1 text-slate-400 hover:text-[#0b50da] transition-colors"
           >
-            <span className="material-symbols-outlined text-3xl">menu</span>
+            <span className="material-symbols-outlined text-4xl">menu</span>
           </button>
         </div>
       </header>
 
       <main>
-        {/* Hero Section conform screenshot layout */}
+        {/* Hero Section */}
         <section className="relative px-8 py-12 md:py-24 max-w-[1440px] mx-auto overflow-visible">
           <div className="flex flex-col lg:flex-row gap-20 items-center">
             {/* Left Content */}
             <div className="flex flex-col gap-12 text-left lg:max-w-2xl animate-in fade-in slide-in-from-left-8 duration-700">
-              <div className="inline-flex items-center gap-3 py-2.5 px-6 bg-blue-50/50 border border-blue-100/50 rounded-full w-fit shadow-sm">
+              <div className="inline-flex items-center gap-3 py-2.5 px-6 bg-blue-50 border border-blue-100/50 rounded-full w-fit shadow-sm">
                 <span className="w-2.5 h-2.5 rounded-full bg-accent-warm shadow-[0_0_8px_rgba(255,154,92,0.6)]"></span>
                 <span className="text-[#0b50da] font-black text-[11px] tracking-[0.25em] uppercase">De toekomst van Mediation</span>
               </div>
@@ -68,20 +69,26 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
               
               <div className="flex items-center gap-5 pt-4">
                  <div className="flex -space-x-4">
-                    {[1,2,3,4].map(i => <img key={i} className="w-14 h-14 rounded-full border-4 border-white shadow-md" src={`https://i.pravatar.cc/150?u=${i+100}`} alt="user" />)}
+                    {[1,2,3,4].map(i => <img key={i} className="w-14 h-14 rounded-full border-4 border-white shadow-md" src={`https://i.pravatar.cc/150?u=${i+200}`} alt="user" />)}
                  </div>
                  <p className="text-[12px] text-slate-400 font-black uppercase tracking-[0.3em]">+500 zaken succesvol afgerond</p>
               </div>
             </div>
             
-            {/* Right Content - De Hero Foto met AI Mediator kaart */}
+            {/* Right Content - Hero Image met robuuste fallback */}
             <div className="relative w-full lg:flex-1 animate-in fade-in zoom-in-95 duration-1000 delay-200 mt-12 lg:mt-0">
               <div className="relative w-full aspect-[1.1] bg-slate-50 rounded-[6rem] shadow-[0_40px_100px_-20px_rgba(11,80,218,0.15)] border-[20px] border-white overflow-hidden group">
                 <img 
-                  src={heroImageUrl} 
+                  src={primaryHeroUrl} 
                   alt="Rsolve Mediation Session" 
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                   loading="eager"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (target.src !== fallbackHeroUrl) {
+                      target.src = fallbackHeroUrl;
+                    }
+                  }}
                 />
 
                 {/* NU ONLINE Badge */}
@@ -90,10 +97,10 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                   <span className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-700">Nu Online</span>
                 </div>
 
-                {/* AI Mediator Kaart conform screenshot */}
+                {/* AI Mediator Kaart */}
                 <div className="absolute bottom-12 right-12 bg-white/98 backdrop-blur-2xl p-12 rounded-[4rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-white/60 max-w-[420px] transform hover:translate-y-[-12px] transition-transform duration-500">
                   <div className="flex items-center gap-5 mb-8">
-                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-md border border-slate-50">
+                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-md border border-slate-50 overflow-hidden">
                       <Logo className="w-10 h-10" />
                     </div>
                     <span className="text-[12px] font-black uppercase tracking-[0.4em] text-[#0b50da]">AI Mediator</span>
@@ -107,7 +114,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
           </div>
         </section>
 
-        {/* Artikel Sectie - Mediation: conflicten oplossen zonder strijd */}
+        {/* Artikel Sectie */}
         <section className="bg-slate-50/30 py-40 px-8 border-y border-slate-100">
           <div className="max-w-4xl mx-auto space-y-16">
             <header className="space-y-8">
@@ -159,66 +166,8 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                     ))}
                   </ul>
                 </div>
-                <p className="text-xl font-black text-[#0b50da] italic text-center pt-6 border-t border-slate-50">
-                  Het proces is doorgaans sneller en aanzienlijk goedkoper dan een juridische procedure.
-                </p>
               </div>
-
-              <div className="space-y-10">
-                <h3 className="text-4xl font-black text-[#0f172a] tracking-tight">Wanneer werkt mediation goed?</h3>
-                <p className="text-xl">
-                  Mediation werkt vooral goed wanneer beide partijen bereid zijn om te communiceren en openstaan voor een oplossing. Dat hoeft niet te betekenen dat iedereen het meteen met elkaar eens is — juist bij stevige conflicten kan mediation verrassend effectief zijn.
-                </p>
-                <div className="p-12 bg-blue-50/50 rounded-[3rem] border border-blue-100 text-center shadow-inner">
-                  <p className="text-[#0b50da] font-black text-4xl tracking-tight leading-none m-0">
-                    "Het belangrijkste is de bereidheid om te praten."
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-12 pt-10">
-                <h3 className="text-4xl font-black text-[#0f172a] tracking-tight">Waarom steeds meer mensen kiezen voor mediation</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-                  {[
-                    { title: "Escalatie voorkomt", desc: "Voorkom dat kleine irritaties uitgroeien tot onoplosbare juridische oorlogen." },
-                    { title: "Stress vermindert", desc: "Geen jarenlange druk van advocaten, maar menselijke dialoog op uw tempo." },
-                    { title: "Praktische oplossingen", desc: "Afspraken die in de echte wereld werken, niet alleen op papier." },
-                    { title: "Toekomstgericht", desc: "Focus op vreedzame vooruitgang in plaats van schuldvragen." }
-                  ].map((benefit, i) => (
-                    <div key={i} className="space-y-4 group border-b border-slate-100 pb-10">
-                      <h4 className="text-3xl font-black text-[#0f172a] group-hover:text-[#0b50da] transition-colors m-0">{benefit.title}</h4>
-                      <p className="text-xl text-slate-500 leading-relaxed font-medium m-0">{benefit.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <footer className="pt-24 text-center">
-                <p className="text-4xl md:text-6xl font-black text-[#0f172a] leading-[1.1] tracking-tighter m-0">
-                  In plaats van terug te kijken naar wie er “gelijk had”, richt mediation zich op: <br/>
-                  <span className="text-[#0b50da] italic underline decoration-[#0b50da]/20 underline-offset-12">hoe gaan we verder?</span>
-                </p>
-              </footer>
             </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section className="bg-white py-40 px-8 max-w-[1440px] mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-            {[
-              { icon: 'bolt', title: 'Snelheid', desc: 'Binnen enkele dagen een definitieve oplossing, zonder de maandenlange wachttijden.' },
-              { icon: 'verified_user', title: 'Rechtsgeldig', desc: 'Een officiële Vaststellingsovereenkomst (VSO), juridisch getoetst door AI.' },
-              { icon: 'lock', title: 'Vertrouwelijk', desc: 'Uw gesprekken zijn 100% versleuteld en worden nooit gedeeld met derden.' }
-            ].map((f, i) => (
-              <div key={i} className="p-16 bg-slate-50/50 rounded-[4rem] border border-slate-100 hover:shadow-2xl hover:bg-white transition-all duration-500 group">
-                <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-md mb-12 group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-[#0b50da] text-5xl">{f.icon}</span>
-                </div>
-                <h3 className="text-4xl font-black text-[#0f172a] mb-6 tracking-tight">{f.title}</h3>
-                <p className="text-slate-500 font-medium leading-relaxed text-xl">{f.desc}</p>
-              </div>
-            ))}
           </div>
         </section>
 
@@ -228,7 +177,6 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             <div className="absolute -top-32 -right-32 w-full h-full bg-[#0b50da]/20 blur-[180px] rounded-full group-hover:scale-110 transition-transform duration-1000"></div>
             <div className="relative z-10 flex flex-col items-center gap-16">
               <h2 className="text-6xl md:text-[140px] font-black text-white tracking-tighter leading-[0.85] m-0">Klaar voor de <span className="text-[#0b50da]">oplossing?</span></h2>
-              <p className="text-slate-400 text-3xl font-medium max-w-3xl leading-relaxed">Start vandaag nog een officieel mediation dossier voor een vreedzame uitkomst.</p>
               <button 
                 onClick={handleStartProcess}
                 className="bg-white text-[#0f172a] px-20 py-8 rounded-[3rem] font-black text-3xl shadow-2xl hover:bg-blue-50 transition-all active:scale-[0.98] mt-8"
@@ -238,34 +186,6 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             </div>
           </div>
         </section>
-
-        <footer className="py-32 border-t border-slate-100 px-8 max-w-[1440px] mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-24">
-            <div className="space-y-8">
-              <Logo showText={true} className="w-14 h-14" />
-              <p className="text-xs font-black text-slate-300 uppercase tracking-[0.6em] max-w-sm leading-relaxed">Conflictbemiddeling voor de digitale generatie.</p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-32">
-              <div className="space-y-8">
-                <span className="text-[11px] font-black text-slate-300 uppercase tracking-[0.5em]">Platform</span>
-                <div className="flex flex-col gap-6">
-                  <Link to="/hoe-werkt-rsolve" className="text-lg font-bold text-slate-600 hover:text-[#0b50da] transition-colors">Hoe het werkt</Link>
-                  <Link to="/kosten" className="text-lg font-bold text-slate-600 hover:text-[#0b50da] transition-colors">Tarieven</Link>
-                </div>
-              </div>
-              <div className="space-y-8">
-                <span className="text-[11px] font-black text-slate-300 uppercase tracking-[0.5em]">Juridisch</span>
-                <div className="flex flex-col gap-6">
-                  <Link to="/privacy" className="text-lg font-bold text-slate-600 hover:text-[#0b50da] transition-colors">Privacy</Link>
-                  <Link to="/terms" className="text-lg font-bold text-slate-600 hover:text-[#0b50da] transition-colors">Voorwaarden</Link>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-32 pt-20 border-t border-slate-50 text-center">
-            <p className="text-[12px] font-black text-slate-200 uppercase tracking-[1em]">© 2024 Rsolve Mediation B.V. • Amsterdam</p>
-          </div>
-        </footer>
       </main>
 
       {/* Settings Modal */}
