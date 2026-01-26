@@ -1,6 +1,11 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
+export interface ChatRoleConfig {
+  initiator: string;
+  respondent: string;
+}
+
 export class GeminiService {
   private get ai() {
     const apiKey = process.env.API_KEY;
@@ -29,7 +34,11 @@ export class GeminiService {
     }
   }
 
-  async generateMediatorResponse(chatHistory: {sender: string, text: string}[], caseTitle: string): Promise<string> {
+  async generateMediatorResponse(
+    chatHistory: {sender: string, text: string}[], 
+    caseTitle: string,
+    roles: ChatRoleConfig
+  ): Promise<string> {
     const client = this.ai;
     if (!client) return "Ik ben even de verbinding kwijt. Blijf constructief.";
     
@@ -37,19 +46,24 @@ export class GeminiService {
     
     try {
       const response = await client.models.generateContent({
-        model: 'gemini-3-flash-preview', // Gewijzigd naar Flash voor snelheid
+        model: 'gemini-3-flash-preview',
         contents: [{
           parts: [{
-            text: `Je bent de Senior AI Mediator van 'Rsolve'. Dossier: "${caseTitle}". 
-            
-JOUW OPDRACHT:
-Help deze mensen hun conflict op te lossen. Reageer direct, menselijk en constructief.
+            text: `Je bent de Senior AI Mediator van 'Rsolve'. 
+Dossier: "${caseTitle}".
 
-REGELS:
-1. Reageer ALTIJD eerst kort op de laatste zin van de gebruiker.
-2. Gebruik geen mediation-clichés. Praat als een coach.
-3. Bij een akkoord voeg je "[ACTION:GENERATE_VSO]" toe aan je bericht.
-4. Antwoord in de taal van de vrager.
+DEELNEMERS:
+- Initiator (heeft de zaak gestart): ${roles.initiator}
+- Respondent (is uitgenodigd): ${roles.respondent}
+
+JOUW OPDRACHT:
+Begeleid dit gesprek naar een oplossing. Wees neutraal, maar sturend.
+
+CRUCIALE REGELS:
+1. De Initiator (${roles.initiator}) heeft dit dossier geopend. Als de Respondent (${roles.respondent}) vraagt wat de bedoeling is, vraag dan aan de INITIATOR om de situatie en het probleem eerst kort uit te leggen. De respondent hoeft niet te raden.
+2. Reageer altijd op de laatst gestelde vraag of opmerking.
+3. Houd het zakelijk maar menselijk (geen juridisch jargon).
+4. Als beide partijen akkoord zijn met een oplossing, voeg dan exact deze tekst toe aan het einde: "[ACTION:GENERATE_VSO]".
 
 Chatgeschiedenis:
 ${historyString}
@@ -58,13 +72,12 @@ Mediator:`
           }]
         }],
         config: {
-          // Thinking budget verwijderd voor minimale latency in chat
           temperature: 0.7,
         }
       });
       
       const text = response.text?.trim();
-      return text || "Ik hoor wat je zegt. Hoe kijkt de andere partij hiernaar?";
+      return text || `Ik begrijp het. ${roles.initiator}, kun jij kort toelichten waarom je dit dossier hebt geopend?`;
     } catch (error) {
       console.error("Mediator error:", error);
       return "Ik zie dat de verbinding even hapert. Laten we teruggaan naar de kern van jullie afspraak.";
@@ -75,7 +88,6 @@ Mediator:`
     const client = this.ai;
     if (!client) return "Geen afspraken kunnen genereren.";
     try {
-      // Voor de VSO gebruiken we wel het krachtigere Pro model omdat nauwkeurigheid hier cruciaal is
       const response = await client.models.generateContent({
         model: 'gemini-3-pro-preview',
         contents: [{

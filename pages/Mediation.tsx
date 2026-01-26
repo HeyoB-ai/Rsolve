@@ -41,6 +41,12 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const myName = caseData.isRespondent ? (caseData.respondentName || 'Tegenpartij') : (caseData.initiatorName || 'Initiator');
   const otherPartyName = caseData.isRespondent ? (caseData.initiatorName || 'Initiator') : caseData.otherParty;
 
+  // Rollen config voor de AI
+  const rolesConfig = {
+    initiator: caseData.isRespondent ? caseData.otherParty : myName,
+    respondent: caseData.isRespondent ? myName : caseData.otherParty
+  };
+
   useEffect(() => {
     const fetchMessages = async () => {
       const { data } = await supabase
@@ -130,7 +136,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
     try {
       const contextTitle = `${caseData.title}`;
-      let aiResponse = await geminiService.generateMediatorResponse(chatHistory, contextTitle);
+      let aiResponse = await geminiService.generateMediatorResponse(chatHistory, contextTitle, rolesConfig);
       
       const hasActionTrigger = aiResponse.includes('[ACTION:GENERATE_VSO]');
       const cleanResponse = aiResponse.replace('[ACTION:GENERATE_VSO]', '').trim();
@@ -184,7 +190,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const handleVSOPrefix = () => {
     onResolve({
       caseId: caseData.id, title: caseData.title,
-      parties: `${caseData.initiatorName} en ${caseData.otherParty}`,
+      parties: `${rolesConfig.initiator} en ${rolesConfig.respondent}`,
       terms: vsoConcept, date: new Date().toLocaleDateString('nl-NL')
     });
   };
