@@ -20,7 +20,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
     navigate('/payment');
   };
 
-  // De door de gebruiker geüploade foto (Mediator met koppel)
+  // De exacte foto die de gebruiker heeft verstrekt
   const heroImageUrl = "https://replicate.delivery/yhqm/f0d8f99e-3e5a-497d-8e42-1e967364b6f7/out-0.png"; 
 
   return (
@@ -45,7 +45,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
       </header>
 
       <main className="overflow-x-hidden">
-        {/* Hero Section - Exacte Match met de geüploade foto */}
+        {/* Hero Section */}
         <section className="relative px-5 py-12 md:py-24 subtle-mesh warm-accent-glow">
           <div className="flex flex-col lg:flex-row gap-16 max-w-7xl mx-auto items-center">
             <div className="flex flex-col gap-8 text-center lg:text-left lg:max-w-xl animate-in fade-in slide-in-from-left-8 duration-700">
@@ -82,17 +82,19 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             {/* De Specifieke Foto Container */}
             <div className="relative w-full lg:flex-1 animate-in fade-in zoom-in-95 duration-1000 delay-200">
               <div className="absolute -inset-4 bg-gradient-to-tr from-primary/5 to-accent-warm/5 rounded-[3rem] blur-2xl"></div>
-              <div 
-                className="relative w-full aspect-[4/3] md:aspect-[3/2] lg:aspect-square bg-center bg-no-repeat bg-cover rounded-[3rem] soft-card-shadow border-8 border-white overflow-hidden group shadow-2xl" 
-                style={{ 
-                  backgroundImage: `url(${heroImageUrl})`,
-                  backgroundPosition: 'center'
-                }}
-              >
-                {/* Floating UI Elements over the user's photo */}
-                <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-white/50 animate-bounce [animation-duration:3s]">
+              <div className="relative w-full aspect-[4/3] md:aspect-[3/2] lg:aspect-square bg-white rounded-[3rem] soft-card-shadow border-8 border-white overflow-hidden group shadow-2xl">
+                {/* img tag for better reliability */}
+                <img 
+                  src={heroImageUrl} 
+                  alt="Rsolve Mediation Session" 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  loading="eager"
+                />
+
+                {/* Floating UI Elements matching the request */}
+                <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-white/50">
                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
                       <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Nu Online</span>
                    </div>
                 </div>
@@ -111,7 +113,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
           </div>
         </section>
 
-        {/* Value Proposition - Stitch Cards */}
+        {/* Features */}
         <section className="bg-white py-24 px-5 max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="p-10 rounded-[2.5rem] bg-slate-50/50 border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
@@ -138,7 +140,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
           </div>
         </section>
 
-        {/* Smart Translate Showcase */}
+        {/* Showcase Area */}
         <section className="px-5 py-24 bg-slate-50/80 border-y border-slate-100 relative">
           <div className="max-w-6xl mx-auto flex flex-col gap-16">
             <div className="text-center space-y-4">
@@ -187,7 +189,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
           </div>
         </section>
 
-        {/* Final CTA */}
+        {/* CTA */}
         <section className="px-5 py-24 text-center bg-white">
           <div className="max-w-5xl mx-auto bg-slate-900 rounded-[4rem] p-16 md:p-24 shadow-2xl relative overflow-hidden">
             <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/20 blur-[120px] rounded-full"></div>
@@ -233,7 +235,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
         </footer>
       </main>
 
-      {/* Settings Modal */}
+      {/* Language Modal */}
       {isLangModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/70 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
