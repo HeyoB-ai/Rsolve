@@ -171,6 +171,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   const handleVSOPrefix = () => {
     const vsoData = {
+      caseId: caseData.id, // Geef het ID mee voor download doeleinden
       title: caseData.title,
       parties: `${caseData.initiatorName} en ${caseData.otherParty}`,
       terms: vsoConcept,

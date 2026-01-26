@@ -4,6 +4,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Logo } from '../components/ui/Logo';
 import { ICONS } from '../constants';
+import { supabase } from '../lib/supabase';
 
 interface VSOProps {
   data: any;
@@ -15,6 +16,7 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
   const [hasSigned, setHasSigned] = useState(false);
   const [signatureName, setSignatureName] = useState('');
   const [isSigning, setIsSigning] = useState(false);
+  const [isDownloadingLog, setIsDownloadingLog] = useState(false);
 
   const handleSign = () => {
     if (!signatureName.trim()) return;
@@ -23,6 +25,52 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
       setHasSigned(true);
       setIsSigning(false);
     }, 1500);
+  };
+
+  const downloadChatHistory = async () => {
+    if (!data.caseId) return;
+    setIsDownloadingLog(true);
+
+    try {
+      const { data: messages, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('case_id', data.caseId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      // Genereer tekst voor het verslag
+      let logText = `GESPREKSVERSLAG RSOLVE MEDIATION\n`;
+      logText += `Dossier: ${data.title}\n`;
+      logText += `Datum export: ${new Date().toLocaleString('nl-NL')}\n`;
+      logText += `Partijen: ${data.parties}\n`;
+      logText += `--------------------------------------------------\n\n`;
+
+      messages.forEach((m: any) => {
+        const time = new Date(m.created_at).toLocaleString('nl-NL');
+        logText += `[${time}] ${m.sender_name}:\n${m.content}\n\n`;
+      });
+
+      logText += `--------------------------------------------------\n`;
+      logText += `EINDE VERSLAG\n`;
+
+      // Maak blob en trigger download
+      const blob = new Blob([logText], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `gespreksverslag-${data.title.replace(/\s+/g, '-').toLowerCase()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Fout bij downloaden verslag:", err);
+      alert("Kon het verslag niet downloaden.");
+    } finally {
+      setIsDownloadingLog(false);
+    }
   };
 
   return (
@@ -37,6 +85,15 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={downloadChatHistory} 
+              isLoading={isDownloadingLog}
+              className="rounded-xl border-slate-200 hidden md:inline-flex"
+            >
+              <ICONS.Folder className="w-4 h-4 mr-2" /> Chatverslag (.txt)
+            </Button>
             <Button variant="outline" size="sm" onClick={() => window.print()} className="rounded-xl border-slate-200">
               <ICONS.File className="w-4 h-4 mr-2" /> Download PDF
             </Button>
@@ -147,9 +204,17 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
               <p className="text-xs text-slate-400 leading-relaxed font-medium mb-6">
                 Je hebt jouw deel ondertekend. Zodra de andere partij dit ook doet, is de mediation officieel gesloten.
               </p>
-              <Button variant="primary" className="w-full rounded-2xl py-4 bg-blue-600 border-none shadow-xl" onClick={() => window.print()}>
-                 Dossier Downloaden
-              </Button>
+              <div className="space-y-3">
+                <Button variant="primary" className="w-full rounded-2xl py-4 bg-blue-600 border-none shadow-xl" onClick={() => window.print()}>
+                   Dossier Downloaden
+                </Button>
+                <button 
+                  onClick={downloadChatHistory}
+                  className="w-full text-center text-[10px] font-black text-slate-400 uppercase tracking-widest py-2"
+                >
+                  Download ook gespreksverslag (.txt)
+                </button>
+              </div>
             </div>
           )}
           <button 
