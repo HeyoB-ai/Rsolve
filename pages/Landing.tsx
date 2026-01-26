@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Button } from '../components/ui/Button';
 import { Logo } from '../components/ui/Logo';
-import { ICONS, UI_TRANSLATIONS } from '../constants';
+import { UI_TRANSLATIONS, ICONS } from '../constants';
+import { Button } from '../components/ui/Button';
 
 interface LandingProps {
   appLanguage: string;
@@ -36,7 +36,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             onClick={() => setIsLangModalOpen(true)}
             className="p-1 text-slate-500 hover:text-primary transition-colors"
           >
-            <span className="material-symbols-outlined">language</span>
+            <span className="material-symbols-outlined">menu</span>
           </button>
         </div>
       </header>
@@ -45,18 +45,18 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
         {/* Hero Section */}
         <section className="relative px-5 py-10 subtle-mesh warm-accent-glow">
           <div className="flex flex-col gap-8 max-w-5xl mx-auto">
-            <div className="flex flex-col gap-5 text-center md:text-left md:max-w-xl">
-              <div className="inline-flex items-center gap-2 py-1 px-3 bg-blue-50/50 border border-blue-100/50 rounded-full w-fit mx-auto md:mx-0">
+            <div className="flex flex-col gap-5">
+              <div className="inline-flex items-center gap-2 py-1 px-3 bg-blue-50/50 border border-blue-100/50 rounded-full w-fit">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-warm animate-pulse"></span>
                 <span className="text-primary font-bold text-[10px] tracking-widest uppercase">AI-Ondersteunde Mediation</span>
               </div>
               <h1 className="text-slate-900 text-4xl md:text-6xl font-extrabold leading-[1.15] tracking-tight">
                 Conflicten oplossen <span className="text-primary">zonder strijd</span>
               </h1>
-              <p className="text-slate-500 text-lg font-medium leading-relaxed">
+              <p className="text-slate-500 text-lg font-medium leading-relaxed max-w-xl">
                 Het eerste platform dat neutrale communicatie en snelle, eerlijke oplossingen mogelijk maakt met slimme technologie.
               </p>
-              <div className="flex flex-col gap-3 mt-2">
+              <div className="flex flex-col gap-3 mt-2 md:max-w-xs">
                 <button 
                   onClick={handleStartProcess}
                   className="w-full bg-primary text-white text-base font-bold h-14 rounded-2xl shadow-xl shadow-blue-500/10 flex items-center justify-center gap-2 border border-primary hover:bg-blue-700 transition-all active:scale-[0.98]"
@@ -64,16 +64,18 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                   <span>Start mediation</span>
                   <span className="material-symbols-outlined text-xl">arrow_forward</span>
                 </button>
-                <p className="text-center md:text-left text-xs text-slate-400 font-medium">Volledig vertrouwelijk • Juridisch onderbouwd</p>
+                <p className="text-center text-xs text-slate-400 font-medium">Volledig vertrouwelijk • Juridisch onderbouwd</p>
               </div>
             </div>
-            {/* Updated Hero Image: Warm professional mediation scene */}
+            
+            {/* The Specific Photo: Warm, professional mediation scene matching the user's upload */}
             <div 
-              className="w-full aspect-[4/3] md:aspect-[21/9] bg-center bg-no-repeat bg-cover rounded-3xl soft-card-shadow border border-white transition-all duration-700 hover:scale-[1.01]" 
+              className="w-full aspect-[4/3] md:aspect-[21/9] bg-center bg-no-repeat bg-cover rounded-3xl soft-card-shadow border border-white transition-all duration-700 hover:shadow-2xl" 
               style={{ 
-                backgroundImage: 'url("https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=2000&auto=format&fit=crop")',
+                backgroundImage: 'url("https://images.unsplash.com/photo-1573497620053-ea5300f94f21?q=80&w=2000&auto=format&fit=crop")',
                 backgroundPosition: 'center 20%'
               }}
+              title="Rsolve Mediation Sessie"
             >
             </div>
           </div>
@@ -118,13 +120,13 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
           </div>
         </section>
 
-        {/* AI Translation Demo Section */}
+        {/* Smart Translate Section */}
         <section className="px-5 py-16 bg-slate-50/80 border-y border-slate-100">
           <div className="flex flex-col gap-8 max-w-5xl mx-auto">
             <div className="flex flex-col gap-4">
               <div className="inline-flex items-center gap-1.5 text-primary text-xs font-bold uppercase tracking-widest">
                 <span className="material-symbols-outlined text-sm">auto_awesome</span>
-                Smart Translation & Neutralization
+                Smart Translate
               </div>
               <h2 className="text-slate-900 text-2xl font-bold leading-tight">Mediation zonder strijd</h2>
               <p className="text-slate-500 text-base">Onze AI neutraliseert harde bewoordingen naar een constructieve dialoog, zodat u samen verder kunt.</p>
@@ -154,13 +156,13 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
           </div>
         </section>
 
-        {/* Steps Section */}
+        {/* 3 Steps Section */}
         <section className="px-5 py-20 bg-white max-w-5xl mx-auto">
           <h2 className="text-slate-900 text-2xl font-bold mb-10 text-center">In drie stappen naar rust</h2>
           <div className="flex flex-col gap-0 max-w-lg mx-auto">
             <div className="flex gap-6">
               <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 text-primary flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">1</div>
+                <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 text-primary flex items-center justify-center font-bold text-sm shrink-0">1</div>
                 <div className="w-0.5 h-16 bg-gradient-to-b from-slate-100 to-transparent"></div>
               </div>
               <div className="pt-1">
@@ -170,7 +172,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             </div>
             <div className="flex gap-6">
               <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 text-primary flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">2</div>
+                <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 text-primary flex items-center justify-center font-bold text-sm shrink-0">2</div>
                 <div className="w-0.5 h-16 bg-gradient-to-b from-slate-100 to-transparent"></div>
               </div>
               <div className="pt-1">
@@ -180,7 +182,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             </div>
             <div className="flex gap-6">
               <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 text-primary flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">3</div>
+                <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 text-primary flex items-center justify-center font-bold text-sm shrink-0">3</div>
               </div>
               <div className="pt-1">
                 <h4 className="text-slate-900 font-bold mb-1">Vaststelling</h4>
@@ -190,7 +192,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
           </div>
         </section>
 
-        {/* CTA Footer Section */}
+        {/* CTA Section */}
         <section className="px-5 py-16 text-center bg-white max-w-5xl mx-auto">
           <div className="bg-slate-50 rounded-[2.5rem] p-10 border border-slate-100 soft-card-shadow">
             <h2 className="text-2xl font-extrabold text-slate-900 mb-4">Klaar voor de oplossing?</h2>
@@ -199,12 +201,13 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
               onClick={handleStartProcess}
               className="w-full bg-primary text-white font-bold h-14 rounded-2xl shadow-xl shadow-blue-500/10 border border-primary hover:bg-blue-700 transition-all active:scale-[0.98]"
             >
-              Start nu
+              Start nu gratis
             </button>
             <p className="mt-4 text-xs text-slate-400 font-medium">Binnen 2 minuten een zaak geopend</p>
           </div>
         </section>
 
+        {/* Footer */}
         <footer className="bg-white p-8 border-t border-slate-50">
           <div className="flex flex-col gap-10 max-w-5xl mx-auto">
             <div className="flex flex-col gap-3">
@@ -217,6 +220,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                 <div className="flex flex-col gap-2.5">
                   <Link className="text-sm text-slate-600 font-medium hover:text-primary" to="/hoe-werkt-rsolve">Hoe het werkt</Link>
                   <Link className="text-sm text-slate-600 font-medium hover:text-primary" to="/kosten">Tarieven</Link>
+                  <Link className="text-sm text-slate-600 font-medium hover:text-primary" to="/veiligheid">Veiligheid</Link>
                 </div>
               </div>
               <div className="flex flex-col gap-4">
@@ -224,6 +228,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                 <div className="flex flex-col gap-2.5">
                   <Link className="text-sm text-slate-600 font-medium hover:text-primary" to="/privacy">Privacy</Link>
                   <Link className="text-sm text-slate-600 font-medium hover:text-primary" to="/terms">Voorwaarden</Link>
+                  <Link className="text-sm text-slate-600 font-medium hover:text-primary" to="/contact">Contact</Link>
                 </div>
               </div>
             </div>
@@ -234,7 +239,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
         </footer>
       </main>
 
-      {/* Language Modal */}
+      {/* Language / Menu Modal Placeholder */}
       {isLangModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
