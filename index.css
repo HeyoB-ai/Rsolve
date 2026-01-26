@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,19 +8,15 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Manrope', sans-serif;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: contain;
-  @apply bg-slate-50 text-slate-900;
+  @apply bg-white text-slate-900;
   margin: 0;
   padding: 0;
-  /* Zorg dat de body nooit groter is dan het scherm om bouncing te voorkomen */
-  height: 100%;
-  overflow: hidden;
 }
 
 .h-safe {
-  /* Gebruik dvh voor moderne browsers, fallback naar de JS berekende --vh */
   height: 100vh;
   height: 100dvh;
   height: calc(var(--vh) * 100);
@@ -29,13 +26,18 @@ body {
   padding-bottom: env(safe-area-inset-bottom, 1rem);
 }
 
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
+/* Stitch Custom Classes */
+.warm-accent-glow {
+    background: radial-gradient(circle at top right, rgba(255, 154, 92, 0.08) 0%, rgba(255, 255, 255, 0) 50%);
+}
+.soft-card-shadow {
+    box-shadow: 0 4px 20px -2px rgba(11, 80, 218, 0.04), 0 2px 8px -1px rgba(0, 0, 0, 0.02);
+}
+.subtle-mesh {
+    background-image: radial-gradient(at 0% 0%, hsla(210,100%,98%,1) 0, transparent 50%), 
+                      radial-gradient(at 100% 100%, hsla(20,100%,98%,1) 0, transparent 50%);
 }
 
-/* Voorkom dat iOS inzoomt op inputs bij focus */
 @media screen and (max-width: 768px) {
   input, select, textarea {
     font-size: 16px !important;

@@ -12,6 +12,19 @@ import Payment from './pages/Payment';
 import JoinCase from './pages/JoinCase';
 import InvitePartner from './pages/InvitePartner';
 
+// Marketing Boilerplates (Placeholder voor content)
+const MarketingPage = ({ title, content }: { title: string, content: string }) => (
+  <div className="min-h-screen bg-white p-8 pt-24 max-w-3xl mx-auto">
+    <h1 className="text-4xl font-extrabold text-slate-900 mb-8">{title}</h1>
+    <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed font-medium">
+      {content.split('\n').map((p, i) => <p key={i} className="mb-4">{p}</p>)}
+    </div>
+    <div className="mt-12 pt-8 border-t border-slate-100 text-center">
+      <a href="/#/" className="text-primary font-bold hover:underline">Terug naar Home</a>
+    </div>
+  </div>
+);
+
 const App: React.FC = () => {
   const [appLanguage, setAppLanguage] = useState<string>(() => {
     return localStorage.getItem('rsolve_app_lang') || 'nl';
@@ -77,7 +90,7 @@ const App: React.FC = () => {
 
   return (
     <HashRouter>
-      <div className="flex flex-col min-h-screen bg-slate-50 relative">
+      <div className="flex flex-col min-h-screen bg-white relative">
         {!isConfigured && (
           <div className="bg-red-600 text-white text-[10px] font-black py-2 px-4 text-center z-[200] uppercase tracking-widest">
             Configuratiefout: Supabase URL/Key ontbreekt in deze omgeving
@@ -104,6 +117,14 @@ const App: React.FC = () => {
               />
             ) : <Navigate to="/" />} />
             <Route path="/vso" element={finalVSO ? <VSO data={finalVSO} t={t} onReset={handleReset} /> : <Navigate to="/" />} />
+            
+            {/* Marketing Routes */}
+            <Route path="/wat-is-mediation" element={<MarketingPage title="Wat is Mediation?" content="Mediation is een manier om conflicten op te lossen zonder tussenkomst van een rechter. Bij Rsolve gebruiken we AI om dit proces toegankelijker en neutraler te maken." />} />
+            <Route path="/kosten" element={<MarketingPage title="Tarieven" content="Bij Rsolve geloven we in transparantie. Voor een eenmalig bedrag van €3,99 start je een dossier. Voor de genodigde partij is deelname volledig gratis." />} />
+            <Route path="/hoe-werkt-rsolve" element={<MarketingPage title="Hoe werkt Rsolve?" content="In drie simpele stappen: Aanmelding, Begeleide Dialoog en Vaststelling. Onze AI mediator zorgt ervoor dat het gesprek constructief blijft." />} />
+            <Route path="/privacy" element={<MarketingPage title="Privacybeleid" content="Jouw gegevens zijn veilig. Gesprekken zijn versleuteld en we gebruiken AI-modellen die voldoen aan de strengste privacy-eisen (GDPR)." />} />
+            <Route path="/terms" element={<MarketingPage title="Voorwaarden" content="Door gebruik te maken van Rsolve ga je akkoord met onze gebruikersvoorwaarden. We bieden ondersteuning bij bemiddeling, geen juridisch advies." />} />
+
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>
