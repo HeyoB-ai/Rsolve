@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { UI_TRANSLATIONS } from './constants';
+import { isDemoMode } from './lib/supabase';
 
 // Pagina's
 import Landing from './pages/Landing';
@@ -29,10 +30,6 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('rsolve_final_vso');
     return saved ? JSON.parse(saved) : null;
   });
-
-  // Check of de benodigde keys aanwezig zijn (ondersteunt beide namen)
-  const isAnonKeyPresent = !!(process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_PUBLIC);
-  const isConfigMissing = !process.env.SUPABASE_URL || !isAnonKeyPresent;
 
   useEffect(() => {
     localStorage.setItem('rsolve_app_lang', appLanguage);
@@ -78,28 +75,14 @@ const App: React.FC = () => {
     return text;
   };
 
-  if (isConfigMissing) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6 text-center">
-        <div className="max-w-md bg-white rounded-[32px] p-8 shadow-2xl">
-          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-          </div>
-          <h1 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Configuratie Fout</h1>
-          <p className="text-slate-500 text-sm mb-6">Er is een mismatch tussen de variabelen in Netlify en de code.</p>
-          <div className="bg-slate-50 p-4 rounded-xl text-left text-[10px] font-mono text-slate-400 break-all space-y-1">
-            <div>URL: {process.env.SUPABASE_URL ? '✅ OK' : '❌ Ontbreekt'}</div>
-            <div>KEY: {isAnonKeyPresent ? '✅ OK' : '❌ Ontbreekt'}</div>
-          </div>
-          <p className="mt-4 text-[10px] text-slate-400 italic">Trigger een nieuwe 'Clear cache & deploy' in Netlify na het opslaan van de wijzigingen.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <HashRouter>
-      <div className="flex flex-col min-h-screen bg-slate-50">
+      <div className="flex flex-col min-h-screen bg-slate-50 relative">
+        {isDemoMode && (
+          <div className="bg-amber-500 text-white text-[8px] font-black uppercase tracking-[0.3em] py-1 px-4 text-center z-[200]">
+            Demo Modus Actief &bull; Lokale Opslag &bull; Geen Database Verbinding
+          </div>
+        )}
         <main className="flex-1">
           <Routes>
             <Route path="/" element={

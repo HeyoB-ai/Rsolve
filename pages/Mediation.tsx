@@ -5,7 +5,7 @@ import { Button } from '../components/ui/Button';
 import { ICONS, UI_TRANSLATIONS } from '../constants';
 import { Logo } from '../components/ui/Logo';
 import { geminiService } from '../services/geminiService';
-import { supabase } from '../lib/supabase';
+import { supabase, isDemoMode } from '../lib/supabase';
 import { Card } from '../components/ui/Card';
 
 interface MediationProps {
@@ -20,11 +20,10 @@ interface MediationProps {
 const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLanguage, t, onResolve, onAbandon }) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [isRespondentJoined, setIsRespondentJoined] = useState(false);
+  const [isRespondentJoined, setIsRespondentJoined] = useState(isDemoMode);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const [isLeavingLoading, setIsLeavingLoading] = useState(false);
   
@@ -43,18 +42,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const otherPartyName = caseData.isRespondent ? (caseData.initiatorName || 'Initiator') : caseData.otherParty;
 
   useEffect(() => {
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
-    }
-  }, []);
-
-  const sendNotification = (title: string, body: string) => {
-    if ("Notification" in window && Notification.permission === "granted" && document.visibilityState !== 'visible') {
-      new Notification(title, { body, icon: '/logo.png' });
-    }
-  };
-
-  useEffect(() => {
     const fetchMessages = async () => {
       const { data } = await supabase
         .from('messages')
@@ -63,7 +50,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         .order('created_at', { ascending: true });
       
       if (data) {
-        setMessages(data.map(m => ({
+        setMessages(data.map((m: any) => ({
           id: m.id,
           text: m.content,
           sender: m.sender_name,
@@ -80,14 +67,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   useEffect(() => {
     const channel = supabase
       .channel(`case_${caseData.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `case_id=eq.${caseData.id}` }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `case_id=eq.${caseData.id}` }, (payload: any) => {
         const newMessage = payload.new;
-        const isActuallyOwn = (caseData.isRespondent && newMessage.sender_id === 'respondent') || (!caseData.isRespondent && newMessage.sender_id === 'initiator');
-        
-        if (!isActuallyOwn) {
-          sendNotification(`Nieuw bericht in Rsolve`, `${newMessage.sender_name}: ${newMessage.content.substring(0, 50)}...`);
-        }
-
         setMessages(prev => {
           if (prev.find(m => m.id === newMessage.id)) return prev;
           return [...prev, {
@@ -103,24 +84,26 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       })
       .subscribe();
 
-    const presenceChannel = supabase.channel(`presence_${caseData.id}`, {
-      config: { presence: { key: caseData.isRespondent ? 'respondent' : 'initiator' } }
-    });
-
-    presenceChannel
-      .on('presence', { event: 'sync' }, () => {
-        const state = presenceChannel.presenceState();
-        const otherRole = caseData.isRespondent ? 'initiator' : 'respondent';
-        setIsRespondentJoined(!!state[otherRole]);
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') await presenceChannel.track({ online_at: new Date().toISOString() });
+    if (!isDemoMode) {
+      const presenceChannel = supabase.channel(`presence_${caseData.id}`, {
+        config: { presence: { key: caseData.isRespondent ? 'respondent' : 'initiator' } }
       });
 
-    return () => {
-      supabase.removeChannel(channel);
-      supabase.removeChannel(presenceChannel);
-    };
+      presenceChannel
+        .on('presence', { event: 'sync' }, () => {
+          const state = presenceChannel.presenceState();
+          const otherRole = caseData.isRespondent ? 'initiator' : 'respondent';
+          setIsRespondentJoined(!!state[otherRole]);
+        })
+        .subscribe(async (status: string) => {
+          if (status === 'SUBSCRIBED') await presenceChannel.track({ online_at: new Date().toISOString() });
+        });
+
+      return () => {
+        supabase.removeChannel(channel);
+        supabase.removeChannel(presenceChannel);
+      };
+    }
   }, [caseData.id, caseData.isRespondent]);
 
   useEffect(() => {
