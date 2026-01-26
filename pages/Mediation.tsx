@@ -14,9 +14,10 @@ interface MediationProps {
   setAppLanguage: (lang: string) => void;
   t: (key: string, params?: any) => string;
   onResolve: (vso: any) => void;
+  onAbandon: () => void;
 }
 
-const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLanguage, t, onResolve }) => {
+const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLanguage, t, onResolve, onAbandon }) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isRespondentJoined, setIsRespondentJoined] = useState(false);
@@ -25,6 +26,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const [isUploading, setIsUploading] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+  const [isLeavingLoading, setIsLeavingLoading] = useState(false);
   
   // VSO Flow States
   const [isVSOReviewOpen, setIsVSOReviewOpen] = useState(false);
@@ -150,6 +153,27 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     }
   };
 
+  const handleConfirmLeave = async () => {
+    setIsLeavingLoading(true);
+    try {
+      // Leg het vertrek vast in de documentatie (messages tabel)
+      await supabase.from('messages').insert([{
+        case_id: caseData.id,
+        sender_id: 'system',
+        sender_name: t('system'),
+        content: `${myName} heeft de mediation voortijdig en definitief verlaten. Dit feit is vastgelegd in het dossier.`,
+        type: 'system'
+      }]);
+      onAbandon();
+    } catch (err) {
+      console.error("Error logging exit:", err);
+      onAbandon();
+    } finally {
+      setIsLeavingLoading(false);
+      setIsExitModalOpen(false);
+    }
+  };
+
   const startVSOFlow = async () => {
     setIsGeneratingVSO(true);
     setIsVSOReviewOpen(true);
@@ -201,6 +225,46 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   return (
     <div className="h-safe flex flex-col bg-slate-50 overflow-hidden relative">
+      
+      {/* Exit Mediation Warning Modal */}
+      {isExitModalOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-xl animate-in fade-in duration-300">
+           <Card className="bg-white w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden flex flex-col p-8 border-none text-center gap-6">
+              <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto">
+                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              </div>
+              
+              <div className="space-y-4">
+                <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Mediation Verlaten?</h2>
+                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                  Let op: als je het proces nu verlaat wordt dat in de documentatie opgeslagen. Dat kan later, wanneer dit uiteindelijk een rechtszaak wordt, in je nadeel werken. 
+                </p>
+                <p className="text-sm text-slate-900 font-bold italic">
+                  Dus bedenk nu of je toch niet liever naar een voor beide partijen acceptabele oplossing zoekt.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 pt-2">
+                 <Button 
+                    variant="danger" 
+                    className="w-full rounded-2xl py-4" 
+                    onClick={handleConfirmLeave}
+                    isLoading={isLeavingLoading}
+                  >
+                    Verlaat toch
+                 </Button>
+                 <Button 
+                    variant="ghost" 
+                    className="w-full rounded-2xl py-3 text-slate-500 font-black uppercase tracking-widest text-[10px]" 
+                    onClick={() => setIsExitModalOpen(false)}
+                  >
+                    Ik wil doorgaan met mediation
+                 </Button>
+              </div>
+           </Card>
+        </div>
+      )}
+
       {/* VSO Review Modal */}
       {isVSOReviewOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300">
@@ -295,11 +359,17 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
               Rond af
             </button>
           )}
-          <button onClick={() => setIsSettingsOpen(true)} className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all">
-            <ICONS.Globe className="w-5 h-5" />
+          <button 
+            onClick={() => setIsExitModalOpen(true)}
+            className="px-3 py-2 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-100 active:scale-95 transition-all"
+          >
+            Verlaat
           </button>
           <button onClick={() => setIsDossierOpen(true)} className="relative p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all">
             <ICONS.Folder className="w-5 h-5" />
+          </button>
+          <button onClick={() => setIsSettingsOpen(true)} className="p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all">
+            <ICONS.Globe className="w-5 h-5" />
           </button>
         </div>
       </header>
@@ -308,7 +378,13 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         {messages.map(m => {
           const isActuallyOwn = (caseData.isRespondent && m.senderId === 'respondent') || (!caseData.isRespondent && m.senderId === 'initiator');
 
-          if (m.type === 'system') return <div key={m.id} className="text-center py-2"><span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">{m.text}</span></div>;
+          if (m.type === 'system') return (
+            <div key={m.id} className="text-center py-2 px-6">
+              <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.15em] leading-relaxed block">
+                {m.text}
+              </span>
+            </div>
+          );
           
           return (
             <ChatBubble 
@@ -325,7 +401,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         })}
         
         {isAiThinking && (
-          <div className="flex flex-col items-start max-w-[85%] self-start">
+          <div className="flex flex-col items-start max-w-[85%] self-start animate-pulse">
             <span className="text-[10px] font-black text-slate-400 mb-1 ml-2 uppercase tracking-widest">{t('mediator')} is aan het typen...</span>
           </div>
         )}
