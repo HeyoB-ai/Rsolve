@@ -280,12 +280,12 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
            <Card className="bg-white w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden flex flex-col p-8 border-none text-center gap-6">
               <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto"><svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div>
               <div className="space-y-2">
-                <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Mediation Verlaten?</h2>
-                <p className="text-sm text-slate-600 font-medium">Je kunt dit dossier dan niet meer openen.</p>
+                <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">{t('leave_modal_title')}</h2>
+                <p className="text-sm text-slate-600 font-medium">{t('leave_modal_desc')}</p>
               </div>
               <div className="flex flex-col gap-3">
-                 <Button variant="danger" className="w-full rounded-2xl py-4" onClick={handleConfirmLeave} isLoading={isLeavingLoading}>Ja, verlaat sessie</Button>
-                 <Button variant="ghost" className="w-full rounded-2xl py-3 text-slate-500 font-black uppercase tracking-widest text-[10px]" onClick={() => setIsExitModalOpen(false)}>Nee, ga door</Button>
+                 <Button variant="danger" className="w-full rounded-2xl py-4" onClick={handleConfirmLeave} isLoading={isLeavingLoading}>{t('leave_confirm')}</Button>
+                 <Button variant="ghost" className="w-full rounded-2xl py-3 text-slate-500 font-black uppercase tracking-widest text-[10px]" onClick={() => setIsExitModalOpen(false)}>{t('leave_cancel')}</Button>
               </div>
            </Card>
         </div>
@@ -298,7 +298,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
               <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
                   <ICONS.Check className={`w-5 h-5 ${vsoError ? 'text-red-500' : 'text-emerald-500'}`} />
-                  <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Controleer Afspraken</h2>
+                  <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">{t('vso_modal_title')}</h2>
                 </div>
                 <button onClick={() => setIsVSOReviewOpen(false)} className="p-2 text-slate-400"><ICONS.X /></button>
               </div>
@@ -306,7 +306,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                  {isGeneratingVSO ? (
                     <div className="flex flex-col items-center justify-center py-12 gap-4">
                        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                       <p className="text-sm font-black text-slate-400 uppercase tracking-widest text-center animate-pulse">VSO Wordt Opgesteld...</p>
+                       <p className="text-sm font-black text-slate-400 uppercase tracking-widest text-center animate-pulse">{t('vso_generating')}</p>
                     </div>
                  ) : vsoError ? (
                     <div className="flex flex-col items-center justify-center py-12 gap-6 text-center">
@@ -321,7 +321,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                  )}
               </div>
               <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex flex-col gap-3 shrink-0">
-                 <Button size="lg" className="w-full rounded-2xl py-4 shadow-xl" disabled={isGeneratingVSO || !!vsoError} onClick={handleVSOPrefix}>Deze Afspraken Bevestigen</Button>
+                 <Button size="lg" className="w-full rounded-2xl py-4 shadow-xl" disabled={isGeneratingVSO || !!vsoError} onClick={handleVSOPrefix}>{t('vso_confirm')}</Button>
               </div>
            </Card>
         </div>
@@ -340,12 +340,12 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         </div>
         <div className="flex items-center gap-2">
           {messages.length > 2 && isRespondentJoined && (
-            <button onClick={startVSOFlow} className="px-3 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">Afronden</button>
+            <button onClick={startVSOFlow} className="px-3 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">{t('finish_btn')}</button>
           )}
           <button onClick={() => setIsLangModalOpen(true)} className="p-2 bg-slate-50 text-slate-400 rounded-xl border border-slate-100 active:scale-95 transition-all">
              <ICONS.Globe className="w-5 h-5" />
           </button>
-          <button onClick={() => setIsExitModalOpen(true)} className="px-3 py-2 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-100 active:scale-95 transition-all">Verlaat</button>
+          <button onClick={() => setIsExitModalOpen(true)} className="px-3 py-2 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-100 active:scale-95 transition-all">{t('leave_btn')}</button>
           <button onClick={() => setIsDossierOpen(true)} className="relative p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all">
             <ICONS.Folder className="w-5 h-5" />
             {dossierItems.length > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white text-[8px] font-black rounded-full flex items-center justify-center animate-bounce">{dossierItems.length}</span>}
@@ -372,7 +372,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.2s]" />
                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.4s]" />
              </div>
-             <span className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em] animate-pulse">Mediator analyseert het gesprek...</span>
+             <span className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em] animate-pulse">{t('analysing')}</span>
           </div>
         )}
         <div ref={scrollRef} className="h-4" />

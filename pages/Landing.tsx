@@ -28,12 +28,12 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
         
         {/* Desktop Nav Links */}
         <div className="hidden md:flex items-center gap-8">
-            <Link to="/wat-is-mediation" className="text-sm font-bold text-slate-600 hover:text-[#0b50da] transition-colors">Wat is mediation?</Link>
+            <Link to="/wat-is-mediation" className="text-sm font-bold text-slate-600 hover:text-[#0b50da] transition-colors">{t('nav_what_is')}</Link>
             <button 
                 onClick={handleStartProcess}
                 className="text-sm font-bold text-[#0b50da] hover:underline"
             >
-                Start mediation
+                {t('nav_start')}
             </button>
             <button 
               onClick={() => setIsLangModalOpen(true)}

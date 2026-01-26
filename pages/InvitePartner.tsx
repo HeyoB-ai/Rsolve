@@ -106,25 +106,25 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
                <ICONS.Check className="w-10 h-10 text-white" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight">Betaling Ontvangen!</h1>
-              <p className="text-slate-500 font-medium">Laten we het dossier opstarten.</p>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight">{t('payment_received')}</h1>
+              <p className="text-slate-500 font-medium">{t('lets_start')}</p>
             </div>
 
             <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">
               <Input 
-                label="Jouw naam"
+                label={t('label_your_name')}
                 placeholder="Bijv. Mark"
                 value={formData.yourName}
                 onChange={e => setFormData({...formData, yourName: e.target.value})}
               />
               <Input 
-                label="Onderwerp van het conflict"
+                label={t('label_subject')}
                 placeholder="Bijv. Terugbetaling lening"
                 value={formData.title}
                 onChange={e => setFormData({...formData, title: e.target.value})}
               />
               <Input 
-                label="Naam van de tegenpartij"
+                label={t('label_counterparty')}
                 placeholder="Wie wil je uitnodigen?"
                 value={formData.otherParty}
                 onChange={e => setFormData({...formData, otherParty: e.target.value})}
@@ -136,7 +136,7 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
                 disabled={!formData.title || !formData.otherParty || !formData.yourName || isSaving}
                 isLoading={isSaving}
               >
-                Opslaan & Uitnodiging Maken
+                {t('btn_save_invite')}
               </Button>
             </Card>
           </div>
@@ -144,8 +144,8 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
           <div className="space-y-8 text-center animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="space-y-4">
               <Logo className="w-20 h-20 mx-auto mb-2" />
-              <h1 className="text-3xl font-black tracking-tight text-slate-900 leading-tight">Nodig {formData.otherParty} uit</h1>
-              <p className="text-slate-500 font-medium px-4">Deel deze link via WhatsApp om het proces officieel te starten.</p>
+              <h1 className="text-3xl font-black tracking-tight text-slate-900 leading-tight">{t('invite_header', {name: formData.otherParty})}</h1>
+              <p className="text-slate-500 font-medium px-4">{t('invite_desc')}</p>
             </div>
 
             <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">
@@ -154,7 +154,7 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
                     onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Hoi, om ons conflict "${formData.title}" op te lossen heb ik een online mediator van Rsolve ingeschakeld. Hij helpt ons via een beveiligde chat om tot een eerlijke oplossing te komen zonder advocaten. Deelname is gratis voor jou. Klik hier: ${inviteLink}`)}`, '_blank')}
                     className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-6 rounded-2xl font-black flex items-center justify-center gap-4 transition-all shadow-lg"
                   >
-                    WhatsApp Uitnodiging
+                    {t('whatsapp_btn')}
                   </Button>
 
                   <button 
@@ -163,7 +163,7 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
                   >
                     <code className="text-[10px] text-slate-400 font-mono truncate mr-2">{inviteLink}</code>
                     <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 shrink-0">
-                      {hasCopied ? 'Gekopieerd' : 'Kopieer'}
+                      {hasCopied ? t('copied') : t('copy')}
                     </span>
                   </button>
                </div>
@@ -175,7 +175,7 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
               className="w-full rounded-2xl py-5 shadow-lg"
               onClick={handleStartMediation}
             >
-              Start Mediation Gesprek
+              {t('start_mediation_btn')}
             </Button>
           </div>
         )}

@@ -34,11 +34,11 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLangu
       if (data) {
         setCaseInfo(data);
       } else {
-        setError("Dossier niet gevonden.");
+        setError(t('dossier_not_found'));
       }
     };
     fetchCase();
-  }, [id]);
+  }, [id, t]);
 
   const handleJoin = async () => {
     if (!caseInfo || !id) return;
@@ -71,7 +71,7 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLangu
       navigate('/mediation');
     } catch (err) {
       console.error("Error joining case:", err);
-      setError("Er ging iets mis.");
+      setError(t('error_generic'));
     } finally {
       setIsJoining(false);
     }
@@ -79,7 +79,7 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLangu
 
   if (error) return <div className="p-6 text-center">{error}</div>;
 
-  if (!caseInfo) return <div className="p-6 text-center animate-pulse uppercase tracking-widest font-black">Laden...</div>;
+  if (!caseInfo) return <div className="p-6 text-center animate-pulse uppercase tracking-widest font-black">{t('loading')}</div>;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500 relative">
@@ -94,7 +94,7 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLangu
         <Logo className="w-24 h-24 mx-auto mb-4" />
         
         <div className="space-y-4">
-          <h1 className="text-3xl font-black text-slate-900 leading-tight">Je bent uitgenodigd</h1>
+          <h1 className="text-3xl font-black text-slate-900 leading-tight">{t('invited_header')}</h1>
           <p className="text-slate-500 font-medium px-4">
             <span className="font-black text-slate-900">{caseInfo.initiator_name}</span> wil een conflict met je oplossen via Rsolve: <br/>
             <span className="text-blue-600 font-bold italic">"{caseInfo.title}"</span>
@@ -108,10 +108,10 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLangu
             onClick={handleJoin}
             isLoading={isJoining}
           >
-            Deelnemen aan gesprek
+            {t('join_btn')}
           </Button>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-             Gratis deelname voor genodigden
+             {t('join_free_notice')}
           </p>
         </Card>
       </div>

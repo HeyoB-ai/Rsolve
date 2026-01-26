@@ -92,7 +92,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
         <div className="text-center">
           <Logo className="w-20 h-20 mx-auto mb-6" />
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">{t('payment_title')}</h1>
-          <p className="text-sm text-slate-500 font-medium">Betaling voor AI Mediation Dossier</p>
+          <p className="text-sm text-slate-500 font-medium">{t('payment_desc')}</p>
         </div>
 
         <Card className="p-0 overflow-hidden border-none shadow-2xl rounded-[32px] bg-white">
@@ -100,7 +100,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
             <div className="flex justify-between items-end">
               <div>
                 <h2 className="text-lg font-black mb-1 italic">Rsolve Access</h2>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Veilige Transactie</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{t('secure_trans')}</p>
               </div>
               <div className="text-3xl font-black text-blue-400">€3,99</div>
             </div>
@@ -110,7 +110,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
             {!showPromoInput ? (
               <>
                 <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1 text-center">Betaal via iDEAL</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1 text-center">{t('pay_via_ideal')}</label>
                   <select 
                     value={selectedBank}
                     onChange={(e) => setSelectedBank(e.target.value)}
@@ -136,21 +136,21 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
                     onClick={() => setShowPromoInput(true)}
                     className="w-full text-center text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-700 transition-colors py-2"
                   >
-                    Heb je een toegangscode?
+                    {t('have_code')}
                   </button>
                 </div>
               </>
             ) : (
               <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Toegangscode Invoeren</label>
-                  <button onClick={() => setShowPromoInput(false)} className="text-[10px] font-black text-red-500 uppercase tracking-widest">Annuleren</button>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('enter_code')}</label>
+                  <button onClick={() => setShowPromoInput(false)} className="text-[10px] font-black text-red-500 uppercase tracking-widest">{t('close')}</button>
                 </div>
                 
                 <div className="flex gap-2">
                   <div className="flex-1">
                     <Input 
-                      placeholder="Bijv. RS-2024-XXXX" 
+                      placeholder={t('code_placeholder')}
                       className="rounded-2xl border-2 uppercase font-mono tracking-wider" 
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
@@ -163,11 +163,11 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
                     isLoading={isVerifyingCode}
                     disabled={!promoCode.trim()}
                   >
-                    OK
+                    {t('validate_code')}
                   </Button>
                 </div>
                 <p className="text-[10px] text-slate-400 italic leading-tight">
-                  Vul de code in die je hebt ontvangen van je werkgever of verzekeraar.
+                  {t('code_instruction')}
                 </p>
               </div>
             )}
@@ -182,7 +182,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
           onClick={() => navigate('/')}
           className="w-full text-center text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors"
         >
-          Terug naar Home
+          {t('back_home')}
         </button>
       </div>
 
@@ -190,7 +190,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
         <div className="fixed inset-0 bg-white/95 z-50 flex flex-col items-center justify-center">
            <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
            <p className="font-black text-slate-900 uppercase tracking-widest text-center">
-             {showPromoInput ? 'Code valideren...' : 'Betaling valideren...'}
+             {showPromoInput ? t('validating') : t('validating')}
            </p>
         </div>
       )}
