@@ -30,22 +30,37 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
   targetLanguageName = 'Nederlands' 
 }) => {
   const [translatedText, setTranslatedText] = useState<string | null>(null);
+  const [showTranslation, setShowTranslation] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
 
   useEffect(() => {
-    if (autoTranslateTo && !isOwn && text) {
-      handleTranslate(autoTranslateTo);
-    } else if (!autoTranslateTo) {
-      setTranslatedText(null);
+    // Auto-translate if requested and not own message
+    if (autoTranslateTo && !isOwn && text && !translatedText && !isTranslating) {
+      performTranslation();
     }
   }, [autoTranslateTo, isOwn, text]);
 
-  const handleTranslate = async (lang: string = targetLanguageName) => {
+  const performTranslation = async () => {
     if (!text) return;
     setIsTranslating(true);
-    const result = await geminiService.translateText(text, lang);
-    setTranslatedText(result);
-    setIsTranslating(false);
+    try {
+      const result = await geminiService.translateText(text, targetLanguageName);
+      setTranslatedText(result);
+      setShowTranslation(true); // Default to showing translation once ready
+    } catch (error) {
+      console.error("Translation failed", error);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!translatedText && !isTranslating) {
+      performTranslation();
+    } else {
+      setShowTranslation(!showTranslation);
+    }
   };
 
   const isMediator = senderRole === 'mediator';
@@ -107,6 +122,8 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
     );
   };
 
+  const displayText = (showTranslation && translatedText) ? translatedText : text;
+
   return (
     <div className={`flex flex-col max-w-[85%] ${isOwn ? 'self-end items-end' : 'self-start items-start'} mb-2 animate-in fade-in slide-in-from-bottom-2 duration-300`}>
       {!isOwn && (
@@ -119,47 +136,50 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
         ${bubbleClasses}
       `}>
         <div className="flex flex-col gap-1">
-          {text && <p className="text-sm leading-relaxed whitespace-pre-wrap">{text}</p>}
+          {text && (
+            <p className="text-sm leading-relaxed whitespace-pre-wrap transition-all duration-300">
+              {displayText}
+            </p>
+          )}
           
           {renderAttachment()}
-          
-          {(translatedText || isTranslating) && (
-            <div className={`pt-2 mt-2 border-t ${isOwn ? 'border-blue-500' : isMediator ? 'border-emerald-100' : 'border-slate-100'} animate-in fade-in slide-in-from-top-1`}>
+
+          {/* Translation Status / Toggle Button */}
+          {!isOwn && text && (
+            <div className={`mt-2 pt-2 border-t flex items-center justify-between gap-2 ${isMediator ? 'border-emerald-100' : 'border-slate-100'}`}>
+              
               {isTranslating ? (
                 <div className="flex items-center gap-2 text-[10px] opacity-70">
-                  <div className="w-1 h-1 bg-current rounded-full animate-bounce" />
-                  <div className="w-1 h-1 bg-current rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <span>Vertaalt naar {targetLanguageName}...</span>
+                  <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" />
+                  <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:0.2s]" />
+                  <span>Vertaalt...</span>
                 </div>
               ) : (
-                <div className="space-y-1">
-                  <p className={`text-[10px] uppercase tracking-widest font-black opacity-40 ${isOwn ? 'text-blue-100' : 'text-slate-400'}`}>Vertaling:</p>
-                  <p className={`text-xs italic leading-relaxed ${isOwn ? 'text-blue-100' : 'text-slate-500'}`}>
-                    {translatedText}
-                  </p>
-                </div>
+                <button 
+                  onClick={handleToggle}
+                  className={`
+                    flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors text-[10px] font-bold uppercase tracking-wider
+                    ${isMediator 
+                      ? 'bg-emerald-100/50 text-emerald-700 hover:bg-emerald-100' 
+                      : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700'}
+                  `}
+                >
+                  <ICONS.Translate className="w-3.5 h-3.5" />
+                  {showTranslation && translatedText 
+                    ? 'Toon origineel' 
+                    : translatedText 
+                      ? 'Toon vertaling' 
+                      : 'Vertaal'}
+                </button>
+              )}
+
+              {/* Indicator if showing translation */}
+              {showTranslation && translatedText && !isTranslating && (
+                <span className={`text-[8px] font-black uppercase tracking-widest opacity-40 ${isMediator ? 'text-emerald-800' : 'text-slate-500'}`}>
+                  Vertaald
+                </span>
               )}
             </div>
-          )}
-
-          {/* Vertaal knop */}
-          {!isOwn && text && !translatedText && !isTranslating && (
-             <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleTranslate();
-                }}
-                className={`
-                  mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors border shadow-sm
-                  ${isMediator 
-                    ? 'bg-emerald-100/50 border-emerald-100 text-emerald-700 hover:bg-emerald-100' 
-                    : 'bg-slate-50 border-slate-100 text-slate-600 hover:bg-slate-100'}
-                `}
-                title={`Vertaal naar ${targetLanguageName}`}
-             >
-                <ICONS.Translate className="w-3.5 h-3.5" />
-                <span className="text-[10px] font-bold uppercase tracking-wide">Vertaal</span>
-             </button>
           )}
         </div>
       </div>
