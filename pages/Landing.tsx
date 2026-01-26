@@ -95,7 +95,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                     <div>
                         <p className="font-bold text-lg">AFBEELDING ONTBREEKT</p>
                         <p className="text-sm font-mono mt-2 bg-white p-2 rounded border border-red-200">/public/assets/mediation-hero.png</p>
-                        <p className="text-xs mt-2 text-slate-500">Plaats het bestand in de map om dit op te lossen.</p>
+                        <p className="text-xs mt-2 text-slate-500">Plaats het bestand handmatig in de map public/assets.</p>
                     </div>
                   </div>
                 )}

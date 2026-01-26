@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { geminiService } from '../../services/geminiService';
 import { ICONS } from '../../constants';
@@ -109,7 +108,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
   };
 
   return (
-    <div className={`flex flex-col max-w-[85%] ${isOwn ? 'self-end items-end' : 'self-start items-start'} mb-1 animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+    <div className={`flex flex-col max-w-[85%] ${isOwn ? 'self-end items-end' : 'self-start items-start'} mb-2 animate-in fade-in slide-in-from-bottom-2 duration-300`}>
       {!isOwn && (
         <span className={`text-[10px] font-black mb-1 ml-2 uppercase tracking-widest ${isMediator ? 'text-emerald-600' : 'text-slate-400'}`}>
           {sender}
@@ -140,18 +139,28 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
             </div>
           )}
 
-          {/* Manual Translate Button for received messages */}
+          {/* Vertaal knop: Nu binnen de content container */}
           {!isOwn && text && !translatedText && !isTranslating && (
-            <button 
-              onClick={() => handleTranslate()}
-              className="absolute -right-2 -bottom-2 bg-white shadow-md border border-slate-100 rounded-full p-1.5 text-slate-400 hover:text-blue-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-              title={`Vertaal naar ${targetLanguageName}`}
-            >
-              <ICONS.Translate className="w-3.5 h-3.5" />
-            </button>
+             <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleTranslate();
+                }}
+                className={`
+                  mt-2 flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors
+                  ${isMediator 
+                    ? 'bg-emerald-100/50 text-emerald-700 hover:bg-emerald-100' 
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}
+                `}
+                title={`Vertaal naar ${targetLanguageName}`}
+             >
+                <ICONS.Translate className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-bold uppercase tracking-wide">Vertaal</span>
+             </button>
           )}
         </div>
       </div>
+      
       <span className="text-[9px] text-slate-300 mt-1 mx-2 font-bold uppercase tracking-tighter">{timestamp}</span>
     </div>
   );
