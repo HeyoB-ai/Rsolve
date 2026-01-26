@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { UI_TRANSLATIONS } from './constants';
@@ -103,9 +102,15 @@ const App: React.FC = () => {
               activeCase ? <Navigate to="/mediation" /> : 
               <Landing appLanguage={appLanguage} setAppLanguage={setAppLanguage} t={t} setHasPaid={setHasPaid} />
             } />
-            <Route path="/payment" element={<Payment onSuccess={() => setHasPaid(true)} t={t} />} />
-            <Route path="/invite-partner" element={hasPaid ? <InvitePartner onComplete={(data) => setActiveCase(data)} t={t} /> : <Navigate to="/payment" />} />
-            <Route path="/invite/:id" element={<JoinCase t={t} onJoin={(data) => setActiveCase(data)} />} />
+            <Route path="/payment" element={
+              <Payment onSuccess={() => setHasPaid(true)} t={t} appLanguage={appLanguage} setAppLanguage={setAppLanguage} />
+            } />
+            <Route path="/invite-partner" element={
+              hasPaid ? <InvitePartner onComplete={(data) => setActiveCase(data)} t={t} appLanguage={appLanguage} setAppLanguage={setAppLanguage} /> : <Navigate to="/payment" />
+            } />
+            <Route path="/invite/:id" element={
+              <JoinCase t={t} onJoin={(data) => setActiveCase(data)} appLanguage={appLanguage} setAppLanguage={setAppLanguage} />
+            } />
             <Route path="/mediation" element={activeCase ? (
               <Mediation 
                 caseData={activeCase} 

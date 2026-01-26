@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -7,16 +6,20 @@ import { Logo } from '../components/ui/Logo';
 import { Input } from '../components/ui/Input';
 import { ICONS } from '../constants';
 import { supabase } from '../lib/supabase';
+import { LanguageSelector } from '../components/ui/LanguageSelector';
 
 interface PaymentProps {
   onSuccess: () => void;
   t: (key: string) => string;
+  appLanguage: string;
+  setAppLanguage: (lang: string) => void;
 }
 
-const Payment: React.FC<PaymentProps> = ({ onSuccess, t }) => {
+const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLanguage }) => {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedBank, setSelectedBank] = useState('');
+  const [isLangModalOpen, setIsLangModalOpen] = useState(false);
   
   // Promo Code States
   const [showPromoInput, setShowPromoInput] = useState(false);
@@ -77,7 +80,14 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center p-6 pt-12 animate-in fade-in duration-500">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center p-6 pt-12 animate-in fade-in duration-500 relative">
+      <button 
+        onClick={() => setIsLangModalOpen(true)}
+        className="absolute top-6 right-6 p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-[#0b50da]"
+      >
+        <ICONS.Globe className="w-5 h-5" />
+      </button>
+
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <Logo className="w-20 h-20 mx-auto mb-6" />
@@ -184,6 +194,14 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t }) => {
            </p>
         </div>
       )}
+
+      <LanguageSelector 
+        isOpen={isLangModalOpen} 
+        onClose={() => setIsLangModalOpen(false)} 
+        currentLang={appLanguage} 
+        onSetLang={setAppLanguage}
+        t={t}
+      />
     </div>
   );
 };

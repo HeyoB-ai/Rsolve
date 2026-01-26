@@ -1,22 +1,26 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Logo } from '../components/ui/Logo';
 import { supabase } from '../lib/supabase';
+import { LanguageSelector } from '../components/ui/LanguageSelector';
+import { ICONS } from '../constants';
 
 interface JoinCaseProps {
   t: (key: string, params?: any) => string;
   onJoin: (data: any) => void;
+  appLanguage: string;
+  setAppLanguage: (lang: string) => void;
 }
 
-const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin }) => {
+const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLanguage }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isJoining, setIsJoining] = useState(false);
   const [caseInfo, setCaseInfo] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLangModalOpen, setIsLangModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchCase = async () => {
@@ -78,7 +82,14 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin }) => {
   if (!caseInfo) return <div className="p-6 text-center animate-pulse uppercase tracking-widest font-black">Laden...</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500 relative">
+      <button 
+        onClick={() => setIsLangModalOpen(true)}
+        className="absolute top-6 right-6 p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-[#0b50da]"
+      >
+        <ICONS.Globe className="w-5 h-5" />
+      </button>
+
       <div className="w-full max-w-md space-y-8 text-center">
         <Logo className="w-24 h-24 mx-auto mb-4" />
         
@@ -104,6 +115,14 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin }) => {
           </p>
         </Card>
       </div>
+
+      <LanguageSelector 
+        isOpen={isLangModalOpen} 
+        onClose={() => setIsLangModalOpen(false)} 
+        currentLang={appLanguage} 
+        onSetLang={setAppLanguage}
+        t={t}
+      />
     </div>
   );
 };

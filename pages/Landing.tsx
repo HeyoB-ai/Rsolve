@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Logo } from '../components/ui/Logo';
-import { UI_TRANSLATIONS, ICONS } from '../constants';
+import { ICONS } from '../constants';
+import { LanguageSelector } from '../components/ui/LanguageSelector';
 
 interface LandingProps {
   appLanguage: string;
@@ -35,6 +35,13 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             >
                 Start mediation
             </button>
+            <button 
+              onClick={() => setIsLangModalOpen(true)}
+              className="p-2 rounded-full hover:bg-slate-50 transition-colors text-slate-400 hover:text-[#0b50da]"
+              title={t('settings')}
+            >
+              <ICONS.Globe className="w-5 h-5" />
+            </button>
         </div>
 
         {/* Mobile Menu Button */}
@@ -56,11 +63,11 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             {/* Left Content */}
             <div className="flex flex-col gap-8 text-left lg:max-w-xl animate-in fade-in slide-in-from-left-8 duration-700">
               <h1 className="text-[#0f172a] text-5xl md:text-7xl font-extrabold leading-[1.1] tracking-tighter">
-                Conflicten oplossen <span className="text-[#0b50da]">zonder strijd.</span>
+                {t('tagline')} <span className="text-[#0b50da]">{t('tagline_highlight')}</span>
               </h1>
               
               <p className="text-slate-500 text-xl font-medium leading-relaxed">
-                AI-gestuurde mediation in (bijna) elke taal. Tweetalig waar nodig.
+                {t('sub_tagline')}
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
@@ -68,7 +75,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                     onClick={handleStartProcess}
                     className="bg-[#0b50da] text-white px-8 py-4 rounded-full text-lg font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95"
                 >
-                    Start mediation
+                    {t('start_btn')}
                 </button>
                 <Link 
                     to="/hoe-werkt-rsolve"
@@ -85,7 +92,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                 {!imgError ? (
                   <img 
                     src="/assets/mediation-hero.png" 
-                    alt="Mediation gesprek in een rustige omgeving" 
+                    alt="Mediation gesprek" 
                     className="w-full h-full object-cover"
                     onError={() => setImgError(true)}
                   />
@@ -228,29 +235,13 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
 
       </main>
 
-      {/* Settings Modal (voor taal) */}
-      {isLangModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-md">
-          <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl p-8 space-y-6 border-none animate-in zoom-in-95 duration-300">
-            <div className="flex justify-between items-center">
-              <h2 className="text-[12px] font-black uppercase tracking-[0.4em] text-slate-400">{t('settings')}</h2>
-              <button onClick={() => setIsLangModalOpen(false)} className="p-2 text-slate-300 hover:text-[#0b50da]"><ICONS.X /></button>
-            </div>
-            <div className="space-y-3">
-              {Object.keys(UI_TRANSLATIONS).map(langKey => (
-                <button 
-                  key={langKey}
-                  onClick={() => { setAppLanguage(langKey); setIsLangModalOpen(false); }}
-                  className={`w-full p-4 rounded-xl border-2 text-left font-black flex items-center justify-between transition-all ${appLanguage === langKey ? 'border-[#0b50da] bg-blue-50 text-[#0b50da]' : 'border-slate-50 text-slate-400 hover:bg-slate-50'}`}
-                >
-                  {UI_TRANSLATIONS[langKey].label}
-                  {appLanguage === langKey && <ICONS.Check className="w-5 h-5" />}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <LanguageSelector 
+        isOpen={isLangModalOpen} 
+        onClose={() => setIsLangModalOpen(false)} 
+        currentLang={appLanguage} 
+        onSetLang={setAppLanguage}
+        t={t}
+      />
     </div>
   );
 };

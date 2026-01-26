@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -7,13 +6,16 @@ import { Input } from '../components/ui/Input';
 import { ICONS } from '../constants';
 import { Logo } from '../components/ui/Logo';
 import { supabase } from '../lib/supabase';
+import { LanguageSelector } from '../components/ui/LanguageSelector';
 
 interface InvitePartnerProps {
   onComplete: (data: any) => void;
   t: (key: string, params?: any) => string;
+  appLanguage: string;
+  setAppLanguage: (lang: string) => void;
 }
 
-const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
+const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t, appLanguage, setAppLanguage }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',
@@ -24,6 +26,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
   const [showInvite, setShowInvite] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLangModalOpen, setIsLangModalOpen] = useState(false);
 
   const inviteLink = `${window.location.origin}/#/invite/${caseId}`;
 
@@ -88,7 +91,14 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500 relative">
+      <button 
+        onClick={() => setIsLangModalOpen(true)}
+        className="absolute top-6 right-6 p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-[#0b50da]"
+      >
+        <ICONS.Globe className="w-5 h-5" />
+      </button>
+
       <div className="w-full max-w-md space-y-8">
         {!showInvite ? (
           <div className="space-y-8 text-center">
@@ -170,6 +180,14 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
           </div>
         )}
       </div>
+
+      <LanguageSelector 
+        isOpen={isLangModalOpen} 
+        onClose={() => setIsLangModalOpen(false)} 
+        currentLang={appLanguage} 
+        onSetLang={setAppLanguage}
+        t={t}
+      />
     </div>
   );
 };

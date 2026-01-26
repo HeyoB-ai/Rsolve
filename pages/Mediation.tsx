@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChatBubble } from '../components/ui/ChatBubble';
 import { Button } from '../components/ui/Button';
@@ -7,6 +6,7 @@ import { Logo } from '../components/ui/Logo';
 import { geminiService } from '../services/geminiService';
 import { supabase } from '../lib/supabase';
 import { Card } from '../components/ui/Card';
+import { LanguageSelector } from '../components/ui/LanguageSelector';
 
 interface MediationProps {
   caseData: any;
@@ -26,6 +26,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const [isLeavingLoading, setIsLeavingLoading] = useState(false);
+  const [isLangModalOpen, setIsLangModalOpen] = useState(false);
   
   const [isVSOReviewOpen, setIsVSOReviewOpen] = useState(false);
   const [vsoConcept, setVsoConcept] = useState<string | null>(null);
@@ -221,6 +222,14 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   return (
     <div className="h-safe flex flex-col bg-slate-50 overflow-hidden relative">
+      <LanguageSelector 
+        isOpen={isLangModalOpen} 
+        onClose={() => setIsLangModalOpen(false)} 
+        currentLang={appLanguage} 
+        onSetLang={setAppLanguage}
+        t={t}
+      />
+
       {/* Dossier Modal */}
       {isDossierOpen && (
         <div className="fixed inset-0 z-[115] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
@@ -333,6 +342,9 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           {messages.length > 2 && isRespondentJoined && (
             <button onClick={startVSOFlow} className="px-3 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">Afronden</button>
           )}
+          <button onClick={() => setIsLangModalOpen(true)} className="p-2 bg-slate-50 text-slate-400 rounded-xl border border-slate-100 active:scale-95 transition-all">
+             <ICONS.Globe className="w-5 h-5" />
+          </button>
           <button onClick={() => setIsExitModalOpen(true)} className="px-3 py-2 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-100 active:scale-95 transition-all">Verlaat</button>
           <button onClick={() => setIsDossierOpen(true)} className="relative p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all">
             <ICONS.Folder className="w-5 h-5" />
