@@ -20,9 +20,8 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
     navigate('/payment');
   };
 
-  // Primaire URL en een zeer stabiele Unsplash fallback
-  const primaryHeroUrl = "https://replicate.delivery/yhqm/f0d8f99e-3e5a-497d-8e42-1e967364b6f7/out-0.png";
-  const fallbackHeroUrl = "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=1200";
+  // Een stabiele, professionele Unsplash foto die nooit verloopt (man en vrouw in gesprek)
+  const heroImageUrl = "https://images.unsplash.com/photo-1573497620053-ea531ad49471?auto=format&fit=crop&q=80&w=1200";
 
   return (
     <div className="bg-white text-[#1e293b] font-display antialiased min-h-screen">
@@ -75,20 +74,14 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
               </div>
             </div>
             
-            {/* Right Content - Hero Image met robuuste fallback */}
+            {/* Right Content - Hero Image */}
             <div className="relative w-full lg:flex-1 animate-in fade-in zoom-in-95 duration-1000 delay-200 mt-12 lg:mt-0">
               <div className="relative w-full aspect-[1.1] bg-slate-50 rounded-[6rem] shadow-[0_40px_100px_-20px_rgba(11,80,218,0.15)] border-[20px] border-white overflow-hidden group">
                 <img 
-                  src={primaryHeroUrl} 
+                  src={heroImageUrl} 
                   alt="Rsolve Mediation Session" 
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                   loading="eager"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    if (target.src !== fallbackHeroUrl) {
-                      target.src = fallbackHeroUrl;
-                    }
-                  }}
                 />
 
                 {/* NU ONLINE Badge */}
