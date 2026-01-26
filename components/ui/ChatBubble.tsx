@@ -132,14 +132,17 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
                   <span>Vertaalt naar {targetLanguageName}...</span>
                 </div>
               ) : (
-                <p className={`text-xs italic leading-relaxed ${isOwn ? 'text-blue-100' : 'text-slate-500'}`}>
-                  {translatedText}
-                </p>
+                <div className="space-y-1">
+                  <p className={`text-[10px] uppercase tracking-widest font-black opacity-40 ${isOwn ? 'text-blue-100' : 'text-slate-400'}`}>Vertaling:</p>
+                  <p className={`text-xs italic leading-relaxed ${isOwn ? 'text-blue-100' : 'text-slate-500'}`}>
+                    {translatedText}
+                  </p>
+                </div>
               )}
             </div>
           )}
 
-          {/* Vertaal knop: Nu binnen de content container */}
+          {/* Vertaal knop */}
           {!isOwn && text && !translatedText && !isTranslating && (
              <button 
                 onClick={(e) => {
@@ -147,10 +150,10 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
                   handleTranslate();
                 }}
                 className={`
-                  mt-2 flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors
+                  mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors border shadow-sm
                   ${isMediator 
-                    ? 'bg-emerald-100/50 text-emerald-700 hover:bg-emerald-100' 
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}
+                    ? 'bg-emerald-100/50 border-emerald-100 text-emerald-700 hover:bg-emerald-100' 
+                    : 'bg-slate-50 border-slate-100 text-slate-600 hover:bg-slate-100'}
                 `}
                 title={`Vertaal naar ${targetLanguageName}`}
              >
