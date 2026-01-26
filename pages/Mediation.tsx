@@ -21,7 +21,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isRespondentJoined, setIsRespondentJoined] = useState(false);
-  const [displayMode, setDisplayMode] = useState<'single' | 'dual'>('single');
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
@@ -37,11 +36,15 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Filter alle bijlagen voor het dossier-overzicht
+  const dossierItems = useMemo(() => {
+    return messages.filter(m => m.type === 'attachment' && m.attachment);
+  }, [messages]);
+
   // Namen ophalen uit caseData
   const myName = caseData.isRespondent ? (caseData.respondentName || 'Tegenpartij') : (caseData.initiatorName || 'Initiator');
   const otherPartyName = caseData.isRespondent ? (caseData.initiatorName || 'Initiator') : caseData.otherParty;
 
-  // Notificatie permissie aanvragen
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
@@ -52,7 +55,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     if ("Notification" in window && Notification.permission === "granted" && document.visibilityState !== 'visible') {
       new Notification(title, {
         body,
-        icon: '/logo.png', // Zorg dat dit pad klopt of gebruik een placeholder
+        icon: '/logo.png',
       });
     }
   };
@@ -73,7 +76,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           senderId: m.sender_id,
           timestamp: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           type: m.type,
-          attachment: m.attachment_url ? { url: m.attachment_url, name: 'Bijlage', type: 'image/jpeg' } : null
+          attachment: m.attachment_url ? { url: m.attachment_url, name: m.content.replace('Heeft een bijlage gestuurd: ', ''), type: 'image/jpeg' } : null
         })));
       }
     };
@@ -91,9 +94,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         filter: `case_id=eq.${caseData.id}` 
       }, (payload) => {
         const newMessage = payload.new;
-        
-        // Notificatie voor nieuw bericht als het niet van onszelf is
         const isActuallyOwn = (caseData.isRespondent && newMessage.sender_id === 'respondent') || (!caseData.isRespondent && newMessage.sender_id === 'initiator');
+        
         if (!isActuallyOwn) {
           sendNotification(`Nieuw bericht in Rsolve`, `${newMessage.sender_name}: ${newMessage.content.substring(0, 50)}...`);
         }
@@ -107,7 +109,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             senderId: newMessage.sender_id,
             timestamp: new Date(newMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             type: newMessage.type,
-            attachment: newMessage.attachment_url ? { url: newMessage.attachment_url, name: 'Bijlage', type: 'image/jpeg' } : null
+            attachment: newMessage.attachment_url ? { url: newMessage.attachment_url, name: newMessage.content.replace('Heeft een bijlage gestuurd: ', ''), type: 'image/jpeg' } : null
           }];
         });
       })
@@ -122,18 +124,10 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         const state = presenceChannel.presenceState();
         const otherRole = caseData.isRespondent ? 'initiator' : 'respondent';
         const isOnline = !!state[otherRole];
-        
-        // Notificatie als de tegenpartij online komt
         if (!isRespondentJoined && isOnline) {
           sendNotification("Rsolve Update", `${otherPartyName} is nu online.`);
         }
-        
         setIsRespondentJoined(isOnline);
-      })
-      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        if (key !== (caseData.isRespondent ? 'respondent' : 'initiator')) {
-           sendNotification("Rsolve Update", `${otherPartyName} is het gesprek binnengekomen.`);
-        }
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
@@ -156,13 +150,13 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     const textToSend = inputValue;
     setInputValue('');
 
-    const { data: userMsg, error } = await supabase.from('messages').insert([{
+    const { error } = await supabase.from('messages').insert([{
       case_id: caseData.id,
       sender_id: caseData.isRespondent ? 'respondent' : 'initiator',
       sender_name: myName, 
       content: textToSend,
       type: 'text'
-    }]).select().single();
+    }]);
 
     if (error) return;
 
@@ -191,17 +185,15 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const handleConfirmLeave = async () => {
     setIsLeavingLoading(true);
     try {
-      // Leg het vertrek vast in de documentatie (messages tabel)
       await supabase.from('messages').insert([{
         case_id: caseData.id,
         sender_id: 'system',
         sender_name: t('system'),
-        content: `${myName} heeft de mediation voortijdig en definitief verlaten. Dit feit is vastgelegd in het dossier.`,
+        content: `${myName} heeft de mediation voortijdig en definitief verlaten.`,
         type: 'system'
       }]);
       onAbandon();
     } catch (err) {
-      console.error("Error logging exit:", err);
       onAbandon();
     } finally {
       setIsLeavingLoading(false);
@@ -212,7 +204,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const startVSOFlow = async () => {
     setIsGeneratingVSO(true);
     setIsVSOReviewOpen(true);
-    
     const chatHistory = messages
       .filter(m => m.type === 'text')
       .map(m => ({ sender: m.sender, text: m.text }));
@@ -221,7 +212,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       const terms = await geminiService.generateVSOTerms(chatHistory, caseData.title);
       setVsoConcept(terms);
     } catch (e) {
-      setVsoConcept("Er kon geen automatische samenvatting gemaakt worden.");
+      setVsoConcept("Fout bij opstellen.");
     } finally {
       setIsGeneratingVSO(false);
     }
@@ -261,6 +252,68 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   return (
     <div className="h-safe flex flex-col bg-slate-50 overflow-hidden relative">
       
+      {/* Dossier Modal */}
+      {isDossierOpen && (
+        <div className="fixed inset-0 z-[115] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+          <Card className="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border-none">
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3 text-slate-900">
+                <ICONS.Folder className="w-5 h-5 text-blue-600" />
+                <h2 className="text-sm font-black uppercase tracking-widest">{t('dossier')}</h2>
+              </div>
+              <button onClick={() => setIsDossierOpen(false)} className="p-2 text-slate-400"><ICONS.X /></button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6">
+              {dossierItems.length > 0 ? (
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                    {dossierItems.length} {t('items_collected')}
+                  </p>
+                  <div className="grid grid-cols-1 gap-3">
+                    {dossierItems.map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 group">
+                        <div className="w-12 h-12 bg-white rounded-xl overflow-hidden border border-slate-200 shrink-0 shadow-sm">
+                          {item.attachment.type.startsWith('image/') ? (
+                            <img src={item.attachment.url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-300">
+                              <ICONS.File className="w-6 h-6" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-slate-900 truncate">{item.attachment.name}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{item.sender} • {item.timestamp}</p>
+                        </div>
+                        <a 
+                          href={item.attachment.url} 
+                          download={item.attachment.name}
+                          className="p-2 bg-white rounded-lg text-blue-600 border border-slate-200 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <ICONS.ChevronRight className="w-4 h-4" />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
+                    <ICONS.Folder className="w-8 h-8" />
+                  </div>
+                  <p className="text-sm text-slate-400 font-medium">{t('no_evidence')}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-slate-100 shrink-0">
+              <Button variant="primary" className="w-full rounded-2xl" onClick={() => setIsDossierOpen(false)}>{t('close')}</Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* Exit Mediation Warning Modal */}
       {isExitModalOpen && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-xl animate-in fade-in duration-300">
@@ -268,33 +321,15 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
               <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto">
                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
               </div>
-              
               <div className="space-y-4">
                 <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Mediation Verlaten?</h2>
                 <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                  Let op: als je het proces nu verlaat wordt dat in de documentatie opgeslagen. Dat kan later, wanneer dit uiteindelijk een rechtszaak wordt, in je nadeel werken. 
-                </p>
-                <p className="text-sm text-slate-900 font-bold italic">
-                  Dus bedenk nu of je toch niet liever naar een voor beide partijen acceptabele oplossing zoekt.
+                  Let op: als je het proces nu verlaat wordt dat in de documentatie opgeslagen.
                 </p>
               </div>
-
               <div className="flex flex-col gap-3 pt-2">
-                 <Button 
-                    variant="danger" 
-                    className="w-full rounded-2xl py-4" 
-                    onClick={handleConfirmLeave}
-                    isLoading={isLeavingLoading}
-                  >
-                    Verlaat toch
-                 </Button>
-                 <Button 
-                    variant="ghost" 
-                    className="w-full rounded-2xl py-3 text-slate-500 font-black uppercase tracking-widest text-[10px]" 
-                    onClick={() => setIsExitModalOpen(false)}
-                  >
-                    Ik wil doorgaan met mediation
-                 </Button>
+                 <Button variant="danger" className="w-full rounded-2xl py-4" onClick={handleConfirmLeave} isLoading={isLeavingLoading}>Verlaat toch</Button>
+                 <Button variant="ghost" className="w-full rounded-2xl py-3 text-slate-500 font-black uppercase tracking-widest text-[10px]" onClick={() => setIsExitModalOpen(false)}>Ik wil doorgaan</Button>
               </div>
            </Card>
         </div>
@@ -311,34 +346,20 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 </div>
                 <button onClick={() => setIsVSOReviewOpen(false)} className="p-2 text-slate-400"><ICONS.X /></button>
               </div>
-              
               <div className="flex-1 overflow-y-auto p-8">
                  {isGeneratingVSO ? (
                     <div className="flex flex-col items-center justify-center py-12 gap-4">
                        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                       <p className="text-sm font-black text-slate-400 uppercase tracking-widest text-center animate-pulse">De AI stelt het document op...</p>
+                       <p className="text-sm font-black text-slate-400 uppercase tracking-widest text-center animate-pulse">Momentje...</p>
                     </div>
                  ) : (
                     <div className="space-y-6">
-                       <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                          Op basis van jullie gesprek heeft de mediator de volgende afspraken geformuleerd.
-                       </p>
-                       <div className="bg-slate-50 p-6 rounded-2xl border-l-4 border-blue-600 font-serif italic text-slate-700 leading-relaxed shadow-inner whitespace-pre-wrap">
-                          {vsoConcept}
-                       </div>
+                       <div className="bg-slate-50 p-6 rounded-2xl border-l-4 border-blue-600 font-serif italic text-slate-700 leading-relaxed shadow-inner whitespace-pre-wrap">{vsoConcept}</div>
                     </div>
                  )}
               </div>
-
               <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex flex-col gap-3 shrink-0">
-                 <Button 
-                   size="lg" 
-                   className="w-full rounded-2xl py-4 shadow-xl" 
-                   disabled={isGeneratingVSO}
-                   onClick={handleVSOPrefix}
-                 >
-                    Bevestig & Naar Ondertekening
-                 </Button>
+                 <Button size="lg" className="w-full rounded-2xl py-4 shadow-xl" disabled={isGeneratingVSO} onClick={handleVSOPrefix}>Bevestig Afspraken</Button>
               </div>
            </Card>
         </div>
@@ -387,40 +408,25 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         
         <div className="flex items-center gap-2">
           {messages.length > 5 && isRespondentJoined && (
-            <button 
-              onClick={startVSOFlow}
-              className="px-3 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all"
-            >
-              Rond af
-            </button>
+            <button onClick={startVSOFlow} className="px-3 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">Rond af</button>
           )}
-          <button 
-            onClick={() => setIsExitModalOpen(true)}
-            className="px-3 py-2 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-100 active:scale-95 transition-all"
-          >
-            Verlaat
-          </button>
+          <button onClick={() => setIsExitModalOpen(true)} className="px-3 py-2 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-100 active:scale-95 transition-all">Verlaat</button>
           <button onClick={() => setIsDossierOpen(true)} className="relative p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all">
             <ICONS.Folder className="w-5 h-5" />
+            {dossierItems.length > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white text-[8px] font-black rounded-full flex items-center justify-center animate-bounce">{dossierItems.length}</span>}
           </button>
-          <button onClick={() => setIsSettingsOpen(true)} className="p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all">
-            <ICONS.Globe className="w-5 h-5" />
-          </button>
+          <button onClick={() => setIsSettingsOpen(true)} className="p-2 bg-slate-50 rounded-xl text-slate-600 border border-slate-100 active:scale-95 transition-all"><ICONS.Globe className="w-5 h-5" /></button>
         </div>
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map(m => {
           const isActuallyOwn = (caseData.isRespondent && m.senderId === 'respondent') || (!caseData.isRespondent && m.senderId === 'initiator');
-
           if (m.type === 'system') return (
             <div key={m.id} className="text-center py-2 px-6">
-              <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.15em] leading-relaxed block">
-                {m.text}
-              </span>
+              <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.15em] leading-relaxed block">{m.text}</span>
             </div>
           );
-          
           return (
             <ChatBubble 
               key={m.id} 
@@ -434,13 +440,11 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             />
           );
         })}
-        
         {isAiThinking && (
           <div className="flex flex-col items-start max-w-[85%] self-start animate-pulse">
-            <span className="text-[10px] font-black text-slate-400 mb-1 ml-2 uppercase tracking-widest">{t('mediator')} is aan het typen...</span>
+            <span className="text-[10px] font-black text-slate-400 mb-1 ml-2 uppercase tracking-widest">{t('mediator')} denkt na...</span>
           </div>
         )}
-
         <div ref={scrollRef} className="h-4" />
       </div>
 
