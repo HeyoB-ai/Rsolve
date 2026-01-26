@@ -13,13 +13,23 @@ interface ChatBubbleProps {
   text?: string;
   isOwn: boolean;
   sender: string;
+  senderRole?: 'initiator' | 'respondent' | 'mediator' | 'system';
   timestamp: string;
   attachment?: Attachment;
   autoTranslateTo?: string | null;
-  targetLanguageName?: string; // Nieuwe prop voor de doeltaal
+  targetLanguageName?: string; 
 }
 
-export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, timestamp, attachment, autoTranslateTo, targetLanguageName = 'Nederlands' }) => {
+export const ChatBubble: React.FC<ChatBubbleProps> = ({ 
+  text, 
+  isOwn, 
+  sender, 
+  senderRole,
+  timestamp, 
+  attachment, 
+  autoTranslateTo, 
+  targetLanguageName = 'Nederlands' 
+}) => {
   const [translatedText, setTranslatedText] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
 
@@ -39,6 +49,15 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
     setIsTranslating(false);
   };
 
+  const isMediator = senderRole === 'mediator';
+
+  // Bepaal bubbel achtergrondkleur en rand
+  const bubbleClasses = isOwn
+    ? 'bg-blue-600 text-white rounded-br-none shadow-md'
+    : isMediator
+    ? 'bg-emerald-50 border border-emerald-100 text-slate-800 rounded-bl-none shadow-sm'
+    : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm';
+
   const renderAttachment = () => {
     if (!attachment) return null;
 
@@ -47,10 +66,10 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
 
     if (isImage) {
       return (
-        <div className="mt-2 rounded-xl overflow-hidden border border-slate-100 shadow-sm bg-slate-50">
+        <div className={`mt-2 rounded-xl overflow-hidden border shadow-sm ${isOwn ? 'bg-blue-700 border-blue-500' : 'bg-slate-50 border-slate-100'}`}>
           <img src={attachment.url} alt={attachment.name} className="max-w-full h-auto block" />
-          <div className="px-3 py-2 bg-white/80 backdrop-blur-sm border-t border-slate-100 flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-500 truncate">{attachment.name}</span>
+          <div className={`px-3 py-2 ${isOwn ? 'bg-blue-800/50' : 'bg-white/80'} backdrop-blur-sm border-t ${isOwn ? 'border-blue-500' : 'border-slate-100'} flex items-center justify-between`}>
+            <span className={`text-[10px] font-bold truncate ${isOwn ? 'text-blue-100' : 'text-slate-500'}`}>{attachment.name}</span>
           </div>
         </div>
       );
@@ -75,7 +94,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
         download={attachment.name}
         className={`
           mt-2 flex items-center gap-3 p-3 rounded-xl border transition-colors
-          ${isOwn ? 'bg-blue-700 border-blue-500 text-white' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}
+          ${isOwn ? 'bg-blue-700 border-blue-500 text-white hover:bg-blue-800' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}
         `}
       >
         <div className={`p-2 rounded-lg ${isOwn ? 'bg-blue-800' : 'bg-white'}`}>
@@ -90,19 +109,23 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ text, isOwn, sender, tim
   };
 
   return (
-    <div className={`flex flex-col max-w-[85%] ${isOwn ? 'self-end items-end' : 'self-start items-start'} mb-1`}>
-      {!isOwn && <span className="text-[10px] font-black text-slate-400 mb-1 ml-2 uppercase tracking-widest">{sender}</span>}
+    <div className={`flex flex-col max-w-[85%] ${isOwn ? 'self-end items-end' : 'self-start items-start'} mb-1 animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+      {!isOwn && (
+        <span className={`text-[10px] font-black mb-1 ml-2 uppercase tracking-widest ${isMediator ? 'text-emerald-600' : 'text-slate-400'}`}>
+          {sender}
+        </span>
+      )}
       <div className={`
-        relative px-4 py-3 rounded-[20px] shadow-sm transition-all duration-300 group
-        ${isOwn ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border border-slate-100 text-slate-800 rounded-bl-none'}
+        relative px-4 py-3 rounded-[20px] transition-all duration-300 group
+        ${bubbleClasses}
       `}>
         <div className="flex flex-col gap-1">
-          {text && <p className="text-sm leading-relaxed">{text}</p>}
+          {text && <p className="text-sm leading-relaxed whitespace-pre-wrap">{text}</p>}
           
           {renderAttachment()}
           
           {(translatedText || isTranslating) && (
-            <div className={`pt-2 mt-2 border-t ${isOwn ? 'border-blue-500' : 'border-slate-100 animate-in fade-in slide-in-from-top-1'}`}>
+            <div className={`pt-2 mt-2 border-t ${isOwn ? 'border-blue-500' : isMediator ? 'border-emerald-100' : 'border-slate-100'} animate-in fade-in slide-in-from-top-1`}>
               {isTranslating ? (
                 <div className="flex items-center gap-2 text-[10px] opacity-70">
                   <div className="w-1 h-1 bg-current rounded-full animate-bounce" />

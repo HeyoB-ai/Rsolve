@@ -121,7 +121,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     const { data: userMsg, error } = await supabase.from('messages').insert([{
       case_id: caseData.id,
       sender_id: caseData.isRespondent ? 'respondent' : 'initiator',
-      sender_name: myName, // Gebruik de eigen naam
+      sender_name: myName, 
       content: textToSend,
       type: 'text'
     }]).select().single();
@@ -134,7 +134,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       .map(m => ({ sender: m.sender, text: m.text }));
 
     try {
-      // De AI krijgt nu de context van wie wie is
       const contextTitle = `${caseData.title} (Partijen: ${caseData.initiatorName || 'Initiator'} vs ${caseData.otherParty})`;
       const aiResponse = await geminiService.generateMediatorResponse(chatHistory, contextTitle);
       await supabase.from('messages').insert([{
@@ -171,7 +170,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   const handleVSOPrefix = () => {
     const vsoData = {
-      caseId: caseData.id, // Geef het ID mee voor download doeleinden
+      caseId: caseData.id,
       title: caseData.title,
       parties: `${caseData.initiatorName} en ${caseData.otherParty}`,
       terms: vsoConcept,
@@ -317,6 +316,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
               text={m.text} 
               isOwn={isActuallyOwn} 
               sender={m.sender} 
+              senderRole={m.senderId}
               timestamp={m.timestamp} 
               attachment={m.attachment} 
               targetLanguageName={UI_TRANSLATIONS[appLanguage].label}
