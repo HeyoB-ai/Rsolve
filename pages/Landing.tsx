@@ -20,14 +20,14 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
     navigate('/payment');
   };
 
-  // Stabiele URL voor de mediation foto (vrouwelijk mediator tussen man en vrouw)
-  const heroImageUrl = "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=1200";
+  // The specific mediator photo requested by the user
+  const heroImageUrl = "https://replicate.delivery/yhqm/f0d8f99e-3e5a-497d-8e42-1e967364b6f7/out-0.png"; 
 
   return (
     <div className="bg-white text-[#1e293b] font-display antialiased min-h-screen">
       {/* Header */}
       <header className="sticky top-0 z-50 flex items-center bg-white/95 backdrop-blur-md px-8 py-5 justify-between max-w-[1440px] mx-auto w-full">
-        <Logo showText={true} />
+        <Logo showText={true} className="w-9 h-9" />
         <div className="flex items-center gap-6">
           <button 
             onClick={handleStartProcess}
@@ -47,7 +47,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
       <main>
         {/* Hero Section */}
         <section className="relative px-8 py-12 md:py-20 max-w-[1440px] mx-auto overflow-visible">
-          <div className="flex flex-col lg:flex-row gap-16 items-start">
+          <div className="flex flex-col lg:flex-row gap-16 items-center">
             {/* Left Content */}
             <div className="flex flex-col gap-10 text-left lg:max-w-2xl animate-in fade-in slide-in-from-left-8 duration-700">
               <div className="inline-flex items-center gap-2 py-2 px-5 bg-blue-50 border border-blue-100 rounded-full w-fit shadow-sm">
@@ -80,7 +80,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
 
               <div className="flex items-center gap-5 pt-8">
                  <div className="flex -space-x-4">
-                    {[1,2,3,4].map(i => <img key={i} className="w-12 h-12 rounded-full border-4 border-white shadow-sm" src={`https://i.pravatar.cc/100?u=${i+60}`} alt="user" />)}
+                    {[1,2,3,4].map(i => <img key={i} className="w-12 h-12 rounded-full border-4 border-white shadow-sm" src={`https://i.pravatar.cc/100?u=${i+12}`} alt="user" />)}
                  </div>
                  <p className="text-[11px] text-slate-400 font-black uppercase tracking-[0.2em]">+500 zaken succesvol afgerond</p>
               </div>
@@ -88,7 +88,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             
             {/* Right Content - Hero Image */}
             <div className="relative w-full lg:flex-1 animate-in fade-in zoom-in-95 duration-1000 delay-200 mt-12 lg:mt-0">
-              <div className="relative w-full aspect-[1.1] bg-slate-50 rounded-[5rem] shadow-2xl border-[16px] border-white overflow-hidden group">
+              <div className="relative w-full aspect-[1.1] bg-slate-100 rounded-[5rem] shadow-2xl border-[16px] border-white overflow-hidden group">
                 <img 
                   src={heroImageUrl} 
                   alt="Rsolve Mediation Session" 
@@ -96,7 +96,8 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                   loading="eager"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = "https://images.unsplash.com/photo-1573497620053-ea531ad49471?auto=format&fit=crop&q=80&w=1200";
+                    // Fallback to a high-quality professional image if the replicate link fails
+                    target.src = "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=1200";
                   }}
                 />
 
