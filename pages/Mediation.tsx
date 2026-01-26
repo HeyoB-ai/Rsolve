@@ -41,6 +41,22 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const myName = caseData.isRespondent ? (caseData.respondentName || 'Tegenpartij') : (caseData.initiatorName || 'Initiator');
   const otherPartyName = caseData.isRespondent ? (caseData.initiatorName || 'Initiator') : caseData.otherParty;
 
+  // Notificatie permissie aanvragen
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  const sendNotification = (title: string, body: string) => {
+    if ("Notification" in window && Notification.permission === "granted" && document.visibilityState !== 'visible') {
+      new Notification(title, {
+        body,
+        icon: '/logo.png', // Zorg dat dit pad klopt of gebruik een placeholder
+      });
+    }
+  };
+
   useEffect(() => {
     const fetchMessages = async () => {
       const { data, error } = await supabase
@@ -75,6 +91,13 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         filter: `case_id=eq.${caseData.id}` 
       }, (payload) => {
         const newMessage = payload.new;
+        
+        // Notificatie voor nieuw bericht als het niet van onszelf is
+        const isActuallyOwn = (caseData.isRespondent && newMessage.sender_id === 'respondent') || (!caseData.isRespondent && newMessage.sender_id === 'initiator');
+        if (!isActuallyOwn) {
+          sendNotification(`Nieuw bericht in Rsolve`, `${newMessage.sender_name}: ${newMessage.content.substring(0, 50)}...`);
+        }
+
         setMessages(prev => {
           if (prev.find(m => m.id === newMessage.id)) return prev;
           return [...prev, {
@@ -98,7 +121,19 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       .on('presence', { event: 'sync' }, () => {
         const state = presenceChannel.presenceState();
         const otherRole = caseData.isRespondent ? 'initiator' : 'respondent';
-        setIsRespondentJoined(!!state[otherRole]);
+        const isOnline = !!state[otherRole];
+        
+        // Notificatie als de tegenpartij online komt
+        if (!isRespondentJoined && isOnline) {
+          sendNotification("Rsolve Update", `${otherPartyName} is nu online.`);
+        }
+        
+        setIsRespondentJoined(isOnline);
+      })
+      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+        if (key !== (caseData.isRespondent ? 'respondent' : 'initiator')) {
+           sendNotification("Rsolve Update", `${otherPartyName} is het gesprek binnengekomen.`);
+        }
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
@@ -110,7 +145,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       supabase.removeChannel(channel);
       supabase.removeChannel(presenceChannel);
     };
-  }, [caseData.id, caseData.isRespondent]);
+  }, [caseData.id, caseData.isRespondent, isRespondentJoined]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });

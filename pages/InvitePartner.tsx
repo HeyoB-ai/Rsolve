@@ -44,12 +44,23 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
     }]);
 
     if (!error) {
-      // Welkomstbericht van de Mediator
+      // Welkomstbericht van de Mediator - Nu meer procesgericht
+      const welcomeMsg = `Welkom ${formData.yourName}. Ik ben de AI Mediator van Rsolve. 
+
+Mijn rol is om als onafhankelijke en neutrale partij jullie te helpen bij het vinden van een eerlijke oplossing voor het conflict: "${formData.title}".
+
+We volgen een vaste procedure:
+1. Ik vraag eerst u (de initiator) om een toelichting op de situatie.
+2. Daarna vraag ik de tegenpartij (${formData.otherParty}) om zijn of haar kant van het verhaal.
+3. Vervolgens zoeken we samen naar afspraken waar beiden achter staan.
+
+${formData.yourName}, kunt u beginnen met een toelichting op wat er precies is gebeurd?`;
+
       await supabase.from('messages').insert([{
         case_id: newId,
         sender_id: 'mediator',
         sender_name: 'Mediator',
-        content: `Welkom ${formData.yourName}. Ik ben jullie AI Mediator. De tegenpartij (${formData.otherParty}) is uitgenodigd, maar we kunnen alvast beginnen. Vertel me gerust wat jouw kant van het verhaal is.\n\nLET OP: deel geen gevoelige privégegevens zoals adressen of burgerservicenummers in deze chat.`,
+        content: welcomeMsg,
         type: 'text'
       }]);
 
@@ -133,7 +144,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t }) => {
             <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">
                <div className="space-y-4">
                   <Button 
-                    onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Hallo, om ons (langlopende) conflict "${formData.title}" op te lossen heb ik een mediator ingeschakeld. Hij werkt online, is neutraal en zal ons helpen om tot een voor beiden acceptabele oplossing te komen. Deelname is gratis voor jou. Klik hier om deel te nemen: ${inviteLink}`)}`, '_blank')}
+                    onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Hallo, om ons conflict "${formData.title}" op te lossen heb ik een online mediator van Rsolve ingeschakeld. Hij helpt ons via een beveiligde chat om tot een eerlijke oplossing te komen zonder advocaten. Deelname is gratis voor jou. Klik hier: ${inviteLink}`)}`, '_blank')}
                     className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-6 rounded-2xl font-black flex items-center justify-center gap-4 transition-all shadow-lg"
                   >
                     WhatsApp Uitnodiging

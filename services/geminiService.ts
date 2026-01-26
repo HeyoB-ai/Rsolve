@@ -31,7 +31,7 @@ export class GeminiService {
 
   async generateMediatorResponse(chatHistory: {sender: string, text: string}[], caseTitle: string): Promise<string> {
     const client = this.ai;
-    if (!client) return "Ik ben momenteel offline. Blijf respectvol met elkaar in gesprek.";
+    if (!client) return "Systeem is momenteel offline.";
     
     const historyString = chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n');
     
@@ -40,14 +40,20 @@ export class GeminiService {
         model: 'gemini-3-flash-preview',
         contents: [{
           parts: [{
-            text: `Je bent de AI Mediator van 'Rsolve'. Jouw doel is om partijen te helpen een conflict over "${caseTitle}" op te lossen via een Vaststellingsovereenkomst (VSO).
+            text: `Je bent de AI Mediator van 'Rsolve'. Dossier: "${caseTitle}". 
+            Je moet een gestructureerd proces volgen, vergelijkbaar met een rechtszitting:
 
-STRIKTE RICHTLIJNEN:
-1. ONBOARDING: Als een partij net is binnengekomen of vraagt "Wat is dit?", leg dan kort uit: Rsolve is een neutraal platform waar jullie via chat, begeleid door AI, tot een rechtsgeldige oplossing komen zonder advocaten.
-2. PRIVACY: Scan de laatste berichten op BSN-nummers (9 cijfers) of specifieke woonadressen. Als je dit ziet, begin je antwoord met: "LET OP: Deel geen BSN of adresgegevens in deze chat voor jullie eigen veiligheid."
-3. GEEN CLICHÉS: Gebruik NOOIT zinloze zinnen zoals "Dat is een duidelijk standpunt" als iemand een vraag stelt. Geef direct antwoord op de vraag of emotie.
-4. NEUTRAAL & DOELGERICHT: Vat samen, stel open vragen en stuur aan op concrete afspraken voor de VSO.
-5. KORT: Maximaal 60 woorden per bericht.
+STRIKTE VOLGORDE:
+1. WELKOM & UITLEG (Reeds gedaan in eerste bericht): Leg uit dat Rsolve neutraal is en helpt bij een eerlijke oplossing.
+2. INTAKE INITIATOR: Als de initiator nog niet uitgebreid zijn verhaal heeft gedaan, vraag hem/haar dan: "Kunt u toelichten wat er precies is gebeurd en waarom u dit dossier bent gestart?"
+3. WEDERHOOR RESPONDENT: Zodra de initiator heeft gesproken, richt je je direct tot de andere partij: "Nu we het standpunt van de initiator hebben gehoord: hoe kijkt u tegen deze situatie aan? Wat is uw kant van het verhaal?"
+4. DIALOOG: Pas als beide partijen hun standpunt hebben gedeeld, start je de bemiddeling naar een oplossing.
+
+RICHTLIJNEN:
+- GEEN JARGON: Noem 'Vaststellingsovereenkomst' pas als er een oplossing is. Praat over "afspraken" of "oplossing".
+- NEUTRAAL & SNEL: Geef direct antwoord. Maximaal 50 woorden.
+- REGIE: Jij bepaalt wie er aan het woord is. Als iemand buiten zijn beurt spreekt, breng de focus terug.
+- PRIVACY: Waarschuw bij BSN-nummers of adressen.
 
 Chatgeschiedenis:
 ${historyString}
@@ -56,22 +62,16 @@ Mediator:`
           }]
         }],
         config: {
-          temperature: 0.7, // Iets lager voor meer consistentie en minder hallucinaties
+          temperature: 0.2, // Lager voor snellere, meer consistente antwoorden
           topP: 0.8
         }
       });
       
       const text = response.text?.trim();
-      if (!text) throw new Error("Lege response");
-      return text;
+      return text || "Ik hoor graag jullie reactie.";
     } catch (error) {
       console.error("Mediator error:", error);
-      const fallbacks = [
-        "Ik ben er om jullie te helpen dit conflict op te lossen. Wat is voor jou op dit moment de belangrijkste volgende stap?",
-        "Laten we kijken naar de feiten van dit dossier. Welke oplossing zou voor beide partijen werkbaar zijn?",
-        "Mijn excuses, ik had een tijdelijke storing. Laten we verder gaan met het bespreken van de afspraken voor jullie VSO."
-      ];
-      return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+      return "Laten we bij de feiten blijven. Wat is volgens u de volgende stap naar een oplossing?";
     }
   }
 
