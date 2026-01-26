@@ -85,7 +85,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
               <div className="relative w-full aspect-video rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-slate-100 bg-slate-200">
                 {!imgError ? (
                   <img 
-                    src="/assets/mediation-hero.jpg" 
+                    src="/assets/mediation-hero.png" 
                     alt="Mediation gesprek in een rustige omgeving" 
                     className="w-full h-full object-cover"
                     onError={() => setImgError(true)}
@@ -95,7 +95,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                     <span className="material-symbols-outlined text-5xl">broken_image</span>
                     <div>
                         <p className="font-bold text-lg">AFBEELDING ONTBREEKT</p>
-                        <p className="text-sm font-mono mt-2 bg-white p-2 rounded border border-red-200">/public/assets/mediation-hero.jpg</p>
+                        <p className="text-sm font-mono mt-2 bg-white p-2 rounded border border-red-200">/public/assets/mediation-hero.png</p>
                         <p className="text-xs mt-2 text-slate-500">Plaats het bestand in de map om dit op te lossen.</p>
                     </div>
                   </div>
