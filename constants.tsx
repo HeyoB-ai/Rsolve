@@ -93,7 +93,7 @@ type TranslationKey =
   | 'sign_party_b' | 'waiting_sign' | 'congrats' | 'signed_desc' | 'download_dossier'
   | 'delete_close' | 'loading' | 'error_generic' | 'dossier_not_found'
   | 'mediation_badge' | 'when_work' | 'when_business' | 'when_neighbors' | 'when_relations' | 'plus_more'
-  | 'placeholder_name' | 'placeholder_subject' | 'placeholder_invite';
+  | 'placeholder_name' | 'placeholder_subject' | 'placeholder_invite' | 'secure_ssl';
 
 const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   label: "English",
@@ -235,7 +235,8 @@ const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   plus_more: "+15...",
   placeholder_name: "e.g. Mark",
   placeholder_subject: "e.g. Loan repayment",
-  placeholder_invite: "Who to invite?"
+  placeholder_invite: "Who to invite?",
+  secure_ssl: "Secured by Rsolve SSL"
 };
 
 // Partial overrides for other languages (using English as fallback for missing keys)
@@ -381,7 +382,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     plus_more: "+15...",
     placeholder_name: "Bijv. Mark",
     placeholder_subject: "Bijv. Terugbetaling lening",
-    placeholder_invite: "Wie wil je uitnodigen?"
+    placeholder_invite: "Wie wil je uitnodigen?",
+    secure_ssl: "Beveiligd door Rsolve SSL"
   }),
   en: BASE_TRANSLATIONS,
   es: createLang("Español", {
@@ -454,7 +456,20 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     join_free_notice: "Participación gratuita para invitados",
     placeholder_name: "Ej. Marcos",
     placeholder_subject: "Ej. Devolución de dinero",
-    placeholder_invite: "¿A quién quieres invitar?"
+    placeholder_invite: "¿A quién quieres invitar?",
+    payment_desc: "Pago único para expediente de mediación",
+    secure_trans: "Transacción segura",
+    pay_via_ideal: "Pagar vía iDEAL",
+    choosing_bank: "Elige tu banco...",
+    pay_btn: "Pagar €3,99",
+    have_code: "¿Tienes un código de acceso?",
+    enter_code: "Ingresar Código",
+    validate_code: "Validar",
+    validating: "Validando...",
+    code_placeholder: "ej. RS-2024-XXXX",
+    code_instruction: "Introduce el código proporcionado por tu empleador o aseguradora.",
+    back_home: "Volver al inicio",
+    secure_ssl: "Protegido por Rsolve SSL"
   }),
   de: createLang("Deutsch", {
     tagline: "Konflikte lösen,",

@@ -173,7 +173,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
             )}
 
             <div className="flex items-center justify-center gap-2 pt-2 grayscale opacity-30">
-               <span className="text-[10px] font-black uppercase tracking-widest">Beveiligd door Rsolve SSL</span>
+               <span className="text-[10px] font-black uppercase tracking-widest">{t('secure_ssl')}</span>
             </div>
           </div>
         </Card>
