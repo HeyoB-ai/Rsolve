@@ -29,6 +29,15 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
     </div>
   );
 
+  const langPills = [
+    { code: 'nl', label: '🇳🇱 Nederlands' },
+    { code: 'en', label: '🇬🇧 English' },
+    { code: 'tr', label: '🇹🇷 Türkçe' },
+    { code: 'pl', label: '🇵🇱 Polski' },
+    { code: 'ar', label: '🇸🇦 العربية' },
+    { code: 'es', label: '🇪🇸 Español' }
+  ];
+
   return (
     <div className="bg-white text-[#1e293b] font-display antialiased min-h-screen flex flex-col">
       {/* Header */}
@@ -119,7 +128,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
               <div className="space-y-8">
                  <div className="inline-flex items-center gap-2 py-1 px-3 bg-blue-50 border border-blue-100 rounded-full w-fit">
-                    <span className="text-[#0b50da] font-black text-[10px] tracking-[0.2em] uppercase">Mediation 2.0</span>
+                    <span className="text-[#0b50da] font-black text-[10px] tracking-[0.2em] uppercase">{t('mediation_badge')}</span>
                  </div>
                  <h2 className="text-4xl font-black text-slate-900 tracking-tight">{t('what_is_title')}</h2>
                  <p className="text-lg text-slate-600 leading-relaxed">{t('what_is_p1')}</p>
@@ -160,10 +169,16 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
               </p>
               
               <div className="flex flex-wrap justify-center gap-3 pt-8 opacity-60">
-                 {['🇳🇱 Nederlands', '🇬🇧 English', '🇹🇷 Türkçe', '🇵🇱 Polski', '🇸🇦 العربية', '🇪🇸 Español'].map(lang => (
-                    <span key={lang} className="px-4 py-2 bg-white/10 rounded-full text-sm font-bold backdrop-blur-sm">{lang}</span>
+                 {langPills.map(lang => (
+                    <button 
+                      key={lang.code} 
+                      onClick={() => setAppLanguage(lang.code)}
+                      className={`px-4 py-2 rounded-full text-sm font-bold backdrop-blur-sm transition-all hover:bg-white/20 active:scale-95 ${appLanguage === lang.code ? 'bg-white text-blue-600' : 'bg-white/10 text-white'}`}
+                    >
+                      {lang.label}
+                    </button>
                  ))}
-                 <span className="px-4 py-2 bg-white/10 rounded-full text-sm font-bold backdrop-blur-sm">+15...</span>
+                 <button onClick={() => setIsLangModalOpen(true)} className="px-4 py-2 bg-white/10 rounded-full text-sm font-bold backdrop-blur-sm hover:bg-white/20 transition-all">{t('plus_more')}</button>
               </div>
            </div>
         </section>
@@ -178,10 +193,10 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                  {[
-                   {icon: 'work', label: 'Werk'},
-                   {icon: 'handshake', label: 'Zakelijk'},
-                   {icon: 'home', label: 'Buren'},
-                   {icon: 'favorite', label: 'Relatie'}
+                   {icon: 'work', label: t('when_work')},
+                   {icon: 'handshake', label: t('when_business')},
+                   {icon: 'home', label: t('when_neighbors')},
+                   {icon: 'favorite', label: t('when_relations')}
                  ].map((item, i) => (
                     <div key={i} className="p-6 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center gap-3">
                        <span className="material-symbols-outlined text-3xl text-slate-400">{item.icon}</span>

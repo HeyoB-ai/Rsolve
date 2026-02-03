@@ -91,7 +91,8 @@ type TranslationKey =
   | 'dispute_desc' | 'section_terms' | 'no_terms' | 'section_final' | 'final_text'
   | 'sign_party_a' | 'digital_sign' | 'ref' | 'date' | 'sign_placeholder' | 'sign_btn'
   | 'sign_party_b' | 'waiting_sign' | 'congrats' | 'signed_desc' | 'download_dossier'
-  | 'delete_close' | 'loading' | 'error_generic' | 'dossier_not_found';
+  | 'delete_close' | 'loading' | 'error_generic' | 'dossier_not_found'
+  | 'mediation_badge' | 'when_work' | 'when_business' | 'when_neighbors' | 'when_relations' | 'plus_more';
 
 const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   label: "English",
@@ -224,7 +225,13 @@ const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   delete_close: "Delete Case & Close",
   loading: "Loading...",
   error_generic: "Something went wrong.",
-  dossier_not_found: "Case not found."
+  dossier_not_found: "Case not found.",
+  mediation_badge: "Mediation 2.0",
+  when_work: "Work",
+  when_business: "Business",
+  when_neighbors: "Neighbors",
+  when_relations: "Relationship",
+  plus_more: "+15..."
 };
 
 // Partial overrides for other languages (using English as fallback for missing keys)
@@ -372,7 +379,13 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     delete_close: "Verwijder & Sluit",
     loading: "Laden...",
     error_generic: "Er ging iets mis.",
-    dossier_not_found: "Dossier niet gevonden."
+    dossier_not_found: "Dossier niet gevonden.",
+    mediation_badge: "Mediation 2.0",
+    when_work: "Werk",
+    when_business: "Zakelijk",
+    when_neighbors: "Buren",
+    when_relations: "Relatie",
+    plus_more: "+15..."
   }),
   en: BASE_TRANSLATIONS,
   de: createLang("Deutsch", {
@@ -388,6 +401,12 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Mediation verlassen?",
     vso_generating: "Vereinbarung wird erstellt...",
     analysing: "Mediator analysiert...",
+    mediation_badge: "Mediation 2.0",
+    when_work: "Arbeit",
+    when_business: "Geschäft",
+    when_neighbors: "Nachbarn",
+    when_relations: "Beziehung",
+    plus_more: "+15..."
   }),
   fr: createLang("Français", {
     tagline: "Résoudre les conflits,",
@@ -402,6 +421,12 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Quitter la médiation?",
     vso_generating: "Rédaction de l'accord...",
     analysing: "Le médiateur analyse...",
+    mediation_badge: "Médiation 2.0",
+    when_work: "Travail",
+    when_business: "Affaires",
+    when_neighbors: "Voisins",
+    when_relations: "Relation",
+    plus_more: "+15..."
   }),
   es: createLang("Español", {
     tagline: "Resolver conflictos,",
@@ -416,6 +441,12 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "¿Salir de la mediación?",
     vso_generating: "Redactando acuerdo...",
     analysing: "El mediador está analizando...",
+    mediation_badge: "Mediación 2.0",
+    when_work: "Trabajo",
+    when_business: "Negocios",
+    when_neighbors: "Vecinos",
+    when_relations: "Relación",
+    plus_more: "+15..."
   }),
   tr: createLang("Türkçe", {
     tagline: "Anlaşmazlığı çözün,",
@@ -438,6 +469,12 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     you: "Sen",
     leave_confirm: "Evet, ayrıl",
     leave_cancel: "Hayır, devam et",
+    mediation_badge: "Arabuluculuk 2.0",
+    when_work: "İş",
+    when_business: "İşletme",
+    when_neighbors: "Komşular",
+    when_relations: "İlişki",
+    plus_more: "+15..."
   }),
   ar: createLang("العربية", {
     tagline: "حل النزاع،",
