@@ -113,19 +113,19 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
             <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">
               <Input 
                 label={t('label_your_name')}
-                placeholder="Bijv. Mark"
+                placeholder={t('placeholder_name')}
                 value={formData.yourName}
                 onChange={e => setFormData({...formData, yourName: e.target.value})}
               />
               <Input 
                 label={t('label_subject')}
-                placeholder="Bijv. Terugbetaling lening"
+                placeholder={t('placeholder_subject')}
                 value={formData.title}
                 onChange={e => setFormData({...formData, title: e.target.value})}
               />
               <Input 
                 label={t('label_counterparty')}
-                placeholder="Wie wil je uitnodigen?"
+                placeholder={t('placeholder_invite')}
                 value={formData.otherParty}
                 onChange={e => setFormData({...formData, otherParty: e.target.value})}
               />
