@@ -20,18 +20,25 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
     navigate('/payment');
   };
 
+  const FeatureItem = ({ icon: Icon, text }: { icon: any, text: string }) => (
+    <div className="flex items-center gap-3">
+      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+        <Icon className="w-3.5 h-3.5 text-blue-600" />
+      </div>
+      <span className="text-slate-700 font-medium">{text}</span>
+    </div>
+  );
+
   return (
     <div className="bg-white text-[#1e293b] font-display antialiased min-h-screen flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 flex items-center bg-white/95 backdrop-blur-md px-6 py-4 md:px-8 md:py-5 justify-between max-w-[1440px] mx-auto w-full border-b border-slate-50">
         <Logo showText={true} className="w-10 h-10" />
         
-        {/* Desktop Nav Links */}
-        <div className="hidden md:flex items-center gap-8">
-            <Link to="/wat-is-mediation" className="text-sm font-bold text-slate-600 hover:text-[#0b50da] transition-colors">{t('nav_what_is')}</Link>
+        <div className="flex items-center gap-4">
             <button 
                 onClick={handleStartProcess}
-                className="text-sm font-bold text-[#0b50da] hover:underline"
+                className="hidden md:block text-sm font-bold text-[#0b50da] hover:underline"
             >
                 {t('nav_start')}
             </button>
@@ -42,16 +49,6 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             >
               <ICONS.Globe className="w-5 h-5" />
             </button>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <div className="flex md:hidden items-center gap-4">
-          <button 
-            onClick={() => setIsLangModalOpen(true)}
-            className="p-1 text-slate-400 hover:text-[#0b50da] transition-colors"
-          >
-            <span className="material-symbols-outlined text-3xl">menu</span>
-          </button>
         </div>
       </header>
 
@@ -70,23 +67,21 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                 {t('sub_tagline')}
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 pt-2">
+              <div className="flex flex-col gap-3">
                 <button 
                     onClick={handleStartProcess}
-                    className="bg-[#0b50da] text-white px-8 py-4 rounded-full text-lg font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95"
+                    className="w-full sm:w-auto bg-[#0b50da] text-white px-8 py-4 rounded-full text-lg font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95"
                 >
                     {t('start_btn')}
                 </button>
-                <Link 
-                    to="/hoe-werkt-rsolve"
-                    className="px-8 py-4 rounded-full text-lg font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all text-center"
-                >
-                    Lees hoe het werkt
-                </Link>
+                <div className="flex items-center gap-2 text-slate-400 text-xs font-bold pl-2">
+                   <ICONS.Clock className="w-4 h-4" />
+                   <span>{t('micro_time')}</span>
+                </div>
               </div>
             </div>
             
-            {/* Right Content - 16:9 Hero Image (PNG) */}
+            {/* Right Content - Hero Image */}
             <div className="w-full lg:flex-1 animate-in fade-in zoom-in-95 duration-1000 delay-200">
               <div className="relative w-full aspect-video rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-slate-100 bg-slate-200">
                 {!imgError ? (
@@ -97,13 +92,10 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                     onError={() => setImgError(true)}
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-red-50 text-red-500 p-8 text-center gap-4">
-                    <span className="material-symbols-outlined text-5xl">broken_image</span>
-                    <div>
-                        <p className="font-bold text-lg">AFBEELDING ONTBREEKT</p>
-                        <p className="text-sm font-mono mt-2 bg-white p-2 rounded border border-red-200">/public/assets/mediation-hero.png</p>
-                        <p className="text-xs mt-2 text-slate-500">Plaats het bestand handmatig in de map public/assets.</p>
-                    </div>
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-blue-50 p-8 text-center gap-4">
+                     <div className="bg-white p-4 rounded-full shadow-sm">
+                       <ICONS.Handshake className="w-12 h-12 text-blue-500" />
+                     </div>
                   </div>
                 )}
               </div>
@@ -112,125 +104,139 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
           </div>
         </section>
 
-        {/* Artikel Sectie */}
-        <section className="bg-slate-50/50 py-24 px-6 border-y border-slate-100">
-          <div className="max-w-3xl mx-auto space-y-16">
-            
-            {/* Header Artikel */}
-            <header className="space-y-6">
-              <div className="inline-flex items-center gap-2 py-1.5 px-4 bg-white border border-slate-200 rounded-full w-fit shadow-sm">
-                <span className="material-symbols-outlined text-[#0b50da] text-lg">auto_stories</span>
-                <span className="text-[#0b50da] font-black text-[10px] tracking-[0.25em] uppercase">Kennisbank</span>
-              </div>
-              <h2 className="text-4xl md:text-6xl font-black text-[#0f172a] tracking-tighter leading-[1.05]">
-                Mediation: conflicten oplossen <span className="text-[#0b50da] italic">zonder strijd.</span>
-              </h2>
-            </header>
-
-            {/* Intro */}
-            <div className="prose prose-lg prose-slate max-w-none text-slate-600 font-medium leading-relaxed space-y-8">
-              <p className="text-xl md:text-2xl leading-relaxed text-slate-700">
-                Conflicten zijn onvermijdelijk. Op het werk, thuis, met buren of in zakelijke relaties: waar mensen samenwerken of samenleven, ontstaan soms spanningen. Toch belanden veel conflicten nog steeds snel bij advocaten of in de rechtszaal.
+        {/* Not Winning Section */}
+        <section className="bg-slate-50 py-20 px-6">
+           <div className="max-w-3xl mx-auto text-center space-y-6">
+              <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">{t('section_not_winning_title')}</h2>
+              <p className="text-lg text-slate-600 leading-relaxed font-medium">
+                {t('section_not_winning_text')}
               </p>
-              
-              <div className="relative py-10 px-10 bg-white rounded-3xl border border-slate-100 shadow-xl shadow-blue-500/5 my-12">
-                <div className="absolute left-0 top-10 bottom-10 w-1.5 bg-[#0b50da] rounded-r-full"></div>
-                <p className="text-[#0f172a] font-black text-2xl md:text-3xl tracking-tight leading-tight italic m-0">
-                  "Dat is zelden de beste oplossing."
-                </p>
-              </div>
-              
-              <p>
-                Een juridische procedure kost vaak veel geld, tijd en energie. Bovendien eindigt een rechtszaak bijna altijd met een winnaar en een verliezer. De onderliggende relatie is daarna vaak beschadigd of zelfs definitief kapot. 
-                <span className="block mt-4 text-[#0b50da] font-bold">Mediation biedt een ander pad.</span>
-              </p>
-
-              {/* Wat is mediation? */}
-              <div className="mt-16 space-y-6">
-                <h3 className="text-3xl font-black text-[#0f172a] tracking-tight">Wat is mediation?</h3>
-                <p>
-                  Mediation is een manier om conflicten op te lossen waarbij beide partijen, onder begeleiding van een neutrale mediator, met elkaar in gesprek gaan. Het doel is niet om te winnen, maar om samen tot afspraken te komen die voor beide acceptabel zijn.
-                </p>
-
-                <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm mt-8">
-                  <p className="font-black text-slate-400 uppercase tracking-[0.2em] text-xs mb-6">Bij mediation:</p>
-                  <ul className="space-y-4 list-none p-0 m-0">
-                    {[
-                      "behouden beide partijen controle over de uitkomst",
-                      "is er ruimte voor emoties én rationele oplossingen",
-                      "staat samenwerking centraal",
-                      "blijven relaties vaker intact"
-                    ].map((item, i) => (
-                      <li key={i} className="flex items-start gap-4 font-bold text-slate-800">
-                        <span className="material-symbols-outlined text-[#0b50da] text-xl shrink-0">check_circle</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="mt-6 text-sm text-slate-500 font-medium border-t border-slate-100 pt-6">
-                    Het proces is doorgaans sneller en aanzienlijk goedkoper dan een juridische procedure.
-                  </p>
-                </div>
-              </div>
-
-              {/* Wanneer werkt mediation? */}
-              <div className="mt-16 space-y-6">
-                <h3 className="text-3xl font-black text-[#0f172a] tracking-tight">Wanneer werkt mediation goed?</h3>
-                <p>
-                  Mediation werkt vooral goed wanneer beide partijen bereid zijn om te communiceren en openstaan voor een oplossing. Dat hoeft niet te betekenen dat iedereen het meteen met elkaar eens is — juist bij stevige conflicten kan mediation verrassend effectief zijn.
-                </p>
-                <p className="font-bold text-slate-900">Het belangrijkste is de bereidheid om te praten.</p>
-              </div>
-
-              {/* Waarom kiezen mensen hiervoor? */}
-              <div className="mt-16 space-y-6">
-                <h3 className="text-3xl font-black text-[#0f172a] tracking-tight">Waarom steeds meer mensen kiezen voor mediation</h3>
-                <p>Steeds meer organisaties, werkgevers en particulieren ontdekken dat mediation:</p>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                  {['Escalatie voorkomt', 'Stress vermindert', 'Praktische oplossingen', 'Toekomstgericht is'].map((tag, i) => (
-                    <div key={i} className="bg-blue-50 text-blue-900 font-bold px-6 py-4 rounded-xl flex items-center gap-3">
-                       <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                       {tag}
-                    </div>
-                  ))}
-                </div>
-                
-                <p className="mt-8">
-                  In plaats van terug te kijken naar wie er <span className="italic">“gelijk had”</span>, richt mediation zich op: <span className="font-bold text-[#0b50da]">hoe gaan we verder?</span>
-                </p>
-              </div>
-            </div>
-
-            {/* CTA in Article */}
-            <div className="pt-12 text-center">
-               <button 
-                onClick={handleStartProcess}
-                className="bg-[#0f172a] text-white px-10 py-5 rounded-full text-xl font-black hover:bg-slate-800 transition-all shadow-2xl active:scale-95"
-              >
-                Start direct jouw dossier
-              </button>
-            </div>
-          </div>
+           </div>
         </section>
 
-        {/* Features Grid (Korte samenvatting) */}
-        <section className="bg-white py-20 px-6 border-t border-slate-100">
-            <div className="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                    { icon: 'translate', title: 'Meertalig', desc: 'Ieder spreekt zijn eigen taal. Onze AI vertaalt direct.' },
-                    { icon: 'gavel', title: 'Rechtsgeldig', desc: 'Eindigt in een vaststellingsovereenkomst (VSO).' },
-                    { icon: 'savings', title: 'Betaalbaar', desc: 'Geen dure uurtarieven. Eén vast laag bedrag.' }
-                ].map((f, i) => (
-                    <div key={i} className="bg-slate-50 p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4">
-                        <div className="w-12 h-12 bg-white text-[#0b50da] rounded-xl flex items-center justify-center border border-slate-200">
-                            <span className="material-symbols-outlined text-2xl">{f.icon}</span>
-                        </div>
-                        <h3 className="text-xl font-black text-slate-900">{f.title}</h3>
-                        <p className="text-slate-500 font-medium">{f.desc}</p>
+        {/* What is Rsolve / Benefits Grid */}
+        <section className="py-24 px-6 max-w-[1440px] mx-auto">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+              <div className="space-y-8">
+                 <div className="inline-flex items-center gap-2 py-1 px-3 bg-blue-50 border border-blue-100 rounded-full w-fit">
+                    <span className="text-[#0b50da] font-black text-[10px] tracking-[0.2em] uppercase">Mediation 2.0</span>
+                 </div>
+                 <h2 className="text-4xl font-black text-slate-900 tracking-tight">{t('what_is_title')}</h2>
+                 <p className="text-lg text-slate-600 leading-relaxed">{t('what_is_p1')}</p>
+                 
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                    <FeatureItem icon={ICONS.Shield} text={t('what_is_list_1')} />
+                    <FeatureItem icon={ICONS.Zap} text={t('what_is_list_2')} />
+                    <FeatureItem icon={ICONS.Check} text={t('what_is_list_3')} />
+                    <FeatureItem icon={ICONS.File} text={t('what_is_list_4')} />
+                 </div>
+              </div>
+              
+              <div className="bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-50 -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                 <h3 className="text-2xl font-black mb-8 relative z-10">{t('why_title')}</h3>
+                 <div className="space-y-4 relative z-10">
+                    {[t('why_1'), t('why_2'), t('why_3'), t('why_4'), t('why_5'), t('why_6')].map((item, i) => (
+                      <div key={i} className="flex items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
+                         <div className="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                         <span className="font-bold">{item}</span>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+           </div>
+        </section>
+
+        {/* Language Section */}
+        <section className="bg-blue-600 text-white py-24 px-6 overflow-hidden relative">
+           <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at center, white 1px, transparent 1px)', backgroundSize: '24px 24px'}}></div>
+           <div className="max-w-4xl mx-auto text-center relative z-10 space-y-8">
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center mx-auto mb-6">
+                 <ICONS.Translate className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-black tracking-tight">{t('language_title')}</h2>
+              <p className="text-xl text-blue-100 font-medium leading-relaxed max-w-2xl mx-auto">
+                 {t('language_text')}
+              </p>
+              
+              <div className="flex flex-wrap justify-center gap-3 pt-8 opacity-60">
+                 {['🇳🇱 Nederlands', '🇬🇧 English', '🇹🇷 Türkçe', '🇵🇱 Polski', '🇸🇦 العربية', '🇪🇸 Español'].map(lang => (
+                    <span key={lang} className="px-4 py-2 bg-white/10 rounded-full text-sm font-bold backdrop-blur-sm">{lang}</span>
+                 ))}
+                 <span className="px-4 py-2 bg-white/10 rounded-full text-sm font-bold backdrop-blur-sm">+15...</span>
+              </div>
+           </div>
+        </section>
+
+        {/* When it works */}
+        <section className="py-24 px-6 bg-white">
+           <div className="max-w-3xl mx-auto text-center space-y-12">
+              <div className="space-y-4">
+                <h2 className="text-3xl font-black text-slate-900">{t('when_title')}</h2>
+                <p className="text-lg text-slate-600">{t('when_text')}</p>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                 {[
+                   {icon: 'work', label: 'Werk'},
+                   {icon: 'handshake', label: 'Zakelijk'},
+                   {icon: 'home', label: 'Buren'},
+                   {icon: 'favorite', label: 'Relatie'}
+                 ].map((item, i) => (
+                    <div key={i} className="p-6 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center gap-3">
+                       <span className="material-symbols-outlined text-3xl text-slate-400">{item.icon}</span>
+                       <span className="font-bold text-slate-700">{item.label}</span>
                     </div>
-                ))}
-            </div>
+                 ))}
+              </div>
+           </div>
+        </section>
+
+        {/* How it works */}
+        <section className="py-24 px-6 bg-slate-900 text-white">
+           <div className="max-w-[1440px] mx-auto">
+              <h2 className="text-3xl font-black mb-16 text-center">{t('how_title')}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                 {[t('how_step_1'), t('how_step_2'), t('how_step_3'), t('how_step_4')].map((step, i) => (
+                    <div key={i} className="relative">
+                       <div className="text-6xl font-black text-slate-800 absolute -top-8 -left-4 select-none z-0">{i + 1}</div>
+                       <div className="relative z-10 bg-slate-800/50 p-6 rounded-2xl border border-slate-700 backdrop-blur-sm">
+                          <h3 className="text-xl font-bold mb-2">{step}</h3>
+                          <div className="w-12 h-1 bg-blue-500 rounded-full"></div>
+                       </div>
+                    </div>
+                 ))}
+              </div>
+           </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="py-24 px-6 bg-white">
+           <div className="max-w-2xl mx-auto space-y-12">
+              <h2 className="text-3xl font-black text-center text-slate-900">{t('faq_title')}</h2>
+              <div className="space-y-6">
+                 {[1, 2, 3, 4].map(n => (
+                    <div key={n} className="border-b border-slate-100 pb-6">
+                       <h3 className="text-lg font-black text-slate-900 mb-2">{t(`faq_${n}_q` as any)}</h3>
+                       <p className="text-slate-600 font-medium">{t(`faq_${n}_a` as any)}</p>
+                    </div>
+                 ))}
+              </div>
+           </div>
+        </section>
+
+        {/* CTA Footer */}
+        <section className="bg-slate-50 py-24 px-6 border-t border-slate-200">
+           <div className="max-w-3xl mx-auto text-center space-y-8">
+              <h2 className="text-4xl font-black text-slate-900 tracking-tight">{t('footer_payoff')}</h2>
+              <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">{t('footer_expats')}</p>
+              <button 
+                onClick={handleStartProcess}
+                className="bg-[#0b50da] text-white px-12 py-5 rounded-full text-xl font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95"
+              >
+                {t('start_btn')}
+              </button>
+           </div>
         </section>
 
       </main>

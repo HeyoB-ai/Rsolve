@@ -51,6 +51,7 @@ export const ICONS = {
   Settings: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>,
   Translate: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>,
   ChevronRight: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m9 18 6-6-6-6"/></svg>,
+  ChevronDown: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m6 9 6 6 6-6"/></svg>,
   Plus: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 5v14M5 12h14"/></svg>,
   Check: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M20 6 9 17l-5-5"/></svg>,
   X: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
@@ -60,10 +61,20 @@ export const ICONS = {
   Camera: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>,
   Globe: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>,
   Shield: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  Zap: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+  Clock: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  Handshake: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m9 2 2.5 2.5a2.121 2.121 0 0 1 0 3L7 12l-4-4 2.5-2.5a2.121 2.121 0 0 1 3 0Z"/><path d="M8 22l4-4 6 6 4-4-6-6-4 4 6 6"/><path d="m17 7 2.5-2.5a2.121 2.121 0 1 1 3 3L20 10"/></svg>,
 };
 
 type TranslationKey = 
   | 'label' | 'tagline' | 'tagline_highlight' | 'sub_tagline' | 'start_btn' | 'invited_btn'
+  | 'micro_time' | 'section_not_winning_title' | 'section_not_winning_text'
+  | 'what_is_title' | 'what_is_p1' | 'what_is_list_1' | 'what_is_list_2' | 'what_is_list_3' | 'what_is_list_4'
+  | 'language_title' | 'language_text' | 'when_title' | 'when_text' | 'why_title'
+  | 'why_1' | 'why_2' | 'why_3' | 'why_4' | 'why_5' | 'why_6'
+  | 'how_title' | 'how_step_1' | 'how_step_2' | 'how_step_3' | 'how_step_4'
+  | 'faq_title' | 'faq_1_q' | 'faq_1_a' | 'faq_2_q' | 'faq_2_a' | 'faq_3_q' | 'faq_3_a' | 'faq_4_q' | 'faq_4_a'
+  | 'footer_payoff' | 'footer_expats'
   | 'dossier' | 'items_collected' | 'no_evidence' | 'view_download' | 'online' | 'waiting'
   | 'placeholder' | 'settings' | 'app_lang' | 'close' | 'dossier_status' | 'invitation_sent'
   | 'mediator' | 'you' | 'system' | 'payment_title' | 'pay_btn' | 'choosing_bank'
@@ -84,11 +95,47 @@ type TranslationKey =
 
 const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   label: "English",
-  tagline: "Resolve conflict,",
-  tagline_highlight: "without the hassle.",
-  sub_tagline: "Reach a fair solution together with the help of AI mediation.",
-  start_btn: "Start Mediation (€3.99)",
+  tagline: "Conflict at work or home?",
+  tagline_highlight: "Solve it today.",
+  sub_tagline: "You speak your language, they speak theirs. Our AI mediator helps you reach a fair solution within 12 minutes.",
+  start_btn: "Start Now (€3.99)",
   invited_btn: "I have been invited",
+  micro_time: "Average insight within 8–12 minutes",
+  section_not_winning_title: "Winning isn't solving",
+  section_not_winning_text: "In a fight, nobody wins. Mediation focuses on finding a way forward, preserving relationships, and saving time.",
+  what_is_title: "What is Rsolve?",
+  what_is_p1: "Rsolve is an automated mediation platform that uses AI to guide you and the other party to an agreement.",
+  what_is_list_1: "Neutral guidance",
+  what_is_list_2: "Concrete solutions",
+  what_is_list_3: "Clear agreements",
+  what_is_list_4: "Optional Settlement Agreement (VSO)",
+  language_title: "Works in every language",
+  language_text: "Don't let language barriers escalate a conflict. Rsolve translates everything instantly between parties.",
+  when_title: "Best for...",
+  when_text: "Labor disputes, neighbor conflicts, debt issues, and relationship disagreements.",
+  why_title: "Why choose Rsolve?",
+  why_1: "No expensive lawyers",
+  why_2: "No long waiting times",
+  why_3: "Results in minutes",
+  why_4: "Costs only €3.99",
+  why_5: "Safe & Confidential",
+  why_6: "Legally usable agreements",
+  how_title: "How it works",
+  how_step_1: "Start Case",
+  how_step_2: "Invite Party",
+  how_step_3: "Guided Chat",
+  how_step_4: "Agreement",
+  faq_title: "Frequently Asked Questions",
+  faq_1_q: "Is it legally valid?",
+  faq_1_a: "Yes, the resulting VSO (Settlement Agreement) can be legally binding under Dutch law (Art. 7:900 BW).",
+  faq_2_q: "Is my data safe?",
+  faq_2_a: "We use encryption and do not share your private data with third parties.",
+  faq_3_q: "What if they don't respond?",
+  faq_3_a: "You only pay once. If they refuse mediation, you have proof you tried to solve it.",
+  faq_4_q: "Who is Rsolve for?",
+  faq_4_a: "Everyone. Employees, employers, neighbors, and partners.",
+  footer_payoff: "Rsolve. Solving conflict without the hassle.",
+  footer_expats: "Suitable for expats and international workers.",
   dossier: "Evidence File",
   items_collected: "items collected",
   no_evidence: "No evidence uploaded yet.",
@@ -156,7 +203,7 @@ const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   legal_accord: "Private Settlement Agreement • Rsolve AI",
   section_parties: "1. The Parties",
   party_a: "Party A",
-  party_b: "Party B",
+  party_b: "Partij B",
   section_dispute: "2. The Dispute",
   dispute_desc: "Parties declare to have had a dispute regarding:",
   section_terms: "3. Agreed Terms",
@@ -187,11 +234,58 @@ const createLang = (label: string, overrides: Partial<Record<TranslationKey, str
 
 export const UI_TRANSLATIONS: Record<string, any> = {
   nl: createLang("Nederlands", {
-    tagline: "Conflict oplossen,",
-    tagline_highlight: "zonder gedoe.",
-    sub_tagline: "Bereik samen een eerlijke oplossing met hulp van AI mediation.",
-    start_btn: "Start Mediation (€3,99)",
+    tagline: "Ruzie op je werk of thuis?",
+    tagline_highlight: "Los het vandaag nog op.",
+    sub_tagline: "Jij spreekt je eigen taal, de ander ook. Onze AI mediator helpt jullie binnen 12 minuten naar een eerlijke oplossing.",
+    start_btn: "Start nu – €3,99",
+    micro_time: "Gemiddeld binnen 8–12 minuten inzicht",
     invited_btn: "Ik ben uitgenodigd",
+    
+    // Landing Sections
+    section_not_winning_title: "Niet winnen, maar oplossen",
+    section_not_winning_text: "In een conflict is 'gelijk krijgen' vaak het einddoel, maar ten koste van wat? Rsolve richt zich op de toekomst. We helpen jullie om de emotie te parkeren en concrete afspraken te maken, zodat de relatie behouden blijft of netjes wordt afgerond.",
+    
+    what_is_title: "Wat is Rsolve?",
+    what_is_p1: "Rsolve is een intelligent bemiddelingsplatform dat gebruik maakt van geavanceerde AI om conflicten neutraal en gestructureerd op te lossen. Zonder advocaten, zonder wachtlijsten.",
+    what_is_list_1: "Neutrale gespreksleiding",
+    what_is_list_2: "Concrete oplossingen",
+    what_is_list_3: "Heldere afspraken",
+    what_is_list_4: "Optionele Vaststellingsovereenkomst (VSO)",
+    
+    language_title: "Werkt in elke taal",
+    language_text: "Taalbarrières escaleren conflicten vaak onnodig. Bij Rsolve typt iedereen in zijn eigen taal. Onze software vertaalt alles direct en foutloos, zodat jullie elkaar écht begrijpen. Ideaal voor expats en internationale teams.",
+    
+    when_title: "Wanneer werkt het?",
+    when_text: "Rsolve is effectief in situaties waar communicatie is vastgelopen maar een oplossing noodzakelijk is:",
+    
+    why_title: "Waarom kiezen voor Rsolve?",
+    why_1: "Geen dure advocaten",
+    why_2: "Geen wachtlijsten",
+    why_3: "Resultaat in minuten",
+    why_4: "Kosten slechts €3,99",
+    why_5: "Veilig & Vertrouwelijk",
+    why_6: "Juridisch bruikbare afspraken",
+    
+    how_title: "Hoe werkt het?",
+    how_step_1: "Start Dossier",
+    how_step_2: "Nodig uit",
+    how_step_3: "Begeleide Chat",
+    how_step_4: "Vaststelling",
+    
+    faq_title: "Veelgestelde Vragen",
+    faq_1_q: "Is het rechtsgeldig?",
+    faq_1_a: "Ja, de afspraken kunnen worden vastgelegd in een Vaststellingsovereenkomst (VSO) conform Art. 7:900 BW. Dit document staat juridisch sterk.",
+    faq_2_q: "Zijn mijn gegevens veilig?",
+    faq_2_a: "Absoluut. Wij gebruiken geen gegevens voor trainingsdoeleinden en gesprekken zijn versleuteld.",
+    faq_3_q: "Wat als de ander niet reageert?",
+    faq_3_a: "Je betaalt eenmalig voor het dossier. Reageert de ander niet? Dan heb jij in elk geval dossieropbouw dat je hebt geprobeerd het op te lossen.",
+    faq_4_q: "Voor wie is Rsolve?",
+    faq_4_a: "Voor iedereen: werknemers, werkgevers, buren, ex-partners en zakelijke relaties.",
+    
+    footer_payoff: "Rsolve. Conflict oplossen zonder gedoe.",
+    footer_expats: "Ook geschikt voor expats en internationale werknemers.",
+
+    // App UI
     dossier: "Bewijs Dossier",
     items_collected: "items verzameld",
     no_evidence: "Nog geen bewijsmateriaal geüpload.",
