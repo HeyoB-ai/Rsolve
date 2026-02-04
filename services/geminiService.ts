@@ -5,6 +5,11 @@ export interface ChatRoleConfig {
   respondent: string;
 }
 
+export interface AttachmentData {
+  mimeType: string;
+  data: string; // Base64
+}
+
 export class GeminiService {
   private get ai() {
     const apiKey = process.env.API_KEY;
@@ -47,7 +52,8 @@ export class GeminiService {
   async generateMediatorResponse(
     chatHistory: {sender: string, text: string, role: string}[], 
     caseTitle: string,
-    roles: ChatRoleConfig
+    roles: ChatRoleConfig,
+    attachment?: AttachmentData
   ): Promise<string> {
     const client = this.ai;
     if (!client) return "Verbinding verbroken.";
@@ -61,9 +67,11 @@ export class GeminiService {
         return `[${role}] ${name}: ${text}`;
       }).join('\n');
     
-      const response = await client.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `SYSTEEM INSTRUCTIE VOOR RSOLVE AI MEDIATOR:
+      const parts: any[] = [];
+      
+      // 1. Text Prompt
+      parts.push({
+        text: `SYSTEEM INSTRUCTIE VOOR RSOLVE AI MEDIATOR:
 Dossier: "${caseTitle}"
 
 IDENTITEITEN (STRIKT VOLGEN):
@@ -72,6 +80,7 @@ IDENTITEITEN (STRIKT VOLGEN):
 
 JOUW DOEL:
 Begeleid dit conflict naar een oplossing. Wees neutraal, rustig en constructief.
+Als er een document of foto is geüpload, analyseer deze dan en geef aan wat je ziet (bijv. "Ik zie dat je een factuur hebt gedeeld...").
 
 PROTOCOL VOOR AFRONDING:
 1. Als er een akkoord lijkt te zijn, vat je dit samen.
@@ -79,16 +88,30 @@ PROTOCOL VOOR AFRONDING:
 3. VRAAG expliciet of ze willen dat je de VSO nu opstelt.
 4. Voeg PAS wanneer beide partijen akkoord zijn de code [TRIGGER:VSO] toe aan je bericht. Doe dit nooit ongevraagd.
 
-PROTOCOL VOOR VRAGEN:
-- Als de Respondent vraagt wat de bedoeling is, vraag dan aan de Initiator (${roles.initiator}) om de situatie toe te lichten.
-
 HUIDIG GESPREK:
 ${formattedHistory}
 
-Mediator:`,
+Mediator:`
+      });
+
+      // 2. Attachment (if any)
+      if (attachment) {
+        parts.push({
+          inlineData: {
+            mimeType: attachment.mimeType,
+            data: attachment.data
+          }
+        });
+        parts.push({
+            text: "\n[Systeem info: De bovenstaande bijlage is zojuist toegevoegd aan het gesprek. Betrek dit in je reactie.]"
+        });
+      }
+
+      const response = await client.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: { parts },
         config: {
           temperature: 0.3,
-          // Cruciaal voor mediation: sta conflicterende content toe zodat de AI niet blokkeert op "ruzie"
           safetySettings: [
             { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
             { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
@@ -98,11 +121,9 @@ Mediator:`,
         }
       });
       
-      // Accessing .text property directly
-      return response.text?.trim() || "Ik luister. Hoe kan ik helpen?";
+      return response.text?.trim() || "Ik heb het ontvangen. Wil je hier iets over toelichten?";
     } catch (error) {
       console.error("Gemini Error:", error);
-      // Fallback response instead of generic error to keep flow going
       return "Ik probeer de situatie te begrijpen. Kunnen jullie kort samenvatten waar we nu staan?";
     }
   }
@@ -111,7 +132,7 @@ Mediator:`,
     const client = this.ai;
     if (!client) throw new Error("No client");
     
-    // Switching to Flash for speed (Pro takes too long > 6 mins sometimes)
+    // Switching to Flash for speed
     const response = await client.models.generateContent({
       model: 'gemini-3-flash-preview', 
       contents: `Stel een formele Vaststellingsovereenkomst (VSO) op (Art. 7:900 BW) gebaseerd op dit mediation gesprek:
@@ -131,7 +152,6 @@ Mediator:`,
       }
     });
     
-    // Accessing .text property directly
     return response.text?.trim() || "Kon geen VSO opstellen.";
   }
 }

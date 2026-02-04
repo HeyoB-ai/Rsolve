@@ -28,6 +28,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   // --- STATE ---
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
   
   // Realtime & Presence
   const [partnerOnline, setPartnerOnline] = useState(false);
@@ -50,6 +51,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const channelRef = useRef<RealtimeChannel | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const audioUnlockedRef = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Refs voor logica (voorkomt re-render loops)
   const lastProcessedMessageIdRef = useRef<string | null>(null);
@@ -77,8 +79,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const myRole = isRespondent ? 'respondent' : 'initiator';
 
   // --- AUDIO ENGINE (SILENT START STRATEGY) ---
-  
-  // 1. Initialiseer Context (maar start nog niet)
   const initAudio = () => {
     if (!audioCtxRef.current) {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
@@ -88,27 +88,20 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     }
   };
 
-  // 2. De "Silent Unlock" - Cruciaal voor iOS
   const unlockAudio = useCallback(() => {
     if (audioUnlockedRef.current) return;
-    
     initAudio();
     const ctx = audioCtxRef.current;
     if (!ctx) return;
-
-    // Als context suspended is (standaard in browsers), resume hem
     if (ctx.state === 'suspended') {
       ctx.resume().catch(e => console.error("[AUDIO] Resume failed", e));
     }
-
-    // SPEEL EEN STIL GELUID AF. Dit is de 'hack' die de audio engine wakker maakt.
     try {
         const buffer = ctx.createBuffer(1, 1, 22050);
         const source = ctx.createBufferSource();
         source.buffer = buffer;
         source.connect(ctx.destination);
         source.start(0);
-        
         audioUnlockedRef.current = true;
         setAudioReady(true);
         console.log("[AUDIO] System unlocked and ready.");
@@ -117,36 +110,23 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     }
   }, []);
 
-  // 3. Play Functie
   const playBeep = useCallback((reason: string) => {
     if (!soundEnabled) return;
-    
-    // Probeer te init-en voor het geval dat
     if (!audioCtxRef.current) initAudio();
     const ctx = audioCtxRef.current;
-
     if (!ctx) return;
-
-    // Check of we echt unlocked zijn, zo niet, probeer te resumen (werkt alleen als dit in een click handler zit, maar goed)
     if (ctx.state === 'suspended') ctx.resume();
-
     try {
       const t = ctx.currentTime;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-
       osc.connect(gain);
       gain.connect(ctx.destination);
-
-      // Helder "Ping" geluid (van 600Hz naar 300Hz) - beter hoorbaar dan 880Hz
       osc.type = 'sine';
       osc.frequency.setValueAtTime(600, t);
       osc.frequency.exponentialRampToValueAtTime(300, t + 0.25);
-
-      // Volume iets harder (0.3)
       gain.gain.setValueAtTime(0.3, t);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
-
       osc.start(t);
       osc.stop(t + 0.3);
       console.log(`[AUDIO] Playing sound: ${reason}`);
@@ -157,8 +137,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   const handleTestAudio = (e: React.MouseEvent) => {
     e.stopPropagation();
-    unlockAudio(); // Forceer unlock bij klik
-    // Korte timeout om zeker te zijn dat context 'running' is
+    unlockAudio();
     setTimeout(() => playBeep("user-test"), 50);
   };
 
@@ -170,20 +149,16 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     if (newState) unlockAudio();
   };
 
-  // Global unlock listener
   useEffect(() => {
     const unlockHandler = () => {
         unlockAudio();
-        // We verwijderen de listener na de eerste succesvolle interactie om performance te sparen
         if (audioUnlockedRef.current) {
             window.removeEventListener('pointerdown', unlockHandler);
             window.removeEventListener('keydown', unlockHandler);
         }
     };
-
     window.addEventListener('pointerdown', unlockHandler);
     window.addEventListener('keydown', unlockHandler);
-
     return () => {
         window.removeEventListener('pointerdown', unlockHandler);
         window.removeEventListener('keydown', unlockHandler);
@@ -193,31 +168,20 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     };
   }, [unlockAudio]);
 
-
   // --- TYPING LOGIC (BROADCAST) ---
   const sendTypingBroadcast = async (isTyping: boolean) => {
     if (!channelRef.current) return;
-
     const now = Date.now();
-
-    // Throttle alleen voor typing=true updates
     if (isTyping && now - lastTypedTimeRef.current < TYPING_THROTTLE_MS) return;
     lastTypedTimeRef.current = now;
-
     isLocallyTypingRef.current = isTyping;
-
     await channelRef.current.send({
       type: "broadcast",
       event: "typing",
-      payload: {
-        userId: myRole,
-        typing: isTyping,
-        ts: now
-      }
+      payload: { userId: myRole, typing: isTyping, ts: now }
     });
   };
 
-  // --- MEDIATOR THINKING BROADCAST ---
   const sendMediatorStatus = async (isThinking: boolean) => {
     if (!channelRef.current) return;
     await channelRef.current.send({
@@ -229,31 +193,22 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
-    
-    // 1. Direct status updaten naar typing=true als we dat nog niet waren
     if (!isLocallyTypingRef.current) {
         void sendTypingBroadcast(true);
     } else {
-        // Update timestamp voor throttle check (keepalive)
         void sendTypingBroadcast(true); 
     }
-
-    // 2. Clear oude timeout
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
-    // 3. Set nieuwe timeout voor stop
     typingTimeoutRef.current = setTimeout(() => {
         void sendTypingBroadcast(false);
     }, TYPING_TIMEOUT_MS);
   };
 
   const handleInputBlur = () => {
-      // Direct stoppen bij blur
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       void sendTypingBroadcast(false);
   };
 
-  // --- MESSAGE FETCHING UTILITY ---
   const fetchMessages = useCallback(async () => {
     const { data } = await supabase
       .from('messages')
@@ -266,15 +221,11 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       if (data.length > 0) {
         lastProcessedMessageIdRef.current = data[data.length - 1].id;
       }
-      // Check of er al een VSO trigger in de berichten zit die we gemist hebben
       const hasTrigger = data.some(m => m.content.includes('[TRIGGER:VSO]'));
       if (hasTrigger) {
-          // Haal ook de VSO tekst op uit de DB als die er al is
           fetchCaseData();
           setShowVSOModal(true);
       }
-
-      // Na initiele load vlag omzetten zodat geluid mag werken bij volgende berichten
       if (isInitialLoadRef.current) {
          setTimeout(() => { isInitialLoadRef.current = false; }, 1000);
       }
@@ -288,13 +239,9 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       }
   };
 
-  // --- SYNC & SLEEP RECOVERY ---
   useEffect(() => {
-    // 1. Initial Load
     fetchMessages();
     fetchCaseData();
-
-    // 2. Wake from sleep / Tab focus handler
     const handleVisibilityChange = () => {
         if (document.visibilityState === 'visible') {
             console.log("[APP] Waking up/Visible -> Refreshing messages & Case Data...");
@@ -302,20 +249,15 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             fetchCaseData();
         }
     };
-
     document.addEventListener("visibilitychange", handleVisibilityChange);
-
     return () => {
         document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [fetchMessages]);
 
-  // --- REALTIME CHANNEL ---
   useEffect(() => {
     const channel = supabase.channel(`case-${caseData.id}`, {
-      config: {
-        presence: { key: myRole },
-      },
+      config: { presence: { key: myRole } },
     });
     channelRef.current = channel;
 
@@ -327,26 +269,21 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         filter: `case_id=eq.${caseData.id}` 
       }, (payload: any) => {
         const newMessage = payload.new;
-        
-        // Update Message List
         setMessages((prev) => {
             if (prev.some(m => m.id === newMessage.id)) return prev;
             return [...prev, newMessage];
         });
 
-        // Trigger logic voor BEIDE partijen bij ontvangst van systeem bericht
         if (newMessage.type === 'system' && newMessage.content.includes('[TRIGGER:VSO]')) {
-            fetchCaseData(); // Check if terms already exist
+            fetchCaseData();
             setShowVSOModal(true);
         }
 
-        // Typing indicator resetten als partner bericht stuurt
         if (newMessage.sender_id !== myRole && newMessage.sender_id !== 'local-user') {
             setPartnerTyping(false);
             if (partnerTypingTimeoutRef.current) clearTimeout(partnerTypingTimeoutRef.current);
         }
 
-        // --- SOUND TRIGGER LOGIC ---
         if (newMessage.id !== lastProcessedMessageIdRef.current) {
              lastProcessedMessageIdRef.current = newMessage.id;
              const isFromMe = newMessage.sender_id === myRole || newMessage.sender_id === 'local-user';
@@ -361,7 +298,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           table: 'cases',
           filter: `id=eq.${caseData.id}`
       }, (payload: any) => {
-          // Sync VSO Terms if other party generated them
           if (payload.new.vso_terms) {
               setVsoTerms(payload.new.vso_terms);
           }
@@ -369,8 +305,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       .on('broadcast', { event: 'typing' }, (payload: any) => {
           const p = payload?.payload;
           if (!p) return;
-          if (p.userId === myRole) return; // ignore own
-
+          if (p.userId === myRole) return;
           if (p.typing === true) {
             setPartnerTyping(true);
             if (partnerTypingTimeoutRef.current) clearTimeout(partnerTypingTimeoutRef.current);
@@ -401,7 +336,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         }
       });
 
-    // Cleanup
     return () => {
       supabase.removeChannel(channel);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -409,19 +343,124 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     };
   }, [caseData.id, myRole, playBeep]);
 
-  // Scroll effect
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, partnerTyping, isAiThinking]);
 
+  // --- FILE UPLOAD AND AI TRIGGER ---
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  // --- SEND MESSAGE ---
+    setIsUploading(true);
+    try {
+      // 1. Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+      const filePath = `${caseData.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('chat-uploads')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('chat-uploads')
+        .getPublicUrl(filePath);
+
+      if (data?.publicUrl) {
+        // 2. Insert Message into DB
+        await supabase.from('messages').insert([{
+          case_id: caseData.id,
+          sender_id: myRole,
+          sender_name: myName,
+          content: file.name,
+          attachment_url: data.publicUrl,
+          type: 'attachment'
+        }]);
+
+        // 3. Convert File to Base64 for AI Analysis
+        const base64Data = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const result = reader.result as string;
+                // Remove prefix (e.g., "data:image/jpeg;base64,")
+                const b64 = result.split(',')[1];
+                resolve(b64);
+            };
+            reader.onerror = error => reject(error);
+        });
+
+        // 4. Trigger AI Analysis Immediately
+        setIsAiThinking(true);
+        void sendMediatorStatus(true);
+        
+        const roles = {
+            initiator: isRespondent ? partnerName : myName,
+            respondent: isRespondent ? myName : partnerName
+        };
+
+        const historyForAI = messages.concat([{ 
+            sender: myName, 
+            text: `[Attachment: ${file.name}]`, 
+            role: myRole 
+        }]).map(m => ({
+            sender: m.sender_name || m.sender, 
+            text: m.content || m.text,
+            role: m.sender_id || m.role
+        }));
+
+        const aiResponse = await geminiService.generateMediatorResponse(
+            historyForAI, 
+            caseData.title, 
+            roles,
+            { mimeType: file.type, data: base64Data } // Pass attachment data
+        );
+
+        setIsAiThinking(false);
+        void sendMediatorStatus(false);
+
+        // 5. Insert AI Response
+        if (aiResponse.includes('[TRIGGER:VSO]')) {
+            const cleanResponse = aiResponse.replace('[TRIGGER:VSO]', '').trim();
+            if (cleanResponse) {
+                await supabase.from('messages').insert([{
+                    case_id: caseData.id,
+                    sender_id: 'mediator',
+                    sender_name: 'Mediator',
+                    content: cleanResponse + " [TRIGGER:VSO]",
+                    type: 'system'
+                }]);
+            }
+            fetchCaseData();
+            setShowVSOModal(true);
+        } else {
+            await supabase.from('messages').insert([{
+                case_id: caseData.id,
+                sender_id: 'mediator',
+                sender_name: 'Mediator',
+                content: aiResponse,
+                type: 'text'
+            }]);
+        }
+      }
+    } catch (error) {
+      console.error("Upload failed", error);
+      alert("Upload mislukt. Probeer het opnieuw.");
+      setIsAiThinking(false);
+      void sendMediatorStatus(false);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
-
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     void sendTypingBroadcast(false);
-
     const textToSend = inputValue;
     setInputValue('');
 
@@ -468,18 +507,15 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
         if (aiResponse.includes('[TRIGGER:VSO]')) {
             const cleanResponse = aiResponse.replace('[TRIGGER:VSO]', '').trim();
-            
-            // Insert bericht - dit triggert de listener bij BEIDE partijen
             if (cleanResponse) {
                 await supabase.from('messages').insert([{
                     case_id: caseData.id,
                     sender_id: 'mediator',
                     sender_name: 'Mediator',
-                    content: cleanResponse + " [TRIGGER:VSO]", // Keep tag hidden in logic but present for trigger
+                    content: cleanResponse + " [TRIGGER:VSO]", 
                     type: 'system'
                 }]);
             }
-            // Lokaal openen we hem ook direct voor responsiviteit
             fetchCaseData();
             setShowVSOModal(true);
         } else {
@@ -499,14 +535,10 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   };
 
   const handleGenerateVSO = async () => {
-    // Double check: maybe it exists now?
     if (vsoTerms) return;
-
     setIsGeneratingVSO(true);
     const history = messages.map(m => ({ sender: m.sender_name, text: m.content }));
     const terms = await geminiService.generateVSOTerms(history, caseData.title);
-    
-    // Save to DB so both see it
     await supabase.from('cases').update({ vso_terms: terms }).eq('id', caseData.id);
     setVsoTerms(terms);
     setIsGeneratingVSO(false);
@@ -523,9 +555,22 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     onResolve(vsoData);
   };
 
+  const getAttachmentFromMessage = (m: any) => {
+    if (m.type !== 'attachment' || !m.attachment_url) return undefined;
+    const ext = m.attachment_url.split('.').pop()?.toLowerCase();
+    let type = 'application/octet-stream';
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) type = 'image/jpeg';
+    else if (['pdf'].includes(ext)) type = 'application/pdf';
+    else if (['mp4', 'mov'].includes(ext)) type = 'video/mp4';
+    return {
+      name: m.content || 'Bijlage', 
+      type,
+      url: m.attachment_url
+    };
+  };
+
   return (
     <div className="flex flex-col h-safe bg-slate-50 relative">
-      {/* Header */}
       <header className="px-4 py-3 bg-white border-b border-slate-100 flex items-center justify-between shrink-0 z-10 shadow-sm">
         <div className="flex items-center gap-3 overflow-hidden">
           <Logo className="w-8 h-8" />
@@ -544,7 +589,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         </div>
         
         <div className="flex items-center gap-2">
-          
           <div className="flex items-center bg-slate-50 rounded-full p-1 border border-slate-100">
              {soundEnabled && (
                 <button 
@@ -567,14 +611,9 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 )}
             </button>
           </div>
-
-          <button 
-            onClick={() => setShowLangSelector(true)}
-            className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
-          >
+          <button onClick={() => setShowLangSelector(true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
             <ICONS.Globe className="w-5 h-5" />
           </button>
-          
           <button 
             onClick={() => setShowLeaveModal(true)}
             className="px-3 py-1.5 text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors uppercase tracking-wider"
@@ -585,16 +624,13 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         </div>
       </header>
 
-      {/* Chat Area */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 scroll-smooth">
         {messages.map((m) => {
           const isMe = m.sender_id === myRole || m.sender_id === 'local-user';
           const isSystem = m.type === 'system';
-          
           if (isSystem) {
             const displayContent = m.content.replace('[TRIGGER:VSO]', '').trim();
-            if (!displayContent) return null; // Don't show empty trigger messages
-
+            if (!displayContent) return null;
             return (
               <div key={m.id} className="flex justify-center my-4 animate-in fade-in zoom-in duration-500">
                 <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-slate-200">
@@ -603,11 +639,11 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
               </div>
             );
           }
-
           return (
             <ChatBubble 
               key={m.id} 
               text={m.content} 
+              attachment={getAttachmentFromMessage(m)}
               isOwn={isMe} 
               sender={m.sender_name}
               senderRole={m.sender_id === 'mediator' ? 'mediator' : undefined} 
@@ -617,12 +653,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             />
           );
         })}
-
-        {/* --- REALTIME TYPING INDICATORS --- */}
         {(isAiThinking || partnerTyping) && (
           <div className="flex flex-col gap-1 ml-4 mt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-             
-             {/* 1. Partner Typing */}
              {partnerTyping && (
                 <div className="flex items-center gap-2 bg-slate-100 w-fit px-3 py-2 rounded-xl rounded-bl-none shadow-sm">
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
@@ -635,8 +667,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                   </div>
                 </div>
              )}
-             
-             {/* 2. AI Thinking (Local OR Broadcast) */}
              {isAiThinking && !partnerTyping && (
                <div className="flex items-center gap-2 text-emerald-600 text-[10px] font-bold bg-emerald-50 w-fit px-3 py-2 rounded-full border border-emerald-100">
                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
@@ -648,9 +678,28 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
       <div className="p-4 bg-white border-t border-slate-100 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
         <div className="relative flex items-end gap-2 max-w-4xl mx-auto">
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            className="hidden" 
+            onChange={handleFileSelect} 
+            accept="image/*,application/pdf"
+          />
+          <Button 
+            size="icon" 
+            variant="secondary"
+            className="rounded-full w-14 h-14 shrink-0 bg-slate-100 text-slate-500 hover:bg-slate-200"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            {isUploading ? (
+              <div className="w-5 h-5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <ICONS.Paperclip className="w-6 h-6" />
+            )}
+          </Button>
           <textarea 
             value={inputValue}
             onChange={handleInputChange}
@@ -676,14 +725,12 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         </div>
       </div>
 
-      {/* Leave Modal */}
       {showLeaveModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/50 backdrop-blur-sm animate-in fade-in">
           <Card className="w-full max-w-sm p-6 text-center space-y-6">
             <div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto">
               <ICONS.Zap className="w-6 h-6" />
             </div>
-            
             <div>
               <h2 className="text-lg font-black text-slate-900">{t('leave_modal_title')}</h2>
               <div className="mt-4 bg-red-50 p-4 rounded-xl border border-red-100 text-left">
@@ -697,7 +744,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
               </div>
               <p className="text-xs text-slate-400 mt-4 font-medium">{t('leave_modal_desc')}</p>
             </div>
-
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" onClick={() => setShowLeaveModal(false)}>{t('leave_cancel')}</Button>
               <Button variant="danger" onClick={onAbandon}>{t('leave_confirm')}</Button>
@@ -706,7 +752,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         </div>
       )}
 
-      {/* VSO Generation Modal */}
       {showVSOModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in">
           <Card className="w-full max-w-md p-8 text-center space-y-6 relative overflow-hidden">
