@@ -57,73 +57,84 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   // Refs voor typing throttling
   const lastTypedTimeRef = useRef<number>(0);
   const typingTimeoutRef = useRef<any>(null);
+  const partnerTypingTimeoutRef = useRef<any>(null);
   const isLocallyTypingRef = useRef(false);
 
   // Identity
   const myRole = caseData.isRespondent ? 'respondent' : 'initiator';
   const myName = caseData.isRespondent ? caseData.respondentName : caseData.initiatorName;
 
-  // --- AUDIO ENGINE ---
+  // --- AUDIO ENGINE (FIXED) ---
   const initAudioContext = () => {
     if (!audioCtxRef.current) {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioCtx) {
         audioCtxRef.current = new AudioCtx();
-        console.log("[AUDIO] Context created");
+        console.log("[AUDIO] Context created, state:", audioCtxRef.current.state);
+      } else {
+        console.warn("[AUDIO] No AudioContext available in this browser");
       }
     }
   };
 
-  const unlockAudio = useCallback(() => {
+  const ensureAudioReady = useCallback(async () => {
     initAudioContext();
-    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
-      audioCtxRef.current.resume().then(() => {
-        console.log("[AUDIO] Context RESUMED/UNLOCKED by user interaction");
-        setAudioUnlocked(true);
-      }).catch(err => console.error("[AUDIO] Resume failed", err));
-    } else if (audioCtxRef.current && audioCtxRef.current.state === 'running') {
-        setAudioUnlocked(true);
+    const ctx = audioCtxRef.current;
+    if (!ctx) return false;
+
+    try {
+      if (ctx.state === "suspended") {
+        await ctx.resume(); // MUST be inside user gesture for iOS
+        console.log("[AUDIO] Context resumed");
+      }
+      // Some browsers report "running" only after resume tick
+      const ready = ctx.state === "running";
+      setAudioUnlocked(ready);
+      return ready;
+    } catch (err) {
+      console.error("[AUDIO] Resume failed", err);
+      setAudioUnlocked(false);
+      return false;
     }
   }, []);
 
-  const playBeep = (force = false) => {
+  const playBeep = useCallback(async (reason: string, force = false) => {
     if (!soundEnabled && !force) return;
-    
-    // Probeer te unlocken indien nodig
-    if (!audioCtxRef.current || audioCtxRef.current.state === 'suspended') {
-        console.warn("[AUDIO] Cannot play beep: AudioContext suspended or missing.");
-        return;
+
+    const ok = await ensureAudioReady();
+    if (!ok) {
+      console.warn("[AUDIO] Cannot play beep: AudioContext not ready");
+      return;
     }
 
     try {
-        const ctx = audioCtxRef.current;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
+      const ctx = audioCtxRef.current!;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
-        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.1); // Drop pitch
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.10);
 
-        gain.gain.setValueAtTime(0.001, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
 
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        
-        osc.start();
-        osc.stop(ctx.currentTime + 0.2);
-        console.log("[AUDIO] Beep played successfully");
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.20);
+
+      console.log("[AUDIO] Beep played:", reason);
     } catch (e) {
-        console.error("[AUDIO] Playback error", e);
+      console.error("[AUDIO] Playback error", e);
     }
-  };
+  }, [soundEnabled, ensureAudioReady]);
 
-  const handleTestAudio = (e: React.MouseEvent) => {
+  const handleTestAudio = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    unlockAudio();
-    // Kleine delay om zeker te zijn dat resume klaar is
-    setTimeout(() => playBeep(true), 50);
+    await playBeep("test", true); // no timeout, must happen in click gesture
   };
 
   const toggleSound = (e: React.MouseEvent) => {
@@ -131,27 +142,31 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     const newState = !soundEnabled;
     setSoundEnabled(newState);
     localStorage.setItem(SOUND_KEY, newState ? "1" : "0");
-    if (newState) unlockAudio();
+    if (newState) void ensureAudioReady();
   };
 
-  // --- TYPING LOGIC (SENDER) ---
-  const broadcastTyping = async (isTyping: boolean) => {
+  // --- TYPING LOGIC (BROADCAST) ---
+  const sendTypingBroadcast = async (isTyping: boolean) => {
     if (!channelRef.current) return;
 
     const now = Date.now();
-    // Throttle: stuur niet vaker dan elke X ms, tenzij we stoppen (dat moet direct)
-    if (isTyping && now - lastTypedTimeRef.current < TYPING_THROTTLE_MS) {
-        return;
-    }
-    
+
+    // Throttle alleen voor typing=true updates
+    if (isTyping && now - lastTypedTimeRef.current < TYPING_THROTTLE_MS) return;
     lastTypedTimeRef.current = now;
+
     isLocallyTypingRef.current = isTyping;
 
-    console.log(`[TYPING] Sending status: ${isTyping}`);
-    await channelRef.current.track({
-        user: myRole,
+    console.log(`[TYPING] Broadcasting: ${isTyping}`);
+
+    await channelRef.current.send({
+      type: "broadcast",
+      event: "typing",
+      payload: {
+        userId: myRole,
         typing: isTyping,
-        updated_at: now
+        ts: now
+      }
     });
   };
 
@@ -160,10 +175,10 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     
     // 1. Direct status updaten naar typing=true als we dat nog niet waren
     if (!isLocallyTypingRef.current) {
-        broadcastTyping(true);
+        void sendTypingBroadcast(true);
     } else {
         // Update timestamp voor throttle check (keepalive)
-        broadcastTyping(true); 
+        void sendTypingBroadcast(true); 
     }
 
     // 2. Clear oude timeout
@@ -171,14 +186,14 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
     // 3. Set nieuwe timeout voor stop
     typingTimeoutRef.current = setTimeout(() => {
-        broadcastTyping(false);
+        void sendTypingBroadcast(false);
     }, TYPING_TIMEOUT_MS);
   };
 
   const handleInputBlur = () => {
       // Direct stoppen bij blur
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      broadcastTyping(false);
+      void sendTypingBroadcast(false);
   };
 
   // --- INITIALIZATION & REALTIME ---
@@ -229,6 +244,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         // Typing indicator resetten als partner bericht stuurt
         if (newMessage.sender_id !== myRole && newMessage.sender_id !== 'local-user') {
             setPartnerTyping(false);
+            if (partnerTypingTimeoutRef.current) clearTimeout(partnerTypingTimeoutRef.current);
         }
 
         // --- SOUND TRIGGER LOGIC ---
@@ -240,45 +256,53 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
              
              if (!isInitialLoadRef.current && !isFromMe) {
                  console.log("[REALTIME] New message from partner/system -> Triggering sound");
-                 playBeep();
+                 void playBeep("new_message");
              }
         }
       })
+      .on('broadcast', { event: 'typing' }, (payload: any) => {
+          const p = payload?.payload;
+          if (!p) return;
+          if (p.userId === myRole) return; // ignore own
+
+          // console.log("[TYPING] Received:", p);
+
+          if (p.typing === true) {
+            setPartnerTyping(true);
+
+            // auto-off na X ms als er niks meer komt (fallback safety)
+            if (partnerTypingTimeoutRef.current) clearTimeout(partnerTypingTimeoutRef.current);
+            partnerTypingTimeoutRef.current = setTimeout(() => {
+              setPartnerTyping(false);
+            }, TYPING_TIMEOUT_MS + 200);
+          } else {
+            setPartnerTyping(false);
+            if (partnerTypingTimeoutRef.current) clearTimeout(partnerTypingTimeoutRef.current);
+          }
+      })
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
-        console.log("[REALTIME] Presence Sync:", state);
-
-        // A. Online Check
+        // A. Online Check (Presence is still best for this)
         const users = Object.keys(state);
-        // Is er een key die NIET mijn role is?
         const others = users.filter(key => key !== myRole);
         setPartnerOnline(others.length > 0);
-
-        // B. Typing Check
-        let anyoneTyping = false;
-        others.forEach(otherKey => {
-            const userState = state[otherKey] as any[];
-            // Check de laatste state entry van deze user
-            const lastState = userState[userState.length - 1];
-            if (lastState && lastState.typing === true) {
-                anyoneTyping = true;
-            }
-        });
-        setPartnerTyping(anyoneTyping);
       })
       .subscribe(async (status: string) => {
         if (status === 'SUBSCRIBED') {
            console.log("[REALTIME] Subscribed to channel");
-           await channel.track({ user: myRole, typing: false, online_at: Date.now() });
+           // Track online status only, typing via broadcast
+           await channel.track({ user: myRole, online_at: Date.now() });
         }
       });
 
     // Cleanup
     return () => {
       supabase.removeChannel(channel);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      if (partnerTypingTimeoutRef.current) clearTimeout(partnerTypingTimeoutRef.current);
       if (audioCtxRef.current) audioCtxRef.current.close();
     };
-  }, [caseData.id, myRole]); // Dependencies strict houden
+  }, [caseData.id, myRole, playBeep]);
 
   // Scroll effect
   useEffect(() => {
@@ -292,14 +316,11 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
     // Direct typing stoppen
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    broadcastTyping(false);
+    void sendTypingBroadcast(false);
 
     const textToSend = inputValue;
     setInputValue('');
 
-    // Optimistic UI update (optioneel, maar we wachten nu op supabase callback voor consistentie)
-    // We inserten in DB, de realtime subscription pikt hem op en update de state.
-    
     // 1. Save user message to Supabase
     const { error } = await supabase.from('messages').insert([{
       case_id: caseData.id,
@@ -390,7 +411,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   return (
     <div 
         className="flex flex-col h-safe bg-slate-50 relative"
-        onPointerDown={unlockAudio} /* Global unlock trigger */
+        onPointerDown={() => { void ensureAudioReady(); }} /* Global unlock trigger */
     >
       {/* Header */}
       <header className="px-4 py-3 bg-white border-b border-slate-100 flex items-center justify-between shrink-0 z-10 shadow-sm">
