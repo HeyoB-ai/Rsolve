@@ -7,23 +7,46 @@
   --vh: 1vh;
 }
 
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Cruciaal: voorkomt dat de hele pagina scrollt/veert op iOS */
+  position: fixed; /* Voorkomt rubber-banding effect op iOS */
+  inset: 0;
+}
+
 body {
   font-family: 'Manrope', sans-serif;
   -webkit-tap-highlight-color: transparent;
-  overscroll-behavior-y: contain;
-  @apply bg-white text-slate-900;
-  margin: 0;
-  padding: 0;
+  background-color: #f8fafc; /* match slate-50 */
 }
 
-.h-safe {
-  height: 100vh;
-  height: 100dvh;
-  height: calc(var(--vh) * 100);
+/* Voor specifieke scroll containers die WEL moeten scrollen */
+.scroll-container {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 .pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 1rem);
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* Custom Scrollbar voor desktop netheid */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Stitch Custom Classes */
@@ -40,6 +63,6 @@ body {
 
 @media screen and (max-width: 768px) {
   input, select, textarea {
-    font-size: 16px !important;
+    font-size: 16px !important; /* Voorkomt inzoomen op iPhone */
   }
 }
