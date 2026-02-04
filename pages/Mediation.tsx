@@ -30,6 +30,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
   
   // Realtime & Presence
   const [partnerOnline, setPartnerOnline] = useState(false);
@@ -391,6 +392,32 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, partnerTyping, isAiThinking]);
 
+  // --- ACTIONS ---
+
+  const handleConfirmAbandon = async () => {
+    if (isLeaving) return;
+    setIsLeaving(true);
+
+    try {
+        const leaveMessage = `${myName} heeft de mediation sessie verlaten. De mediator informeert u: Het eenzijdig afbreken van mediation kan in een eventuele juridische vervolgprocedure nadelige gevolgen hebben (bijv. m.b.t. proceskosten). Dit dossier wordt hierbij gesloten.`;
+        
+        await supabase.from('messages').insert([{
+            case_id: caseData.id,
+            sender_id: 'mediator',
+            sender_name: 'Mediator',
+            content: leaveMessage,
+            type: 'system'
+        }]);
+
+        // Korte vertraging om zeker te weten dat de insert verwerkt wordt alvorens lokaal te sluiten
+        await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (err) {
+        console.error("Error logging leave:", err);
+    } finally {
+        onAbandon();
+    }
+  };
+
   // --- FILE UPLOAD AND AI TRIGGER ---
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -708,8 +735,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             const displayContent = m.content.replace('[TRIGGER:VSO]', '').trim();
             if (!displayContent) return null;
             return (
-              <div key={m.id} className="flex justify-center my-4 animate-in fade-in zoom-in duration-500">
-                <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-slate-200">
+              <div key={m.id} className="flex justify-center my-4 animate-in fade-in zoom-in duration-500 px-4">
+                <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-4 py-2 rounded-xl text-center border border-slate-200 shadow-sm leading-relaxed max-w-xs">
                   {displayContent}
                 </span>
               </div>
@@ -822,7 +849,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             </div>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" onClick={() => setShowLeaveModal(false)}>{t('leave_cancel')}</Button>
-              <Button variant="danger" onClick={onAbandon}>{t('leave_confirm')}</Button>
+              <Button variant="danger" onClick={handleConfirmAbandon} isLoading={isLeaving}>{t('leave_confirm')}</Button>
             </div>
           </Card>
         </div>
