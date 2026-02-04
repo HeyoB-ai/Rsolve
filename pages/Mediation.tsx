@@ -388,7 +388,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           
           <button 
             onClick={() => setShowLeaveModal(true)}
-            className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+            title={t('leave_btn') || "Verlaten"}
           >
             <ICONS.X className="w-5 h-5" />
           </button>
