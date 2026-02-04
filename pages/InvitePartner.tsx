@@ -48,9 +48,8 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t, appLanguag
 
     if (!error) {
       // DIT IS HET ALLEREERSTE BERICHT: Alleen welkom en privacy.
-      const firstWelcome = `Hoi! Welkom bij Rsolve. Ik ben je AI mediator. 
-
-Ik ben volledig neutraal en help jullie om samen tot een eerlijke oplossing te komen voor het dossier: "${formData.title}". Dit doen we zonder gedoe en zonder dure advocaten.
+      const firstWelcome = `Goedendag. Ik stuur je dit bericht om dat ik ons conflict over "${formData.title}" op wil lossen. Daarvoor wil ik deze AI mediator inzetten.
+      Die is volledig neutraal, kent de Dit doen we zonder gedoe en zonder dure advocaten.
 
 BELANGRIJK: Deel voor je eigen veiligheid nooit privacygevoelige gegevens zoals BSN-nummers of volledige adressen in deze chat. 
 
