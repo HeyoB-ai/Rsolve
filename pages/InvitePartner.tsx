@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
@@ -48,10 +49,9 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t, appLanguag
 
     if (!error) {
       // DIT IS HET ALLEREERSTE BERICHT: Alleen welkom en privacy.
-      const firstWelcome = `Goedendag. Ik stuur je dit bericht om dat ik ons conflict over "${formData.title}" op wil lossen. Daarvoor wil ik deze AI mediator inzetten.
-      Die is volledig neutraal, kent de Dit doen we zonder gedoe en zonder dure advocaten.
+      const firstWelcome = `Welkom. Fijn dat je mee wilt werken om ons conflict over "${formData.title}" op te lossen. Ik ben een AI mediator die jullie gaat helpen een voor beiden aanvaardbare oplossing te bedenken. Ik ben volledig neutraal, ik ken veel regel- en wetgeving en weet hoe we in alle redelijkheid naar oplossingen toe kunnen werken. Dit voorkomt de inzet van dure advocaten en een eventuele rechtszaak. Als we een voor beiden aanvaardbare oplossing hebben gevonden maak ik een vaststellingsovereenkomst die ik jullie toestuur.
 
-BELANGRIJK: Deel voor je eigen veiligheid nooit privacygevoelige gegevens zoals BSN-nummers of volledige adressen in deze chat. 
+BELANGRIJK: Deel voor je eigen veiligheid nooit privacygevoelige gegevens zoals BSN-nummers of volledige adressen in deze chat.
 
 Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
 
