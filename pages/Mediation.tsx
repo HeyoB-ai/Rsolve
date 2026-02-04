@@ -132,9 +132,20 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
     setIsAiThinking(true);
     // Stuur de rollen expliciet mee naar de AI service
-    const chatHistoryForAi = [...messages, { sender: myName, text: textToSend, role: caseData.isRespondent ? 'respondent' : 'initiator' }]
+    const chatHistoryForAi = [
+      ...messages, 
+      { 
+        sender: myName, 
+        text: textToSend, 
+        senderId: caseData.isRespondent ? 'respondent' : 'initiator' 
+      }
+    ]
       .slice(-15)
-      .map(m => ({ sender: m.sender, text: m.text, role: m.senderId }));
+      .map(m => ({ 
+        sender: m.sender, 
+        text: m.text, 
+        role: m.senderId 
+      }));
 
     try {
       const contextTitle = `${caseData.title}`;

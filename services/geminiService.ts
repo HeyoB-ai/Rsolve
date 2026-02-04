@@ -53,10 +53,13 @@ export class GeminiService {
     const client = this.ai;
     if (!client) return "Verbinding verbroken.";
     
-    // We formatteren de geschiedenis zeer strikt zodat de AI geen rollen verwisselt
-    const formattedHistory = chatHistory.map(m => `[${m.role.toUpperCase()}] ${m.sender}: ${m.text}`).join('\n');
-    
     try {
+      // Formatteren binnen try-block voor veiligheid en robuustheid
+      const formattedHistory = chatHistory.map(m => {
+        const role = m.role ? String(m.role).toUpperCase() : 'UNKNOWN';
+        return `[${role}] ${m.sender}: ${m.text}`;
+      }).join('\n');
+    
       const response = await client.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `SYSTEEM INSTRUCTIE VOOR RSOLVE AI MEDIATOR:
@@ -90,6 +93,7 @@ Mediator:`,
       // Accessing .text property directly
       return response.text?.trim() || "Ik luister. Hoe kan ik helpen?";
     } catch (error) {
+      console.error("Gemini Error:", error);
       return "Ik ervaar een korte storing in mijn analyse. Laten we bij de kern blijven.";
     }
   }
