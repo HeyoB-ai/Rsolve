@@ -65,7 +65,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const isLocallyTypingRef = useRef(false);
 
   // Identity & Names Correction
-  const isRespondent = caseData.isRespondent;
+  const isRespondent = !!caseData.isRespondent;
   
   // Bepaal mijn naam robuust
   const myName = isRespondent 
@@ -220,31 +220,23 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     if (data) {
       setMessages(prev => {
         // Slimme merge: behoud 'temp-' berichten die nog niet in de database data zitten
-        // Dit voorkomt dat optimistische berichten flikkeren/verdwijnen
         const pendingOptimistic = prev.filter(m => 
             m.id.toString().startsWith('temp-') && 
             !data.some(d => d.content === m.content && d.sender_id === m.sender_id)
         );
         
-        // Combineer echte data + nog niet verwerkte optimistische data
         const merged = [...data, ...pendingOptimistic];
         
         if (merged.length > 0) {
-            // Update last processed om geluidjes correct te laten werken
              const lastRealMsg = data[data.length - 1];
              if (lastRealMsg && lastRealMsg.id !== lastProcessedMessageIdRef.current) {
-                 // Trigger sound effect only if it's new and not from us
-                 if (!isInitialLoadRef.current && lastRealMsg.sender_id !== myRole && lastRealMsg.sender_id !== 'local-user') {
-                     // We doen dit hier niet direct, maar laten de useEffect of Realtime listener dit doen
-                     // om dubbele geluiden te voorkomen.
-                 }
+                 // Trigger sound effect logic handled elsewhere
              }
         }
         return merged;
       });
 
       if (data.length > 0) {
-        // Alleen updaten als het een echt ID is
         const lastId = data[data.length - 1].id;
         if (!lastId.toString().startsWith('temp-')) {
              lastProcessedMessageIdRef.current = lastId;
@@ -273,7 +265,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     fetchMessages();
     fetchCaseData();
     
-    // Polling Fallback (Backup voor als Realtime socket faalt)
+    // Polling Fallback
     const interval = setInterval(() => {
         fetchMessages();
     }, POLLING_INTERVAL_MS);
@@ -308,13 +300,9 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       }, (payload: any) => {
         const newMessage = payload.new;
         
-        // Optimistic UI Reconciliation
         setMessages((prev) => {
-            // Deduplication: If ID matches (e.g. from our optimistic insert result), ignore
             if (prev.some(m => m.id === newMessage.id)) return prev;
             
-            // Replace temporary message if exists (fallback match by content + sender)
-            // Dit zorgt ervoor dat het grijze/temp bericht wordt vervangen door de echte database versie
             const existsAsTemp = prev.findIndex(m => 
                 m.id.toString().startsWith('temp-') && 
                 m.content === newMessage.content && 
@@ -410,7 +398,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
     setIsUploading(true);
     try {
-      // 1. Upload to Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
       const filePath = `${caseData.id}/${fileName}`;
@@ -426,7 +413,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         .getPublicUrl(filePath);
 
       if (data?.publicUrl) {
-        // Optimistic UI for File
         const tempId = 'temp-' + Date.now();
         const tempMsg = {
           id: tempId,
@@ -440,8 +426,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         };
         setMessages(prev => [...prev, tempMsg]);
 
-        // 2. Insert Message into DB
-        const { data: insertedMsg, error: insertError } = await supabase.from('messages').insert([{
+        const { data: insertedMsg } = await supabase.from('messages').insert([{
           case_id: caseData.id,
           sender_id: myRole,
           sender_name: myName,
@@ -454,7 +439,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
              setMessages(prev => prev.map(m => m.id === tempId ? insertedMsg : m));
         }
 
-        // 3. Convert File to Base64 for AI Analysis
         const base64Data = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -466,7 +450,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             reader.onerror = error => reject(error);
         });
 
-        // 4. Trigger AI Analysis
         setIsAiThinking(true);
         void sendMediatorStatus(true);
         
@@ -491,7 +474,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         setIsAiThinking(false);
         void sendMediatorStatus(false);
 
-        // 5. Insert AI Response
         if (aiResponse.includes('[TRIGGER:VSO]')) {
             const cleanResponse = aiResponse.replace('[TRIGGER:VSO]', '').trim();
             if (cleanResponse) {
@@ -514,15 +496,13 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 type: 'text'
             }]);
         }
-        
-        // Removed fetchMessages() here to prevent race conditions
       }
     } catch (error) {
       console.error("Upload failed", error);
       alert("Upload mislukt. Probeer het opnieuw.");
       setIsAiThinking(false);
       void sendMediatorStatus(false);
-      fetchMessages(); // Rollback if needed
+      fetchMessages();
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -537,7 +517,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     const textToSend = inputValue;
     setInputValue('');
 
-    // --- OPTIMISTIC UI UPDATE ---
     const tempId = 'temp-' + Date.now();
     const tempMsg = {
       id: tempId,
@@ -551,7 +530,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     
     setMessages(prev => [...prev, tempMsg]);
 
-    // Insert into DB
     const { data: insertedMsg, error } = await supabase.from('messages').insert([{
       case_id: caseData.id,
       sender_id: myRole,
@@ -562,14 +540,11 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
     if (error) {
         console.error("Failed to send", error);
-        // Remove optimistic update on error? Or retry?
-        // For now, let's refresh to sync truth
         fetchMessages();
         return;
     }
 
     if (insertedMsg) {
-        // Replace temp message with real one to get correct ID for future
         setMessages(prev => prev.map(m => m.id === tempId ? insertedMsg : m));
     }
 
@@ -619,8 +594,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 type: 'text'
             }]);
         }
-        
-        // Removed fetchMessages() here to avoid removing the optimistic UI before DB is consistent
 
     } catch (err) {
         console.error(err);
@@ -640,9 +613,17 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   };
 
   const finalizeVSO = () => {
+    // Determine strict names based on role
+    // If I am respondent: Initiator is Partner, Respondent is Me
+    const initiatorName = isRespondent ? partnerName : myName;
+    const respondentName = isRespondent ? myName : partnerName;
+
     const vsoData = {
       title: caseData.title,
-      parties: `${isRespondent ? partnerName : myName} en ${isRespondent ? myName : partnerName}`,
+      parties: `${initiatorName} en ${respondentName}`,
+      initiatorName: initiatorName,
+      respondentName: respondentName,
+      isRespondent: isRespondent, // Pass current user role
       date: new Date().toLocaleDateString('nl-NL'),
       terms: vsoTerms,
       caseId: caseData.id

@@ -58,6 +58,9 @@ export class GeminiService {
     const client = this.ai;
     if (!client) return "Verbinding verbroken.";
     
+    // Injecteer de huidige tijd
+    const now = new Date().toLocaleString('nl-NL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
     try {
       // Formatteren met fallbacks voor namen en tekst om 'undefined' te voorkomen
       const formattedHistory = chatHistory.map(m => {
@@ -72,6 +75,8 @@ export class GeminiService {
       // 1. Text Prompt
       parts.push({
         text: `SYSTEEM INSTRUCTIE VOOR RSOLVE AI MEDIATOR:
+HUIDIGE DATUM EN TIJD: ${now}. (Gebruik deze datum strikt voor alle referenties naar 'vandaag' of datumberekeningen).
+
 Dossier: "${caseTitle}"
 
 IDENTITEITEN (STRIKT VOLGEN):
@@ -132,10 +137,13 @@ Mediator:`
     const client = this.ai;
     if (!client) throw new Error("No client");
     
+    const now = new Date().toLocaleDateString('nl-NL', { year: 'numeric', month: 'long', day: 'numeric' });
+
     // Switching to Flash for speed
     const response = await client.models.generateContent({
       model: 'gemini-3-flash-preview', 
-      contents: `Stel een formele Vaststellingsovereenkomst (VSO) op (Art. 7:900 BW) gebaseerd op dit mediation gesprek:
+      contents: `Stel een formele Vaststellingsovereenkomst (VSO) op (Art. 7:900 BW) gebaseerd op dit mediation gesprek.
+          Datum van opstellen: ${now}
           Onderwerp: ${caseTitle}
           Gesprek:
           ${chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n')}
