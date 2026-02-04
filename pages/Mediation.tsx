@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChatBubble } from '../components/ui/ChatBubble';
 import { Button } from '../components/ui/Button';
 import { ICONS, UI_TRANSLATIONS } from '../constants';
@@ -8,41 +8,39 @@ import { geminiService } from '../services/geminiService';
 import { supabase } from '../lib/supabase';
 import { Card } from '../components/ui/Card';
 import { LanguageSelector } from '../components/ui/LanguageSelector';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
-// Web Audio API Sound Helper (No assets required)
+// --- A) Notification Sound (Web Audio API) ---
 const playNotificationSound = () => {
   try {
-    const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext);
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioCtx) return;
-    
     const ctx = new AudioCtx();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    // Friendly "Pop" sound
     osc.type = "sine";
-    osc.frequency.value = 880; 
-    
-    // Envelope to avoid clicking
+    osc.frequency.value = 880; // "Pop" frequentie
+
+    // Envelope voor zacht begin/eind (geen klikjes)
     gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15);
+    gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
-
+    
     osc.start();
-    osc.stop(ctx.currentTime + 0.2);
+    osc.stop(ctx.currentTime + 0.13);
 
     osc.onended = () => {
-      // Cleanup context prevents memory leaks
+      // Sluit context om memory leaks te voorkomen
       setTimeout(() => {
-        if(ctx.state !== 'closed') ctx.close().catch(() => {});
+        if (ctx.state !== 'closed') ctx.close().catch(() => {});
       }, 200);
     };
   } catch (e) {
-    // Silent fail if audio is not supported or blocked
-    console.debug("Audio play failed", e);
+    console.error("Audio play failed", e);
   }
 };
 
@@ -60,43 +58,43 @@ interface MediationProps {
 const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLanguage, t, onResolve, onAbandon }) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false); // AI typing state
+  
+  // Realtime States
   const [partnerOnline, setPartnerOnline] = useState(false);
+  const [partnerTyping, setPartnerTyping] = useState(false);
+  
+  // UI States
   const [showLangSelector, setShowLangSelector] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showVSOModal, setShowVSOModal] = useState(false);
   const [isGeneratingVSO, setIsGeneratingVSO] = useState(false);
   const [vsoTerms, setVsoTerms] = useState('');
-  
-  // Sound & Interaction State
-  const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) !== "false");
+
+  // Sound & Interaction
+  const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) !== "0");
   const [hasInteracted, setHasInteracted] = useState(false);
-  
-  // Refs for tracking changes
+
+  // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const prevMsgCountRef = useRef(0);
-  const prevPartnerOnlineRef = useRef(false);
+  const lastMessageIdRef = useRef<string | null>(null);
   const isInitialLoadRef = useRef(true);
+  const typingTimeoutRef = useRef<any>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
+
+  const myRole = caseData.isRespondent ? 'respondent' : 'initiator';
+  const myName = caseData.isRespondent ? caseData.respondentName : caseData.initiatorName;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Toggle Sound Preference
-  const toggleSound = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering interaction logic redundantly
-    const newState = !soundEnabled;
-    setSoundEnabled(newState);
-    localStorage.setItem(SOUND_KEY, newState.toString());
-    setHasInteracted(true); // Clicking toggle counts as interaction
-  };
-
-  // Mark interaction to unlock audio context
+  // --- Interaction Handler (Autoplay Policy) ---
   const handleInteraction = () => {
     if (!hasInteracted) {
       setHasInteracted(true);
-      // Resume audio context if it was suspended (browser specific fix)
-      const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext);
+      // Resume audio context indien nodig
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioCtx) {
         const ctx = new AudioCtx();
         ctx.resume().then(() => ctx.close());
@@ -104,47 +102,44 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     }
   };
 
-  useEffect(() => {
-    // Scroll on new messages
-    scrollToBottom();
+  const toggleSound = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newState = !soundEnabled;
+    setSoundEnabled(newState);
+    localStorage.setItem(SOUND_KEY, newState ? "1" : "0");
+    setHasInteracted(true);
+  };
 
-    // Sound Logic
-    if (soundEnabled && hasInteracted) {
-      const msgCount = messages.length;
-      const prevCount = prevMsgCountRef.current;
+  // --- Effect: Sound Logic ---
+  useEffect(() => {
+    if (messages.length === 0) return;
+
+    const lastMsg = messages[messages.length - 1];
+    
+    // Check of dit bericht nieuw is (dedupe)
+    if (lastMsg.id !== lastMessageIdRef.current) {
+      lastMessageIdRef.current = lastMsg.id;
+
+      // Speel geluid alleen als:
+      // 1. Niet initial load
+      // 2. Geluid aan + interactie
+      // 3. Niet van mezelf (of lokale user)
+      // 4. Niet van systeem (optioneel, maar wel fijn voor chat flow)
       
-      // 1. Partner came online?
-      if (!prevPartnerOnlineRef.current && partnerOnline) {
+      const isMe = lastMsg.sender_id === myRole || lastMsg.sender_id === 'local-user';
+      
+      if (!isInitialLoadRef.current && soundEnabled && hasInteracted && !isMe) {
         playNotificationSound();
       }
-      
-      // 2. New message received? (Exclude initial load)
-      if (msgCount > prevCount && !isInitialLoadRef.current) {
-        const lastMsg = messages[msgCount - 1];
-        // Only beep if message is NOT from me
-        const isMe = lastMsg.sender_id === (caseData.isRespondent ? 'respondent' : 'initiator') || lastMsg.sender_id === 'local-user';
-        
-        if (!isMe) {
-          playNotificationSound();
-        }
-      }
     }
-
-    // Update refs
-    prevMsgCountRef.current = messages.length;
-    prevPartnerOnlineRef.current = partnerOnline;
     
-    // Disable initial load flag after first render with data
-    if (messages.length > 0) {
-        isInitialLoadRef.current = false;
-    }
+    scrollToBottom();
+  }, [messages, soundEnabled, hasInteracted, myRole]);
 
-  }, [messages, partnerOnline, soundEnabled, hasInteracted, caseData.isRespondent]);
-
-  // Load chat history & Realtime subscription
+  // --- Effect: Supabase Realtime (Messages + Presence) ---
   useEffect(() => {
     const fetchMessages = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('messages')
         .select('*')
         .eq('case_id', caseData.id)
@@ -152,44 +147,116 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       
       if (data) {
         setMessages(data);
-        isInitialLoadRef.current = false; // Mark initial load complete immediately after fetch
+        if (data.length > 0) {
+          lastMessageIdRef.current = data[data.length - 1].id;
+        }
+        // Markeer initial load als klaar na eerste render
+        setTimeout(() => { isInitialLoadRef.current = false; }, 500);
       }
     };
 
     fetchMessages();
 
-    // Subscribe to new messages
-    const channel = supabase
-      .channel(`case-${caseData.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `case_id=eq.${caseData.id}` }, (payload: any) => {
+    // Setup Channel
+    const channel = supabase.channel(`case-${caseData.id}`, {
+      config: {
+        presence: {
+          key: myRole,
+        },
+      },
+    });
+
+    channelRef.current = channel;
+
+    channel
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'messages', 
+        filter: `case_id=eq.${caseData.id}` 
+      }, (payload: any) => {
         setMessages((prev) => [...prev, payload.new]);
       })
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
-        // Check if there is another user ID present besides me
-        const others = Object.keys(state).length > 1; 
-        setPartnerOnline(others);
+        
+        // 1. Online detectie
+        // Check of er een ANDERE key is dan mijn eigen role
+        const users = Object.keys(state);
+        const otherUserPresent = users.some(key => key !== myRole);
+        setPartnerOnline(otherUserPresent);
+
+        // 2. Typing detectie
+        // Check of iemand anders dan ik 'typing: true' heeft
+        let isOtherTyping = false;
+        Object.entries(state).forEach(([key, values]: [string, any[]]) => {
+          if (key !== myRole) {
+            // Values is een array van presence objecten voor die key
+            // We kijken naar de laatste update
+            const lastStatus = values[values.length - 1];
+            if (lastStatus?.typing) {
+              isOtherTyping = true;
+            }
+          }
+        });
+        setPartnerTyping(isOtherTyping);
       })
       .subscribe(async (status: string) => {
         if (status === 'SUBSCRIBED') {
-          await channel.track({ user: caseData.isRespondent ? 'respondent' : 'initiator', online_at: new Date().toISOString() });
+          // Initiele status tracken (niet typend)
+          await channel.track({ 
+            online_at: new Date().toISOString(),
+            typing: false 
+          });
         }
       });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [caseData.id, caseData.isRespondent]);
+  }, [caseData.id, myRole]);
+
+  // --- B) Typing Logic (Sender) ---
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setInputValue(val);
+
+    if (!channelRef.current) return;
+
+    // Als we nog niet aan het typen waren, stuur status update
+    // We gebruiken een ref om debounce te managen
+    clearTimeout(typingTimeoutRef.current);
+
+    // Stuur 'typing: true' (maar niet spammen bij elke keystroke, throttle logic via presence is automatisch redelijk efficiënt, 
+    // maar we sturen hem opnieuw om de timeout aan de andere kant levend te houden als we dat zouden implementeren)
+    // Hier sturen we gewoon bij elke keystroke een debounced 'stop'
+    
+    // Update presence state naar typing: true
+    channelRef.current.track({ 
+      online_at: new Date().toISOString(),
+      typing: true 
+    });
+
+    // Zet timeout om status weer op false te zetten na 2 seconden niks doen
+    typingTimeoutRef.current = setTimeout(() => {
+      if (channelRef.current) {
+        channelRef.current.track({ 
+          online_at: new Date().toISOString(),
+          typing: false 
+        });
+      }
+    }, 2000);
+  };
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
-    const myRole = caseData.isRespondent ? 'respondent' : 'initiator';
-    const myName = caseData.isRespondent ? caseData.respondentName : caseData.initiatorName;
+    // Reset typing direct bij verzenden
+    clearTimeout(typingTimeoutRef.current);
+    if (channelRef.current) {
+      channelRef.current.track({ online_at: new Date().toISOString(), typing: false });
+    }
 
-    // Optimistic UI update removed to prevent duplicate keys/state with Supabase realtime
-    // We rely on the subscription to show the message
-    
     const textToSend = inputValue;
     setInputValue('');
 
@@ -202,16 +269,14 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       type: 'text'
     }]);
 
-    setIsTyping(true);
+    setIsTyping(true); // AI is thinking locally UI
 
     // 2. AI Mediation Logic
-    // We fetch the full history again or use state to ensure context is correct
     const roles = {
       initiator: caseData.initiatorName,
       respondent: caseData.respondentName || "Tegenpartij"
     };
 
-    // Format history for Gemini
     const historyForAI = messages.concat([{ 
         sender: myName, 
         text: textToSend, 
@@ -231,7 +296,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
         setIsTyping(false);
 
-        // Check for VSO Trigger
         if (aiResponse.includes('[TRIGGER:VSO]')) {
             const cleanResponse = aiResponse.replace('[TRIGGER:VSO]', '').trim();
             if (cleanResponse) {
@@ -243,7 +307,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                     type: 'system'
                 }]);
             }
-            setShowVSOModal(true); // Open Modal to confirm generation
+            setShowVSOModal(true);
         } else {
             await supabase.from('messages').insert([{
                 case_id: caseData.id,
@@ -253,7 +317,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 type: 'text'
             }]);
         }
-
     } catch (err) {
         console.error(err);
         setIsTyping(false);
@@ -262,7 +325,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   const handleGenerateVSO = async () => {
     setIsGeneratingVSO(true);
-    // Gather all messages for context
     const history = messages.map(m => ({ sender: m.sender_name, text: m.content }));
     const terms = await geminiService.generateVSOTerms(history, caseData.title);
     setVsoTerms(terms);
@@ -280,12 +342,10 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     onResolve(vsoData);
   };
 
-  const myId = caseData.isRespondent ? 'respondent' : 'initiator';
-
   return (
     <div 
         className="flex flex-col h-safe bg-slate-50 relative"
-        onPointerDown={handleInteraction} /* Capture first interaction for AudioContext */
+        onPointerDown={handleInteraction} /* Capture interaction for AudioContext */
     >
       {/* Header */}
       <header className="px-4 py-3 bg-white border-b border-slate-100 flex items-center justify-between shrink-0 z-10">
@@ -294,7 +354,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           <div className="flex flex-col overflow-hidden">
             <h1 className="text-sm font-black text-slate-900 truncate max-w-[150px] sm:max-w-xs">{caseData.title}</h1>
             <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${partnerOnline ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+              <span className={`w-2 h-2 rounded-full transition-colors duration-500 ${partnerOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-300'}`} />
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">
                 {partnerOnline 
                   ? `${caseData.isRespondent ? caseData.initiatorName : caseData.respondentName} ${t('online')}` 
@@ -309,14 +369,14 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           {/* Sound Toggle */}
           <button 
             onClick={toggleSound}
-            className={`p-2 rounded-full transition-colors ${soundEnabled ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'}`}
+            className={`p-2 rounded-full transition-all active:scale-95 ${soundEnabled ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'}`}
             title={soundEnabled ? "Geluid aan" : "Geluid uit"}
           >
-            {soundEnabled ? (
-               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-            ) : (
-               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
-            )}
+             {soundEnabled ? (
+               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+             ) : (
+               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+             )}
           </button>
 
           <button 
@@ -338,7 +398,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       {/* Chat Area */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 scroll-smooth">
         {messages.map((m) => {
-          const isMe = m.sender_id === myId || m.sender_id === 'local-user';
+          const isMe = m.sender_id === myRole || m.sender_id === 'local-user';
           const isSystem = m.type === 'system';
           
           if (isSystem) {
@@ -364,10 +424,29 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             />
           );
         })}
-        {isTyping && (
-          <div className="flex items-center gap-2 text-slate-400 text-xs ml-4 mt-2 animate-pulse">
-            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" />
-            <span className="font-bold uppercase tracking-wider">{t('mediator_thinking')}</span>
+
+        {/* Typing Indicators */}
+        {(isTyping || partnerTyping) && (
+          <div className="flex items-center gap-2 ml-4 mt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+             {partnerTyping && (
+                <div className="flex items-center gap-2 bg-slate-100 px-3 py-2 rounded-xl rounded-bl-none">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    {caseData.isRespondent ? caseData.initiatorName : caseData.respondentName} {t('typing_indicator')}
+                  </span>
+                  <div className="flex gap-1">
+                    <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" />
+                    <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce delay-75" />
+                    <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce delay-150" />
+                  </div>
+                </div>
+             )}
+             
+             {isTyping && !partnerTyping && (
+               <div className="flex items-center gap-2 text-emerald-600 text-[10px] font-bold bg-emerald-50 px-3 py-2 rounded-full border border-emerald-100">
+                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                  <span className="uppercase tracking-wider">{t('mediator_thinking')}</span>
+               </div>
+             )}
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -378,7 +457,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         <div className="relative flex items-end gap-2 max-w-4xl mx-auto">
           <textarea 
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
