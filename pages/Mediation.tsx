@@ -253,28 +253,51 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       void sendTypingBroadcast(false);
   };
 
-  // --- INITIALIZATION & REALTIME ---
+  // --- MESSAGE FETCHING UTILITY ---
+  const fetchMessages = useCallback(async () => {
+    const { data } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('case_id', caseData.id)
+      .order('created_at', { ascending: true });
+    
+    if (data) {
+      setMessages(data);
+      if (data.length > 0) {
+        lastProcessedMessageIdRef.current = data[data.length - 1].id;
+      }
+      // Na initiele load vlag omzetten zodat geluid mag werken bij volgende berichten
+      if (isInitialLoadRef.current) {
+         setTimeout(() => { isInitialLoadRef.current = false; }, 1000);
+      }
+    }
+  }, [caseData.id]);
+
+  // --- SYNC & SLEEP RECOVERY ---
   useEffect(() => {
     // 1. Initial Load
-    const fetchMessages = async () => {
-      const { data } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('case_id', caseData.id)
-        .order('created_at', { ascending: true });
-      
-      if (data) {
-        setMessages(data);
-        if (data.length > 0) {
-          lastProcessedMessageIdRef.current = data[data.length - 1].id;
-        }
-        // Na initiele load vlag omzetten zodat geluid mag werken bij volgende berichten
-        setTimeout(() => { isInitialLoadRef.current = false; }, 1000);
-      }
-    };
     fetchMessages();
 
-    // 2. Channel Setup
+    // 2. Wake from sleep / Tab focus handler
+    // Dit lost het probleem op dat berichten niet binnenkomen als de telefoon in slaapstand was
+    const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+            console.log("[APP] Waking up/Visible -> Refreshing messages...");
+            fetchMessages();
+            // Als channel disconnected is, zou Supabase auto-reconnect moeten doen,
+            // maar de fetch garandeert dat we de data hebben.
+        }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [fetchMessages]);
+
+  // --- REALTIME CHANNEL ---
+  useEffect(() => {
     const channel = supabase.channel(`case-${caseData.id}`, {
       config: {
         presence: { key: myRole },

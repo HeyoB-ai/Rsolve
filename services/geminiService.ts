@@ -54,10 +54,12 @@ export class GeminiService {
     if (!client) return "Verbinding verbroken.";
     
     try {
-      // Formatteren binnen try-block voor veiligheid en robuustheid
+      // Formatteren met fallbacks voor namen en tekst om 'undefined' te voorkomen
       const formattedHistory = chatHistory.map(m => {
         const role = m.role ? String(m.role).toUpperCase() : 'UNKNOWN';
-        return `[${role}] ${m.sender}: ${m.text}`;
+        const name = m.sender || 'Deelnemer';
+        const text = m.text || '(geen tekst)';
+        return `[${role}] ${name}: ${text}`;
       }).join('\n');
     
       const response = await client.models.generateContent({
@@ -70,7 +72,7 @@ IDENTITEITEN (STRIKT VOLGEN):
 - RESPONDENT (Genodigde): ${roles.respondent}
 
 JOUW DOEL:
-Begeleid dit conflict naar een oplossing.
+Begeleid dit conflict naar een oplossing. Wees neutraal, rustig en constructief.
 
 PROTOCOL VOOR AFRONDING:
 1. Als er een akkoord lijkt te zijn, vat je dit samen.
@@ -86,7 +88,14 @@ ${formattedHistory}
 
 Mediator:`,
         config: {
-          temperature: 0.3, // Lager voor meer logische consistentie
+          temperature: 0.3,
+          // Cruciaal voor mediation: sta conflicterende content toe zodat de AI niet blokkeert op "ruzie"
+          safetySettings: [
+            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+          ]
         }
       });
       
@@ -94,7 +103,8 @@ Mediator:`,
       return response.text?.trim() || "Ik luister. Hoe kan ik helpen?";
     } catch (error) {
       console.error("Gemini Error:", error);
-      return "Ik ervaar een korte storing in mijn analyse. Laten we bij de kern blijven.";
+      // Fallback response instead of generic error to keep flow going
+      return "Ik probeer de situatie te begrijpen. Kunnen jullie kort samenvatten waar we nu staan?";
     }
   }
 
@@ -111,7 +121,15 @@ Mediator:`,
           ${chatHistory.map(m => `${m.sender}: ${m.text}`).join('\n')}
           
           Geef ENKEL de genummerde artikelen in juridisch correct Nederlands. Geef geen inleiding of slot.`,
-      config: { temperature: 0.1 }
+      config: { 
+        temperature: 0.1,
+        safetySettings: [
+            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        ]
+      }
     });
     
     // Accessing .text property directly
