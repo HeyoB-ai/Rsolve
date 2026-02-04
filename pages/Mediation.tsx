@@ -53,7 +53,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const audioUnlockedRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Refs voor logica (voorkomt re-render loops)
+  // Refs voor logica
   const lastProcessedMessageIdRef = useRef<string | null>(null);
   const isInitialLoadRef = useRef(true);
   
@@ -256,6 +256,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   }, [fetchMessages]);
 
   useEffect(() => {
+    // --- ROBUST REALTIME SETUP ---
     const channel = supabase.channel(`case-${caseData.id}`, {
       config: { presence: { key: myRole } },
     });
@@ -269,8 +270,20 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         filter: `case_id=eq.${caseData.id}` 
       }, (payload: any) => {
         const newMessage = payload.new;
+        
+        // Optimistic UI Reconciliation
         setMessages((prev) => {
+            // Deduplication: If ID matches (e.g. from our optimistic insert result), ignore
             if (prev.some(m => m.id === newMessage.id)) return prev;
+            
+            // Replace temporary message if exists (fallback if ID replacement logic failed)
+            const existsAsTemp = prev.findIndex(m => m.id.toString().startsWith('temp-') && m.content === newMessage.content && m.sender_id === newMessage.sender_id);
+            if (existsAsTemp !== -1) {
+                const newArr = [...prev];
+                newArr[existsAsTemp] = newMessage;
+                return newArr;
+            }
+
             return [...prev, newMessage];
         });
 
@@ -370,15 +383,33 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         .getPublicUrl(filePath);
 
       if (data?.publicUrl) {
+        // Optimistic UI for File
+        const tempId = 'temp-' + Date.now();
+        const tempMsg = {
+          id: tempId,
+          case_id: caseData.id,
+          sender_id: myRole,
+          sender_name: myName,
+          content: file.name,
+          attachment_url: data.publicUrl,
+          type: 'attachment',
+          created_at: new Date().toISOString()
+        };
+        setMessages(prev => [...prev, tempMsg]);
+
         // 2. Insert Message into DB
-        await supabase.from('messages').insert([{
+        const { data: insertedMsg, error: insertError } = await supabase.from('messages').insert([{
           case_id: caseData.id,
           sender_id: myRole,
           sender_name: myName,
           content: file.name,
           attachment_url: data.publicUrl,
           type: 'attachment'
-        }]);
+        }]).select().single();
+
+        if (insertedMsg) {
+             setMessages(prev => prev.map(m => m.id === tempId ? insertedMsg : m));
+        }
 
         // 3. Convert File to Base64 for AI Analysis
         const base64Data = await new Promise<string>((resolve, reject) => {
@@ -386,14 +417,13 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             reader.readAsDataURL(file);
             reader.onload = () => {
                 const result = reader.result as string;
-                // Remove prefix (e.g., "data:image/jpeg;base64,")
                 const b64 = result.split(',')[1];
                 resolve(b64);
             };
             reader.onerror = error => reject(error);
         });
 
-        // 4. Trigger AI Analysis Immediately
+        // 4. Trigger AI Analysis
         setIsAiThinking(true);
         void sendMediatorStatus(true);
         
@@ -402,11 +432,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             respondent: isRespondent ? myName : partnerName
         };
 
-        const historyForAI = messages.concat([{ 
-            sender: myName, 
-            text: `[Attachment: ${file.name}]`, 
-            role: myRole 
-        }]).map(m => ({
+        const historyForAI = messages.concat([tempMsg]).map(m => ({
             sender: m.sender_name || m.sender, 
             text: m.content || m.text,
             role: m.sender_id || m.role
@@ -416,7 +442,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             historyForAI, 
             caseData.title, 
             roles,
-            { mimeType: file.type, data: base64Data } // Pass attachment data
+            { mimeType: file.type, data: base64Data }
         );
 
         setIsAiThinking(false);
@@ -445,12 +471,16 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 type: 'text'
             }]);
         }
+        
+        // Safety Fetch
+        fetchMessages();
       }
     } catch (error) {
       console.error("Upload failed", error);
       alert("Upload mislukt. Probeer het opnieuw.");
       setIsAiThinking(false);
       void sendMediatorStatus(false);
+      fetchMessages(); // Rollback if needed
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -461,20 +491,44 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     if (!inputValue.trim()) return;
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     void sendTypingBroadcast(false);
+    
     const textToSend = inputValue;
     setInputValue('');
 
-    const { error } = await supabase.from('messages').insert([{
+    // --- OPTIMISTIC UI UPDATE ---
+    const tempId = 'temp-' + Date.now();
+    const tempMsg = {
+      id: tempId,
+      case_id: caseData.id,
+      sender_id: myRole,
+      sender_name: myName,
+      content: textToSend,
+      type: 'text',
+      created_at: new Date().toISOString()
+    };
+    
+    setMessages(prev => [...prev, tempMsg]);
+
+    // Insert into DB
+    const { data: insertedMsg, error } = await supabase.from('messages').insert([{
       case_id: caseData.id,
       sender_id: myRole,
       sender_name: myName,
       content: textToSend,
       type: 'text'
-    }]);
+    }]).select().single();
 
     if (error) {
         console.error("Failed to send", error);
+        // Remove optimistic update on error? Or retry?
+        // For now, let's refresh to sync truth
+        fetchMessages();
         return;
+    }
+
+    if (insertedMsg) {
+        // Replace temp message with real one to get correct ID for future
+        setMessages(prev => prev.map(m => m.id === tempId ? insertedMsg : m));
     }
 
     setIsAiThinking(true);
@@ -485,11 +539,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       respondent: isRespondent ? myName : partnerName
     };
 
-    const historyForAI = messages.concat([{ 
-        sender: myName, 
-        text: textToSend, 
-        role: myRole 
-    }]).map(m => ({
+    const historyForAI = messages.concat([tempMsg]).map(m => ({
         sender: m.sender_name || m.sender, 
         text: m.content || m.text,
         role: m.sender_id || m.role
@@ -527,6 +577,10 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 type: 'text'
             }]);
         }
+        
+        // Safety Fetch
+        fetchMessages();
+
     } catch (err) {
         console.error(err);
         setIsAiThinking(false);
