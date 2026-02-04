@@ -151,7 +151,7 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
             <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">
                <div className="space-y-4">
                   <Button 
-                    onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Hoi, om ons conflict "${formData.title}" op te lossen heb ik een online mediator van Rsolve ingeschakeld. Hij helpt ons via een beveiligde chat om tot een eerlijke oplossing te komen zonder advocaten. Deelname is gratis voor jou. Klik hier: ${inviteLink}`)}`, '_blank')}
+                    onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Goedendag, om ons conflict "${formData.title}" op te lossen heb ik een online mediator van Rsolve ingeschakeld. Hij helpt ons via een beveiligde chat om tot een eerlijke oplossing te komen zonder advocaten. Deelname is gratis voor jou. Klik hier: ${inviteLink}`)}`, '_blank')}
                     className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-6 rounded-2xl font-black flex items-center justify-center gap-4 transition-all shadow-lg"
                   >
                     {t('whatsapp_btn')}
