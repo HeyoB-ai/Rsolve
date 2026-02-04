@@ -61,9 +61,20 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const partnerTypingTimeoutRef = useRef<any>(null);
   const isLocallyTypingRef = useRef(false);
 
-  // Identity
-  const myRole = caseData.isRespondent ? 'respondent' : 'initiator';
-  const myName = caseData.isRespondent ? caseData.respondentName : caseData.initiatorName;
+  // Identity & Names Correction
+  const isRespondent = caseData.isRespondent;
+  
+  // Bepaal mijn naam robuust
+  const myName = isRespondent 
+    ? (caseData.respondentName || "Respondent") 
+    : (caseData.initiatorName || "Initiator");
+
+  // Bepaal partner naam robuust (fallback naar otherParty als respondentName leeg is bij initiator)
+  const partnerName = isRespondent
+    ? (caseData.initiatorName || "Initiator")
+    : (caseData.respondentName || caseData.otherParty || "Tegenpartij");
+
+  const myRole = isRespondent ? 'respondent' : 'initiator';
 
   // --- AUDIO ENGINE (SILENT START STRATEGY) ---
   
@@ -195,8 +206,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
     isLocallyTypingRef.current = isTyping;
 
-    // console.log(`[TYPING] Broadcasting: ${isTyping}`);
-
     await channelRef.current.send({
       type: "broadcast",
       event: "typing",
@@ -205,6 +214,16 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         typing: isTyping,
         ts: now
       }
+    });
+  };
+
+  // --- MEDIATOR THINKING BROADCAST ---
+  const sendMediatorStatus = async (isThinking: boolean) => {
+    if (!channelRef.current) return;
+    await channelRef.current.send({
+        type: "broadcast",
+        event: "mediator_status",
+        payload: { isThinking }
     });
   };
 
@@ -286,14 +305,12 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         }
 
         // --- SOUND TRIGGER LOGIC ---
-        // Checken: Is bericht nieuw? Is het NIET van mij? Is het NIET de eerste load?
         if (newMessage.id !== lastProcessedMessageIdRef.current) {
              lastProcessedMessageIdRef.current = newMessage.id;
              
              const isFromMe = newMessage.sender_id === myRole || newMessage.sender_id === 'local-user';
              
              if (!isInitialLoadRef.current && !isFromMe) {
-                 // console.log("[REALTIME] New message from partner/system -> Triggering sound");
                  playBeep("new_message");
              }
         }
@@ -303,12 +320,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           if (!p) return;
           if (p.userId === myRole) return; // ignore own
 
-          // console.log("[TYPING] Received:", p);
-
           if (p.typing === true) {
             setPartnerTyping(true);
-
-            // auto-off na X ms als er niks meer komt (fallback safety)
             if (partnerTypingTimeoutRef.current) clearTimeout(partnerTypingTimeoutRef.current);
             partnerTypingTimeoutRef.current = setTimeout(() => {
               setPartnerTyping(false);
@@ -316,6 +329,12 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           } else {
             setPartnerTyping(false);
             if (partnerTypingTimeoutRef.current) clearTimeout(partnerTypingTimeoutRef.current);
+          }
+      })
+      .on('broadcast', { event: 'mediator_status' }, (payload: any) => {
+          const p = payload?.payload;
+          if (p && typeof p.isThinking === 'boolean') {
+              setIsAiThinking(p.isThinking);
           }
       })
       .on('presence', { event: 'sync' }, () => {
@@ -328,7 +347,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       .subscribe(async (status: string) => {
         if (status === 'SUBSCRIBED') {
            console.log("[REALTIME] Subscribed to channel");
-           // Track online status only, typing via broadcast
            await channel.track({ user: myRole, online_at: Date.now() });
         }
       });
@@ -372,12 +390,14 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         return;
     }
 
-    setIsAiThinking(true); // Lokale state voor "Mediator denkt na"
+    setIsAiThinking(true);
+    void sendMediatorStatus(true); // Broadcast aan de ander dat mediator nadenkt
 
     // 2. AI Mediation Logic
+    // Robuuste rol-mapping
     const roles = {
-      initiator: caseData.initiatorName,
-      respondent: caseData.respondentName || "Tegenpartij"
+      initiator: isRespondent ? partnerName : myName,
+      respondent: isRespondent ? myName : partnerName
     };
 
     const historyForAI = messages.concat([{ 
@@ -385,9 +405,9 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         text: textToSend, 
         role: myRole 
     }]).map(m => ({
-        sender: m.sender_name,
-        text: m.content,
-        role: m.sender_id
+        sender: m.sender_name || m.sender, // Fallback voor lokale 'concat' berichten
+        text: m.content || m.text,
+        role: m.sender_id || m.role
     }));
 
     try {
@@ -398,6 +418,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         );
 
         setIsAiThinking(false);
+        void sendMediatorStatus(false); // Broadcast dat mediator klaar is
 
         if (aiResponse.includes('[TRIGGER:VSO]')) {
             const cleanResponse = aiResponse.replace('[TRIGGER:VSO]', '').trim();
@@ -423,6 +444,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     } catch (err) {
         console.error(err);
         setIsAiThinking(false);
+        void sendMediatorStatus(false);
     }
   };
 
@@ -437,7 +459,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const finalizeVSO = () => {
     const vsoData = {
       title: caseData.title,
-      parties: `${caseData.initiatorName} en ${caseData.respondentName || 'Tegenpartij'}`,
+      parties: `${isRespondent ? partnerName : myName} en ${isRespondent ? myName : partnerName}`,
       date: new Date().toLocaleDateString('nl-NL'),
       terms: vsoTerms,
       caseId: caseData.id
@@ -457,8 +479,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
               <span className={`w-2 h-2 rounded-full transition-colors duration-500 ${partnerOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-300'}`} />
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">
                 {partnerOnline 
-                  ? `${caseData.isRespondent ? caseData.initiatorName : caseData.respondentName} ${t('online')}` 
-                  : `${t('waiting')} ${caseData.isRespondent ? caseData.initiatorName : caseData.respondentName}...`
+                  ? `${partnerName} ${t('online')}` 
+                  : `${t('waiting')} ${partnerName}...`
                 }
               </p>
             </div>
@@ -546,7 +568,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
              {partnerTyping && (
                 <div className="flex items-center gap-2 bg-slate-100 w-fit px-3 py-2 rounded-xl rounded-bl-none shadow-sm">
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                    {caseData.isRespondent ? caseData.initiatorName : caseData.respondentName} {t('typing_indicator')}
+                    {partnerName} {t('typing_indicator')}
                   </span>
                   <div className="flex gap-1">
                     <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" />
@@ -556,7 +578,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 </div>
              )}
              
-             {/* 2. AI Thinking (Local State) */}
+             {/* 2. AI Thinking (Local OR Broadcast) */}
              {isAiThinking && !partnerTyping && (
                <div className="flex items-center gap-2 text-emerald-600 text-[10px] font-bold bg-emerald-50 w-fit px-3 py-2 rounded-full border border-emerald-100">
                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
