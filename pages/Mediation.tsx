@@ -22,6 +22,12 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const [inputValue, setInputValue] = useState('');
   const [isRespondentJoined, setIsRespondentJoined] = useState(false);
   const [isAiThinking, setIsAiThinking] = useState(false);
+  
+  // Nieuwe state voor typing indicators
+  const [remoteTypingUser, setRemoteTypingUser] = useState<string | null>(null);
+  const [isRemoteAiThinking, setIsRemoteAiThinking] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const [isUploading, setIsUploading] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
@@ -35,6 +41,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const channelRef = useRef<any>(null);
 
   const dossierItems = useMemo(() => {
     return messages.filter(m => m.type === 'attachment' && m.attachment);
@@ -72,10 +79,17 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   }, [caseData.id]);
 
   useEffect(() => {
-    const channel = supabase
+    // Database changes channel
+    const dbChannel = supabase
       .channel(`case_${caseData.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `case_id=eq.${caseData.id}` }, (payload: any) => {
         const newMessage = payload.new;
+        
+        // Als we een nieuw bericht binnenkrijgen van de mediator, stop de "thinking" state
+        if (newMessage.sender_id === 'mediator') {
+          setIsRemoteAiThinking(false);
+        }
+
         setMessages(prev => {
           if (prev.find(m => m.id === newMessage.id)) return prev;
           return [...prev, {
@@ -91,29 +105,63 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       })
       .subscribe();
 
-    const presenceChannel = supabase.channel(`presence_${caseData.id}`, {
+    // Presence & Broadcast channel (voor typing indicators)
+    const realtimeChannel = supabase.channel(`room_${caseData.id}`, {
       config: { presence: { key: caseData.isRespondent ? 'respondent' : 'initiator' } }
     });
 
-    presenceChannel
+    realtimeChannel
       .on('presence', { event: 'sync' }, () => {
-        const state = presenceChannel.presenceState();
+        const state = realtimeChannel.presenceState();
         const otherRole = caseData.isRespondent ? 'initiator' : 'respondent';
         setIsRespondentJoined(!!state[otherRole]);
       })
+      // Luister naar events van de andere partij
+      .on('broadcast', { event: 'typing' }, (payload: any) => {
+        if (payload.user !== myName) {
+           setRemoteTypingUser(payload.user);
+           // Reset de typing indicator na 3 seconden inactiviteit
+           if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+           typingTimeoutRef.current = setTimeout(() => setRemoteTypingUser(null), 3000);
+        }
+      })
+      .on('broadcast', { event: 'ai_start' }, (payload: any) => {
+        // De andere partij heeft de AI gestart
+        setIsRemoteAiThinking(true);
+      })
+      .on('broadcast', { event: 'ai_stop' }, (payload: any) => {
+        setIsRemoteAiThinking(false);
+      })
       .subscribe(async (status: string) => {
-        if (status === 'SUBSCRIBED') await presenceChannel.track({ online_at: new Date().toISOString() });
+        if (status === 'SUBSCRIBED') {
+          await realtimeChannel.track({ online_at: new Date().toISOString() });
+          channelRef.current = realtimeChannel;
+        }
       });
 
     return () => {
-      supabase.removeChannel(channel);
-      supabase.removeChannel(presenceChannel);
+      supabase.removeChannel(dbChannel);
+      supabase.removeChannel(realtimeChannel);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     };
-  }, [caseData.id, caseData.isRespondent]);
+  }, [caseData.id, caseData.isRespondent, myName]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isAiThinking]);
+  }, [messages, isAiThinking, remoteTypingUser, isRemoteAiThinking]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputValue(e.target.value);
+    
+    // Stuur broadcast dat ik aan het typen ben
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'typing',
+        payload: { user: myName }
+      });
+    }
+  };
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
@@ -131,6 +179,12 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     if (error) return;
 
     setIsAiThinking(true);
+    
+    // Broadcast: AI begint met denken (voor de andere gebruiker)
+    if (channelRef.current) {
+      channelRef.current.send({ type: 'broadcast', event: 'ai_start' });
+    }
+
     // Stuur de rollen expliciet mee naar de AI service
     const chatHistoryForAi = [
       ...messages, 
@@ -169,6 +223,10 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       console.error("AI Error:", e);
     } finally {
       setIsAiThinking(false);
+      // Broadcast: AI is klaar
+      if (channelRef.current) {
+        channelRef.current.send({ type: 'broadcast', event: 'ai_stop' });
+      }
     }
   };
 
@@ -230,6 +288,23 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     };
     reader.readAsDataURL(file);
   };
+
+  // Helper component for typing bubbles
+  const TypingIndicator = ({ name, isMediator = false }: { name: string, isMediator?: boolean }) => (
+    <div className={`flex flex-col items-start max-w-[85%] self-start mb-2 animate-in fade-in slide-in-from-bottom-2`}>
+       <span className="text-[10px] font-black mb-1 ml-2 uppercase tracking-widest text-slate-400">
+          {name}
+       </span>
+       <div className={`px-4 py-3 rounded-[20px] rounded-bl-none shadow-sm flex items-center gap-1.5 ${isMediator ? 'bg-emerald-50 border border-emerald-100' : 'bg-white border border-slate-200'}`}>
+          <div className={`w-1.5 h-1.5 rounded-full animate-bounce ${isMediator ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+          <div className={`w-1.5 h-1.5 rounded-full animate-bounce ${isMediator ? 'bg-emerald-500' : 'bg-slate-400'} [animation-delay:0.2s]`} />
+          <div className={`w-1.5 h-1.5 rounded-full animate-bounce ${isMediator ? 'bg-emerald-500' : 'bg-slate-400'} [animation-delay:0.4s]`} />
+          <span className={`text-[10px] ml-1 font-bold ${isMediator ? 'text-emerald-600' : 'text-slate-400'}`}>
+             {isMediator ? t('mediator_thinking') : t('typing_indicator')}
+          </span>
+       </div>
+    </div>
+  );
 
   return (
     <div className="h-safe flex flex-col bg-slate-50 overflow-hidden relative">
@@ -376,16 +451,17 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             <ChatBubble key={m.id} text={m.text} isOwn={isActuallyOwn} sender={m.sender} senderRole={m.senderId} timestamp={m.timestamp} attachment={m.attachment} targetLanguageName={UI_TRANSLATIONS[appLanguage].label} />
           );
         })}
-        {isAiThinking && (
-          <div className="flex flex-col items-start max-w-[85%] self-start p-2 animate-in fade-in slide-in-from-left-2">
-             <div className="flex items-center gap-2 mb-2">
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" />
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.2s]" />
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.4s]" />
-             </div>
-             <span className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em] animate-pulse">{t('analysing')}</span>
-          </div>
+        
+        {/* Remote user typing indicator */}
+        {remoteTypingUser && (
+          <TypingIndicator name={remoteTypingUser} />
         )}
+        
+        {/* AI Thinking indicator (for both local and remote) */}
+        {(isAiThinking || isRemoteAiThinking) && (
+          <TypingIndicator name={t('mediator')} isMediator={true} />
+        )}
+
         <div ref={scrollRef} className="h-4" />
       </div>
 
@@ -393,7 +469,13 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         <div className="flex gap-2 max-w-2xl mx-auto w-full items-end pb-2">
           <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*,video/*,.pdf,.doc,.docx" />
           <button onClick={() => fileInputRef.current?.click()} disabled={isUploading || isAiThinking} className="p-3 rounded-2xl bg-slate-100 text-slate-500 shrink-0 mb-0.5"><ICONS.Paperclip className="w-5 h-5" /></button>
-          <textarea className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 font-medium resize-none max-h-32" placeholder={t('placeholder')} rows={1} value={inputValue} onChange={e => setInputValue(e.target.value)} />
+          <textarea 
+            className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 font-medium resize-none max-h-32" 
+            placeholder={t('placeholder')} 
+            rows={1} 
+            value={inputValue} 
+            onChange={handleInputChange} 
+          />
           <Button size="icon" className="rounded-2xl w-12 h-12 shadow-lg" onClick={handleSend} disabled={!inputValue.trim() || isAiThinking}><svg className="w-5 h-5 -rotate-45" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></Button>
         </div>
       </div>

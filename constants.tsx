@@ -94,7 +94,8 @@ type TranslationKey =
   | 'sign_party_b' | 'waiting_sign' | 'congrats' | 'signed_desc' | 'download_dossier'
   | 'delete_close' | 'loading' | 'error_generic' | 'dossier_not_found'
   | 'mediation_badge' | 'when_work' | 'when_business' | 'when_neighbors' | 'when_relations' | 'plus_more'
-  | 'placeholder_name' | 'placeholder_subject' | 'placeholder_invite' | 'secure_ssl';
+  | 'placeholder_name' | 'placeholder_subject' | 'placeholder_invite' | 'secure_ssl'
+  | 'typing_indicator' | 'mediator_thinking';
 
 const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   label: "English",
@@ -237,7 +238,9 @@ const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   placeholder_name: "e.g. Mark",
   placeholder_subject: "e.g. Loan repayment",
   placeholder_invite: "Who to invite?",
-  secure_ssl: "Secured by Rsolve SSL"
+  secure_ssl: "Secured by Rsolve SSL",
+  typing_indicator: "is typing...",
+  mediator_thinking: "Mediator is thinking..."
 };
 
 // Partial overrides for other languages (using English as fallback for missing keys)
@@ -384,7 +387,9 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     placeholder_name: "Bijv. Mark",
     placeholder_subject: "Bijv. Terugbetaling lening",
     placeholder_invite: "Wie wil je uitnodigen?",
-    secure_ssl: "Beveiligd door Rsolve SSL"
+    secure_ssl: "Beveiligd door Rsolve SSL",
+    typing_indicator: "is aan het typen...",
+    mediator_thinking: "Mediator is aan het nadenken..."
   }),
   en: BASE_TRANSLATIONS,
   es: createLang("Español", {
@@ -470,7 +475,9 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     code_placeholder: "ej. RS-2024-XXXX",
     code_instruction: "Introduce el código proporcionado por tu empleador o aseguradora.",
     back_home: "Volver al inicio",
-    secure_ssl: "Protegido por Rsolve SSL"
+    secure_ssl: "Protegido por Rsolve SSL",
+    typing_indicator: "está escribiendo...",
+    mediator_thinking: "El mediador está pensando..."
   }),
   de: createLang("Deutsch", {
     tagline: "Konflikte lösen,",
@@ -556,7 +563,9 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     code_placeholder: "z.B. RS-2024-XXXX",
     code_instruction: "Geben Sie den Code Ihres Arbeitgebers oder Versicherers ein.",
     back_home: "Zurück zur Startseite",
-    secure_ssl: "Gesichert durch Rsolve SSL"
+    secure_ssl: "Gesichert durch Rsolve SSL",
+    typing_indicator: "schreibt...",
+    mediator_thinking: "Mediator denkt nach..."
   }),
   fr: createLang("Français", {
     tagline: "Résoudre les conflits,",
@@ -642,7 +651,9 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     code_placeholder: "ex. RS-2024-XXXX",
     code_instruction: "Entrez le code fourni par votre employeur ou assureur.",
     back_home: "Retour à l'accueil",
-    secure_ssl: "Sécurisé par Rsolve SSL"
+    secure_ssl: "Sécurisé par Rsolve SSL",
+    typing_indicator: "est en train d'écrire...",
+    mediator_thinking: "Le médiateur réfléchit..."
   }),
   tr: createLang("Türkçe", {
     tagline: "Anlaşmazlığı çözün,",
@@ -734,7 +745,9 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     code_placeholder: "örn. RS-2024-XXXX",
     code_instruction: "İşvereniniz veya sigortacınız tarafından verilen kodu girin.",
     back_home: "Ana Sayfaya Dön",
-    secure_ssl: "Rsolve SSL ile Güvenli"
+    secure_ssl: "Rsolve SSL ile Güvenli",
+    typing_indicator: "yazıyor...",
+    mediator_thinking: "Arabulucu düşünüyor..."
   }),
   ar: createLang("العربية", {
     tagline: "حل النزاع،",
@@ -780,7 +793,9 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     mediator: "الوسيط",
     you: "أنت",
     dossier: "ملف",
-    join_btn: "انضم للمحادثة"
+    join_btn: "انضم للمحادثة",
+    typing_indicator: "يكتب...",
+    mediator_thinking: "الوسيط يفكر..."
   }),
   pl: createLang("Polski", {
     tagline: "Rozwiąż konflikt,",
@@ -823,6 +838,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Opuścić mediację?",
     vso_generating: "Tworzenie ugody...",
     analysing: "Mediator analizuje...",
+    typing_indicator: "pisze...",
+    mediator_thinking: "Mediator myśli..."
   }),
   it: createLang("Italiano", {
     tagline: "Risolvi i conflitti,",
@@ -833,7 +850,7 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     section_not_winning_title: "Vincere non è risolvere",
     section_not_winning_text: "In una lotta, nessuno vince. La mediazione si concentra sul trovare una strada da percorrere, preservare le relazioni e risparmiare tempo.",
     what_is_title: "Cos'è Rsolve?",
-    what_is_p1: "Rsolve è una piattaforma di mediazione automatizzata che usa l'IA per guidare te e l'altra parte verso un accordo.",
+    what_is_p1: "Rsolve è una piattaforma de mediazione automatizzata che usa l'IA per guidare te e l'altra parte verso un accordo.",
     what_is_list_1: "Guida neutrale",
     what_is_list_2: "Soluzioni concrete",
     what_is_list_3: "Accordi chiari",
@@ -865,6 +882,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Lasciare la mediazione?",
     vso_generating: "Stesura accordo...",
     analysing: "Il mediatore analizza...",
+    typing_indicator: "sta scrivendo...",
+    mediator_thinking: "Il mediatore sta pensando..."
   }),
   pt: createLang("Português", {
     tagline: "Resolva conflitos,",
@@ -907,6 +926,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Sair da mediação?",
     vso_generating: "Redigindo acordo...",
     analysing: "O mediador está analisando...",
+    typing_indicator: "está digitando...",
+    mediator_thinking: "Mediador pensando..."
   }),
   ro: createLang("Română", {
     tagline: "Rezolvă conflicte,",
@@ -949,6 +970,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Părăsiți medierea?",
     vso_generating: "Se redactează acordul...",
     analysing: "Mediatorul analizează...",
+    typing_indicator: "scrie...",
+    mediator_thinking: "Mediatorul gândește..."
   }),
   bg: createLang("Български", {
     tagline: "Разрешете конфликта,",
@@ -991,6 +1014,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Напускане?",
     vso_generating: "Изготвяне на споразумение...",
     analysing: "Медиаторът анализира...",
+    typing_indicator: "пише...",
+    mediator_thinking: "Медиаторът мисли..."
   }),
   zh: createLang("中文 (简体)", {
     tagline: "解决冲突，",
@@ -1033,6 +1058,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "离开调解？",
     vso_generating: "正在起草协议...",
     analysing: "调解员正在分析...",
+    typing_indicator: "正在输入...",
+    mediator_thinking: "调解员正在思考..."
   }),
   uk: createLang("Українська", {
     tagline: "Вирішуйте конфлікти,",
@@ -1075,6 +1102,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Покинути медіацію?",
     vso_generating: "Складання угоди...",
     analysing: "Медіатор аналізує...",
+    typing_indicator: "друкує...",
+    mediator_thinking: "Медіатор думає..."
   }),
   ru: createLang("Русский", {
     tagline: "Решайте конфликты,",
@@ -1117,6 +1146,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Покинуть медиацию?",
     vso_generating: "Составление соглашения...",
     analysing: "Медиатор анализирует...",
+    typing_indicator: "печатает...",
+    mediator_thinking: "Медиатор думает..."
   }),
   id: createLang("Bahasa Indonesia", {
     tagline: "Selesaikan konflik,",
@@ -1159,6 +1190,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Keluar dari mediasi?",
     vso_generating: "Menyusun perjanjian...",
     analysing: "Mediator sedang menganalisis...",
+    typing_indicator: "sedang mengetik...",
+    mediator_thinking: "Mediator sedang berpikir..."
   }),
   hi: createLang("हिन्दी", {
     tagline: "विवाद सुलझाएं,",
@@ -1201,6 +1234,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "मध्यस्थता छोड़ें?",
     vso_generating: "समझौता तैयार हो रहा है...",
     analysing: "मध्यस्थ विश्लेषण कर रहा है...",
+    typing_indicator: "टाइप कर रहा है...",
+    mediator_thinking: "मध्यस्थ सोच रहा है..."
   }),
   ur: createLang("اردو", {
     tagline: "تنازعہ حل کریں،",
@@ -1243,6 +1278,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "ثالثی چھوڑ دیں؟",
     vso_generating: "معاہدہ تیار ہو رہا ہے...",
     analysing: "ثالث تجزیہ کر رہا ہے...",
+    typing_indicator: "لکھ رہا ہے...",
+    mediator_thinking: "ثالث سوچ رہا ہے..."
   }),
   fa: createLang("فارسی", {
     tagline: "حل اختلاف،",
@@ -1265,7 +1302,7 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     why_title: "چرا Rsolve؟",
     why_1: "بدون وکیل گران",
     why_2: "بدون انتظار طولانی",
-    why_3: "نتایج در چند دقیقه",
+    why_3: "نتائج در چند دقیقه",
     why_4: "فقط €3.99",
     why_5: "امن و محرمانه",
     why_6: "توافقات قانونی معتبر",
@@ -1285,6 +1322,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "ترک میانجیگری؟",
     vso_generating: "در حال پیش‌نویس توافق...",
     analysing: "میانجی در حال تجزیه و تحلیل...",
+    typing_indicator: "در حال تایپ...",
+    mediator_thinking: "میانجی در حال فکر کردن..."
   }),
   ku: createLang("Kurdî", {
     tagline: "Nakokiyê çareser bikin,",
@@ -1327,6 +1366,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Jê derkeve?",
     vso_generating: "Peyman tê amadekirin...",
     analysing: "Navbeynkar analîz dike...",
+    typing_indicator: "dinivîse...",
+    mediator_thinking: "Navbeynkar difikire..."
   }),
   el: createLang("Ελληνικά", {
     tagline: "Λύστε τη σύγκρουση,",
@@ -1336,7 +1377,7 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     micro_time: "Μέση εικόνα σε 8–12 λεπτά",
     section_not_winning_title: "Η νίκη δεν είναι λύση",
     section_not_winning_text: "Σε έναν καβγά, κανείς δεν κερδίζει. Η διαμεσολάβηση εστιάζει στην εύρεση μιας λύσης και στη διατήρηση των σχέσεων.",
-    what_is_title: "Τι είναι το Rsolve;",
+    what_is_title: "Τι είναι το Rsolve?",
     what_is_p1: "Το Rsolve είναι μια αυτοματοποιημένη πλατφόρμα διαμεσολάβησης που χρησιμοποιεί AI για να σας οδηγήσει σε συμφωνία.",
     what_is_list_1: "Ουδέτερη καθοδήγηση",
     what_is_list_2: "Συγκεκριμένες λύσεις",
@@ -1369,6 +1410,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Αποχώρηση;",
     vso_generating: "Σύνταξη συμφωνίας...",
     analysing: "Ο διαμεσολαβητής αναλύει...",
+    typing_indicator: "πληκτρολογεί...",
+    mediator_thinking: "Ο διαμεσολαβητής σκέφτεται..."
   }),
   hu: createLang("Magyar", {
     tagline: "Oldja meg a konfliktust,",
@@ -1411,5 +1454,7 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_title: "Kilépés?",
     vso_generating: "Megállapodás készítése...",
     analysing: "A mediátor elemez...",
+    typing_indicator: "gépel...",
+    mediator_thinking: "A mediátor gondolkodik..."
   }),
 };
