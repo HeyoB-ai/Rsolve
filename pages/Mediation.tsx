@@ -500,10 +500,10 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           
           <button 
             onClick={() => setShowLeaveModal(true)}
-            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+            className="px-3 py-1.5 text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors uppercase tracking-wider"
             title={t('leave_btn') || "Verlaten"}
           >
-            <ICONS.X className="w-5 h-5" />
+             {t('leave_btn_label') || "Stop"}
           </button>
         </div>
       </header>
@@ -603,10 +603,21 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             <div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto">
               <ICONS.Zap className="w-6 h-6" />
             </div>
+            
             <div>
               <h2 className="text-lg font-black text-slate-900">{t('leave_modal_title')}</h2>
-              <p className="text-sm text-slate-500 mt-2">{t('leave_modal_desc')}</p>
+              <div className="mt-4 bg-red-50 p-4 rounded-xl border border-red-100 text-left">
+                 <div className="flex gap-2 mb-2">
+                    <ICONS.Shield className="w-4 h-4 text-red-600" />
+                    <span className="text-xs font-black text-red-700 uppercase tracking-wider">Juridische Waarschuwing</span>
+                 </div>
+                 <p className="text-xs text-red-800 font-medium leading-relaxed">
+                   {t('leave_legal_warning') || "Let op: Het niet meewerken aan een oplossing kan in een eventuele latere rechtszaak in uw nadeel werken."}
+                 </p>
+              </div>
+              <p className="text-xs text-slate-400 mt-4 font-medium">{t('leave_modal_desc')}</p>
             </div>
+
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" onClick={() => setShowLeaveModal(false)}>{t('leave_cancel')}</Button>
               <Button variant="danger" onClick={onAbandon}>{t('leave_confirm')}</Button>

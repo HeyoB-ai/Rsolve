@@ -85,7 +85,7 @@ type TranslationKey =
   | 'payment_received' | 'lets_start' | 'label_your_name' | 'label_subject' | 'label_counterparty'
   | 'btn_save_invite' | 'invite_header' | 'invite_desc' | 'whatsapp_btn' | 'copy' | 'copied'
   | 'start_mediation_btn' | 'invited_header' | 'join_btn' | 'join_free_notice'
-  | 'leave_modal_title' | 'leave_modal_desc' | 'leave_confirm' | 'leave_cancel'
+  | 'leave_modal_title' | 'leave_modal_desc' | 'leave_confirm' | 'leave_cancel' | 'leave_btn_label' | 'leave_legal_warning'
   | 'vso_modal_title' | 'vso_generating' | 'vso_confirm' | 'finish_btn' | 'leave_btn'
   | 'analysing' | 'vso_title' | 'legal_doc' | 'download_chat' | 'download_pdf' | 'settlement_agreement'
   | 'legal_accord' | 'section_parties' | 'party_a' | 'party_b' | 'section_dispute'
@@ -193,6 +193,8 @@ const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   leave_modal_desc: "You will not be able to open this case again.",
   leave_confirm: "Yes, leave session",
   leave_cancel: "No, continue",
+  leave_btn_label: "Stop",
+  leave_legal_warning: "Warning: Refusing to cooperate in mediation may be viewed unfavorably in future legal proceedings.",
   vso_modal_title: "Review Agreement",
   vso_generating: "Drafting Agreement...",
   vso_confirm: "Confirm Agreement",
@@ -342,6 +344,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     leave_modal_desc: "Je kunt dit dossier niet meer openen.",
     leave_confirm: "Ja, verlaat sessie",
     leave_cancel: "Nee, ga door",
+    leave_btn_label: "Stoppen",
+    leave_legal_warning: "Let op: Het niet meewerken aan een oplossing kan in een eventuele latere rechtszaak in uw nadeel werken.",
     vso_modal_title: "Controleer Afspraken",
     vso_generating: "VSO wordt opgesteld...",
     vso_confirm: "Afspraken Bevestigen",
@@ -808,7 +812,7 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     what_is_title: "Czym jest Rsolve?",
     what_is_p1: "Rsolve to zautomatyzowana platforma mediacyjna wykorzystująca AI, by poprowadzić ciebie i drugą stronę do porozumienia.",
     what_is_list_1: "Neutralne prowadzenie",
-    what_is_list_2: "Konkretne rozwiązania",
+    what_is_list_2: "Konkrete rozwiązania",
     what_is_list_3: "Jasne ustalenia",
     what_is_list_4: "Opcjonalna ugoda (VSO)",
     language_title: "Działa w każdym języku",
@@ -899,7 +903,7 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     what_is_list_2: "Soluções concretas",
     what_is_list_3: "Acordos claros",
     what_is_list_4: "Acordo de liquidação opcional",
-    language_title: "Funciona em todos os idiomas",
+    language_title: "Funciona em todos los idiomas",
     language_text: "Não deixe barreiras linguísticas escalarem um conflito. Rsolve traduz tudo instantaneamente.",
     when_title: "Melhor para...",
     when_text: "Disputas trabalhistas, conflitos de vizinhos, problemas de dívida e desentendimentos de relacionamento.",
