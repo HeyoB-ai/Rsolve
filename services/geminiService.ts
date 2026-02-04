@@ -111,9 +111,9 @@ Mediator:`,
     const client = this.ai;
     if (!client) throw new Error("No client");
     
-    // Drafting a VSO is a complex reasoning task, using gemini-3-pro-preview per guidelines
+    // Switching to Flash for speed (Pro takes too long > 6 mins sometimes)
     const response = await client.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-3-flash-preview', 
       contents: `Stel een formele Vaststellingsovereenkomst (VSO) op (Art. 7:900 BW) gebaseerd op dit mediation gesprek:
           Onderwerp: ${caseTitle}
           Gesprek:

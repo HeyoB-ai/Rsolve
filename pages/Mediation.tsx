@@ -266,6 +266,14 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       if (data.length > 0) {
         lastProcessedMessageIdRef.current = data[data.length - 1].id;
       }
+      // Check of er al een VSO trigger in de berichten zit die we gemist hebben
+      const hasTrigger = data.some(m => m.content.includes('[TRIGGER:VSO]'));
+      if (hasTrigger) {
+          // Haal ook de VSO tekst op uit de DB als die er al is
+          fetchCaseData();
+          setShowVSOModal(true);
+      }
+
       // Na initiele load vlag omzetten zodat geluid mag werken bij volgende berichten
       if (isInitialLoadRef.current) {
          setTimeout(() => { isInitialLoadRef.current = false; }, 1000);
@@ -273,19 +281,25 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     }
   }, [caseData.id]);
 
+  const fetchCaseData = async () => {
+      const { data } = await supabase.from('cases').select('vso_terms').eq('id', caseData.id).single();
+      if (data && data.vso_terms) {
+          setVsoTerms(data.vso_terms);
+      }
+  };
+
   // --- SYNC & SLEEP RECOVERY ---
   useEffect(() => {
     // 1. Initial Load
     fetchMessages();
+    fetchCaseData();
 
     // 2. Wake from sleep / Tab focus handler
-    // Dit lost het probleem op dat berichten niet binnenkomen als de telefoon in slaapstand was
     const handleVisibilityChange = () => {
         if (document.visibilityState === 'visible') {
-            console.log("[APP] Waking up/Visible -> Refreshing messages...");
+            console.log("[APP] Waking up/Visible -> Refreshing messages & Case Data...");
             fetchMessages();
-            // Als channel disconnected is, zou Supabase auto-reconnect moeten doen,
-            // maar de fetch garandeert dat we de data hebben.
+            fetchCaseData();
         }
     };
 
@@ -316,10 +330,15 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         
         // Update Message List
         setMessages((prev) => {
-            // Dedupe check
             if (prev.some(m => m.id === newMessage.id)) return prev;
             return [...prev, newMessage];
         });
+
+        // Trigger logic voor BEIDE partijen bij ontvangst van systeem bericht
+        if (newMessage.type === 'system' && newMessage.content.includes('[TRIGGER:VSO]')) {
+            fetchCaseData(); // Check if terms already exist
+            setShowVSOModal(true);
+        }
 
         // Typing indicator resetten als partner bericht stuurt
         if (newMessage.sender_id !== myRole && newMessage.sender_id !== 'local-user') {
@@ -330,13 +349,22 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         // --- SOUND TRIGGER LOGIC ---
         if (newMessage.id !== lastProcessedMessageIdRef.current) {
              lastProcessedMessageIdRef.current = newMessage.id;
-             
              const isFromMe = newMessage.sender_id === myRole || newMessage.sender_id === 'local-user';
-             
              if (!isInitialLoadRef.current && !isFromMe) {
                  playBeep("new_message");
              }
         }
+      })
+      .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'cases',
+          filter: `id=eq.${caseData.id}`
+      }, (payload: any) => {
+          // Sync VSO Terms if other party generated them
+          if (payload.new.vso_terms) {
+              setVsoTerms(payload.new.vso_terms);
+          }
       })
       .on('broadcast', { event: 'typing' }, (payload: any) => {
           const p = payload?.payload;
@@ -362,7 +390,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       })
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
-        // A. Online Check (Presence is still best for this)
         const users = Object.keys(state);
         const others = users.filter(key => key !== myRole);
         setPartnerOnline(others.length > 0);
@@ -392,14 +419,12 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
-    // Direct typing stoppen
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     void sendTypingBroadcast(false);
 
     const textToSend = inputValue;
     setInputValue('');
 
-    // 1. Save user message to Supabase
     const { error } = await supabase.from('messages').insert([{
       case_id: caseData.id,
       sender_id: myRole,
@@ -414,10 +439,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     }
 
     setIsAiThinking(true);
-    void sendMediatorStatus(true); // Broadcast aan de ander dat mediator nadenkt
+    void sendMediatorStatus(true); 
 
-    // 2. AI Mediation Logic
-    // Robuuste rol-mapping
     const roles = {
       initiator: isRespondent ? partnerName : myName,
       respondent: isRespondent ? myName : partnerName
@@ -428,7 +451,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         text: textToSend, 
         role: myRole 
     }]).map(m => ({
-        sender: m.sender_name || m.sender, // Fallback voor lokale 'concat' berichten
+        sender: m.sender_name || m.sender, 
         text: m.content || m.text,
         role: m.sender_id || m.role
     }));
@@ -441,19 +464,23 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         );
 
         setIsAiThinking(false);
-        void sendMediatorStatus(false); // Broadcast dat mediator klaar is
+        void sendMediatorStatus(false); 
 
         if (aiResponse.includes('[TRIGGER:VSO]')) {
             const cleanResponse = aiResponse.replace('[TRIGGER:VSO]', '').trim();
+            
+            // Insert bericht - dit triggert de listener bij BEIDE partijen
             if (cleanResponse) {
                 await supabase.from('messages').insert([{
                     case_id: caseData.id,
                     sender_id: 'mediator',
                     sender_name: 'Mediator',
-                    content: cleanResponse,
+                    content: cleanResponse + " [TRIGGER:VSO]", // Keep tag hidden in logic but present for trigger
                     type: 'system'
                 }]);
             }
+            // Lokaal openen we hem ook direct voor responsiviteit
+            fetchCaseData();
             setShowVSOModal(true);
         } else {
             await supabase.from('messages').insert([{
@@ -472,9 +499,15 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   };
 
   const handleGenerateVSO = async () => {
+    // Double check: maybe it exists now?
+    if (vsoTerms) return;
+
     setIsGeneratingVSO(true);
     const history = messages.map(m => ({ sender: m.sender_name, text: m.content }));
     const terms = await geminiService.generateVSOTerms(history, caseData.title);
+    
+    // Save to DB so both see it
+    await supabase.from('cases').update({ vso_terms: terms }).eq('id', caseData.id);
     setVsoTerms(terms);
     setIsGeneratingVSO(false);
   };
@@ -512,7 +545,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         
         <div className="flex items-center gap-2">
           
-          {/* Audio Controls */}
           <div className="flex items-center bg-slate-50 rounded-full p-1 border border-slate-100">
              {soundEnabled && (
                 <button 
@@ -560,10 +592,13 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           const isSystem = m.type === 'system';
           
           if (isSystem) {
+            const displayContent = m.content.replace('[TRIGGER:VSO]', '').trim();
+            if (!displayContent) return null; // Don't show empty trigger messages
+
             return (
               <div key={m.id} className="flex justify-center my-4 animate-in fade-in zoom-in duration-500">
                 <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-slate-200">
-                  {m.content}
+                  {displayContent}
                 </span>
               </div>
             );
