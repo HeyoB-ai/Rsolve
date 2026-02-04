@@ -14,6 +14,7 @@ import { RealtimeChannel } from '@supabase/supabase-js';
 const SOUND_KEY = "rsolve_sound_enabled";
 const TYPING_TIMEOUT_MS = 1200; // Hoe lang na laatste toetsaanslag stopt typing
 const TYPING_THROTTLE_MS = 400; // Maximaal 1 event per 400ms sturen
+const POLLING_INTERVAL_MS = 4000; // Backup polling voor als Realtime faalt
 
 interface MediationProps {
   caseData: any;
@@ -217,10 +218,39 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       .order('created_at', { ascending: true });
     
     if (data) {
-      setMessages(data);
+      setMessages(prev => {
+        // Slimme merge: behoud 'temp-' berichten die nog niet in de database data zitten
+        // Dit voorkomt dat optimistische berichten flikkeren/verdwijnen
+        const pendingOptimistic = prev.filter(m => 
+            m.id.toString().startsWith('temp-') && 
+            !data.some(d => d.content === m.content && d.sender_id === m.sender_id)
+        );
+        
+        // Combineer echte data + nog niet verwerkte optimistische data
+        const merged = [...data, ...pendingOptimistic];
+        
+        if (merged.length > 0) {
+            // Update last processed om geluidjes correct te laten werken
+             const lastRealMsg = data[data.length - 1];
+             if (lastRealMsg && lastRealMsg.id !== lastProcessedMessageIdRef.current) {
+                 // Trigger sound effect only if it's new and not from us
+                 if (!isInitialLoadRef.current && lastRealMsg.sender_id !== myRole && lastRealMsg.sender_id !== 'local-user') {
+                     // We doen dit hier niet direct, maar laten de useEffect of Realtime listener dit doen
+                     // om dubbele geluiden te voorkomen.
+                 }
+             }
+        }
+        return merged;
+      });
+
       if (data.length > 0) {
-        lastProcessedMessageIdRef.current = data[data.length - 1].id;
+        // Alleen updaten als het een echt ID is
+        const lastId = data[data.length - 1].id;
+        if (!lastId.toString().startsWith('temp-')) {
+             lastProcessedMessageIdRef.current = lastId;
+        }
       }
+
       const hasTrigger = data.some(m => m.content.includes('[TRIGGER:VSO]'));
       if (hasTrigger) {
           fetchCaseData();
@@ -230,7 +260,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
          setTimeout(() => { isInitialLoadRef.current = false; }, 1000);
       }
     }
-  }, [caseData.id]);
+  }, [caseData.id, myRole]);
 
   const fetchCaseData = async () => {
       const { data } = await supabase.from('cases').select('vso_terms').eq('id', caseData.id).single();
@@ -242,6 +272,12 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   useEffect(() => {
     fetchMessages();
     fetchCaseData();
+    
+    // Polling Fallback (Backup voor als Realtime socket faalt)
+    const interval = setInterval(() => {
+        fetchMessages();
+    }, POLLING_INTERVAL_MS);
+
     const handleVisibilityChange = () => {
         if (document.visibilityState === 'visible') {
             console.log("[APP] Waking up/Visible -> Refreshing messages & Case Data...");
@@ -251,6 +287,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
+        clearInterval(interval);
         document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [fetchMessages]);
@@ -276,8 +313,14 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             // Deduplication: If ID matches (e.g. from our optimistic insert result), ignore
             if (prev.some(m => m.id === newMessage.id)) return prev;
             
-            // Replace temporary message if exists (fallback if ID replacement logic failed)
-            const existsAsTemp = prev.findIndex(m => m.id.toString().startsWith('temp-') && m.content === newMessage.content && m.sender_id === newMessage.sender_id);
+            // Replace temporary message if exists (fallback match by content + sender)
+            // Dit zorgt ervoor dat het grijze/temp bericht wordt vervangen door de echte database versie
+            const existsAsTemp = prev.findIndex(m => 
+                m.id.toString().startsWith('temp-') && 
+                m.content === newMessage.content && 
+                m.sender_id === newMessage.sender_id
+            );
+            
             if (existsAsTemp !== -1) {
                 const newArr = [...prev];
                 newArr[existsAsTemp] = newMessage;
@@ -472,8 +515,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             }]);
         }
         
-        // Safety Fetch
-        fetchMessages();
+        // Removed fetchMessages() here to prevent race conditions
       }
     } catch (error) {
       console.error("Upload failed", error);
@@ -578,8 +620,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             }]);
         }
         
-        // Safety Fetch
-        fetchMessages();
+        // Removed fetchMessages() here to avoid removing the optimistic UI before DB is consistent
 
     } catch (err) {
         console.error(err);
