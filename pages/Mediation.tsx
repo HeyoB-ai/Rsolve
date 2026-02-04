@@ -481,8 +481,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   };
 
   return (
-    // Fixed inset-0 zorgt ervoor dat de pagina 'vast' staat en niet kan bouncen op iOS
-    <div className="fixed inset-0 bg-slate-50 flex items-center justify-center">
+    // 'touch-none' hier toegevoegd om het bouncen op mobiel te voorkomen in de app
+    <div className="fixed inset-0 bg-slate-50 flex items-center justify-center touch-none">
       {/* 
         Container Logic: 
         - Op desktop: Een 'kaart' die gecentreerd is (max-w-3xl) met schaduw.
@@ -525,8 +525,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           </div>
         </header>
 
-        {/* Messages Container - scroll-container class uses -webkit-overflow-scrolling */}
-        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 scroll-smooth scroll-container bg-slate-50/50">
+        {/* Messages Container - touch-pan-y allows internal scrolling */}
+        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 scroll-smooth scroll-container bg-slate-50/50 touch-pan-y">
           {messages.map((m) => {
             const isMe = m.sender_id === myRole || m.sender_id === 'local-user';
             const isSystem = m.type === 'system';

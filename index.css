@@ -7,14 +7,16 @@
   --vh: 1vh;
 }
 
-html, body, #root {
+html, body {
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Cruciaal: voorkomt dat de hele pagina scrollt/veert op iOS */
-  position: fixed; /* Voorkomt rubber-banding effect op iOS */
-  inset: 0;
+}
+
+#root {
+  min-height: 100%;
+  width: 100%;
 }
 
 body {
@@ -23,7 +25,7 @@ body {
   background-color: #f8fafc; /* match slate-50 */
 }
 
-/* Voor specifieke scroll containers die WEL moeten scrollen */
+/* Voor specifieke scroll containers die WEL moeten scrollen (zoals chat) */
 .scroll-container {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
