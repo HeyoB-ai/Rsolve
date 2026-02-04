@@ -36,7 +36,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   // Audio State
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) !== "0");
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [audioReady, setAudioReady] = useState(false);
 
   // UI Modals
   const [showLangSelector, setShowLangSelector] = useState(false);
@@ -49,6 +49,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const audioUnlockedRef = useRef(false);
   
   // Refs voor logica (voorkomt re-render loops)
   const lastProcessedMessageIdRef = useRef<string | null>(null);
@@ -64,77 +65,90 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const myRole = caseData.isRespondent ? 'respondent' : 'initiator';
   const myName = caseData.isRespondent ? caseData.respondentName : caseData.initiatorName;
 
-  // --- AUDIO ENGINE (FIXED) ---
-  const initAudioContext = () => {
+  // --- AUDIO ENGINE (SILENT START STRATEGY) ---
+  
+  // 1. Initialiseer Context (maar start nog niet)
+  const initAudio = () => {
     if (!audioCtxRef.current) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioCtx) {
-        audioCtxRef.current = new AudioCtx();
-        console.log("[AUDIO] Context created, state:", audioCtxRef.current.state);
-      } else {
-        console.warn("[AUDIO] No AudioContext available in this browser");
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioContext) {
+        audioCtxRef.current = new AudioContext();
       }
     }
   };
 
-  const ensureAudioReady = useCallback(async () => {
-    initAudioContext();
+  // 2. De "Silent Unlock" - Cruciaal voor iOS
+  const unlockAudio = useCallback(() => {
+    if (audioUnlockedRef.current) return;
+    
+    initAudio();
     const ctx = audioCtxRef.current;
-    if (!ctx) return false;
+    if (!ctx) return;
 
+    // Als context suspended is (standaard in browsers), resume hem
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(e => console.error("[AUDIO] Resume failed", e));
+    }
+
+    // SPEEL EEN STIL GELUID AF. Dit is de 'hack' die de audio engine wakker maakt.
     try {
-      if (ctx.state === "suspended") {
-        await ctx.resume(); // MUST be inside user gesture for iOS
-        console.log("[AUDIO] Context resumed");
-      }
-      // Some browsers report "running" only after resume tick
-      const ready = ctx.state === "running";
-      setAudioUnlocked(ready);
-      return ready;
-    } catch (err) {
-      console.error("[AUDIO] Resume failed", err);
-      setAudioUnlocked(false);
-      return false;
+        const buffer = ctx.createBuffer(1, 1, 22050);
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(ctx.destination);
+        source.start(0);
+        
+        audioUnlockedRef.current = true;
+        setAudioReady(true);
+        console.log("[AUDIO] System unlocked and ready.");
+    } catch (e) {
+        console.error("[AUDIO] Unlock buffer failed", e);
     }
   }, []);
 
-  const playBeep = useCallback(async (reason: string, force = false) => {
-    if (!soundEnabled && !force) return;
+  // 3. Play Functie
+  const playBeep = useCallback((reason: string) => {
+    if (!soundEnabled) return;
+    
+    // Probeer te init-en voor het geval dat
+    if (!audioCtxRef.current) initAudio();
+    const ctx = audioCtxRef.current;
 
-    const ok = await ensureAudioReady();
-    if (!ok) {
-      console.warn("[AUDIO] Cannot play beep: AudioContext not ready");
-      return;
-    }
+    if (!ctx) return;
+
+    // Check of we echt unlocked zijn, zo niet, probeer te resumen (werkt alleen als dit in een click handler zit, maar goed)
+    if (ctx.state === 'suspended') ctx.resume();
 
     try {
-      const ctx = audioCtxRef.current!;
+      const t = ctx.currentTime;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.10);
-
-      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.20);
+      // Helder "Ping" geluid (van 600Hz naar 300Hz) - beter hoorbaar dan 880Hz
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, t);
+      osc.frequency.exponentialRampToValueAtTime(300, t + 0.25);
 
-      console.log("[AUDIO] Beep played:", reason);
+      // Volume iets harder (0.3)
+      gain.gain.setValueAtTime(0.3, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+
+      osc.start(t);
+      osc.stop(t + 0.3);
+      console.log(`[AUDIO] Playing sound: ${reason}`);
     } catch (e) {
-      console.error("[AUDIO] Playback error", e);
+      console.error("[AUDIO] Play failed", e);
     }
-  }, [soundEnabled, ensureAudioReady]);
+  }, [soundEnabled]);
 
-  const handleTestAudio = async (e: React.MouseEvent) => {
+  const handleTestAudio = (e: React.MouseEvent) => {
     e.stopPropagation();
-    await playBeep("test", true); // no timeout, must happen in click gesture
+    unlockAudio(); // Forceer unlock bij klik
+    // Korte timeout om zeker te zijn dat context 'running' is
+    setTimeout(() => playBeep("user-test"), 50);
   };
 
   const toggleSound = (e: React.MouseEvent) => {
@@ -142,8 +156,32 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     const newState = !soundEnabled;
     setSoundEnabled(newState);
     localStorage.setItem(SOUND_KEY, newState ? "1" : "0");
-    if (newState) void ensureAudioReady();
+    if (newState) unlockAudio();
   };
+
+  // Global unlock listener
+  useEffect(() => {
+    const unlockHandler = () => {
+        unlockAudio();
+        // We verwijderen de listener na de eerste succesvolle interactie om performance te sparen
+        if (audioUnlockedRef.current) {
+            window.removeEventListener('pointerdown', unlockHandler);
+            window.removeEventListener('keydown', unlockHandler);
+        }
+    };
+
+    window.addEventListener('pointerdown', unlockHandler);
+    window.addEventListener('keydown', unlockHandler);
+
+    return () => {
+        window.removeEventListener('pointerdown', unlockHandler);
+        window.removeEventListener('keydown', unlockHandler);
+        if (audioCtxRef.current) {
+            audioCtxRef.current.close().catch(() => {});
+        }
+    };
+  }, [unlockAudio]);
+
 
   // --- TYPING LOGIC (BROADCAST) ---
   const sendTypingBroadcast = async (isTyping: boolean) => {
@@ -157,7 +195,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
     isLocallyTypingRef.current = isTyping;
 
-    console.log(`[TYPING] Broadcasting: ${isTyping}`);
+    // console.log(`[TYPING] Broadcasting: ${isTyping}`);
 
     await channelRef.current.send({
       type: "broadcast",
@@ -255,8 +293,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
              const isFromMe = newMessage.sender_id === myRole || newMessage.sender_id === 'local-user';
              
              if (!isInitialLoadRef.current && !isFromMe) {
-                 console.log("[REALTIME] New message from partner/system -> Triggering sound");
-                 void playBeep("new_message");
+                 // console.log("[REALTIME] New message from partner/system -> Triggering sound");
+                 playBeep("new_message");
              }
         }
       })
@@ -300,7 +338,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       supabase.removeChannel(channel);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       if (partnerTypingTimeoutRef.current) clearTimeout(partnerTypingTimeoutRef.current);
-      if (audioCtxRef.current) audioCtxRef.current.close();
     };
   }, [caseData.id, myRole, playBeep]);
 
@@ -409,10 +446,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   };
 
   return (
-    <div 
-        className="flex flex-col h-safe bg-slate-50 relative"
-        onPointerDown={() => { void ensureAudioReady(); }} /* Global unlock trigger */
-    >
+    <div className="flex flex-col h-safe bg-slate-50 relative">
       {/* Header */}
       <header className="px-4 py-3 bg-white border-b border-slate-100 flex items-center justify-between shrink-0 z-10 shadow-sm">
         <div className="flex items-center gap-3 overflow-hidden">
@@ -438,10 +472,10 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
              {soundEnabled && (
                 <button 
                   onClick={handleTestAudio} 
-                  className={`text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-full transition-colors ${audioUnlocked ? 'text-blue-500 bg-blue-50' : 'text-amber-600 bg-amber-50 animate-pulse'}`}
+                  className={`text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-full transition-colors ${audioReady ? 'text-emerald-500 bg-emerald-50' : 'text-amber-600 bg-amber-50 animate-pulse'}`}
                   title="Klik om geluid te testen"
                 >
-                   {audioUnlocked ? 'Test' : 'Unlock'}
+                   {audioReady ? 'Test' : 'Tap'}
                 </button>
              )}
              <button 
