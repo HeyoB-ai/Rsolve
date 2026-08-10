@@ -5,7 +5,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   define: {
-    'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
+    // API_KEY is bewust VERWIJDERD: de Gemini-sleutel mag niet meer in de client-bundle.
+    // Alle AI-calls lopen nu via server-side Netlify Functions (netlify/functions/*).
     'process.env.SUPABASE_URL': JSON.stringify(process.env.SUPABASE_URL),
     'process.env.SUPABASE_ANON_KEY': JSON.stringify(process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_PUBLIC),
     'process.env.SUPABASE_ANON_PUBLIC': JSON.stringify(process.env.SUPABASE_ANON_PUBLIC),

@@ -171,15 +171,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     });
   };
 
-  const sendMediatorStatus = async (isThinking: boolean) => {
-    if (!channelRef.current) return;
-    await channelRef.current.send({
-        type: "broadcast",
-        event: "mediator_status",
-        payload: { isThinking }
-    });
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
     if (!isLocallyTypingRef.current) {
@@ -240,9 +231,10 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   }, [caseData.id, myRole]);
 
   const fetchCaseData = async () => {
-      const { data } = await supabase.from('cases').select('vso_terms').eq('id', caseData.id).single();
-      if (data && data.vso_terms) {
-          setVsoTerms(data.vso_terms);
+      const { data } = await supabase.from('cases').select('vso_terms, mediator_busy').eq('id', caseData.id).single();
+      if (data) {
+          if (data.vso_terms) setVsoTerms(data.vso_terms);
+          if (typeof data.mediator_busy === 'boolean') setIsAiThinking(data.mediator_busy);
       }
   };
 
@@ -311,6 +303,11 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           if (payload.new.vso_terms) {
               setVsoTerms(payload.new.vso_terms);
           }
+          // De "mediator denkt na"-indicator volgt nu de server-side lock (mediator_busy),
+          // zodat beide partijen hem zien terwijl het antwoord server-side wordt gemaakt.
+          if (typeof payload.new.mediator_busy === 'boolean') {
+              setIsAiThinking(payload.new.mediator_busy);
+          }
       })
       .on('broadcast', { event: 'typing' }, (payload: any) => {
           const p = payload?.payload;
@@ -322,12 +319,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           } else {
             setPartnerTyping(false);
             if (partnerTypingTimeoutRef.current) clearTimeout(partnerTypingTimeoutRef.current);
-          }
-      })
-      .on('broadcast', { event: 'mediator_status' }, (payload: any) => {
-          const p = payload?.payload;
-          if (p && typeof p.isThinking === 'boolean') {
-              setIsAiThinking(p.isThinking);
           }
       })
       .on('presence', { event: 'sync' }, () => {
@@ -383,31 +374,10 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         const { data: insertedMsg } = await supabase.from('messages').insert([{ case_id: caseData.id, sender_id: myRole, sender_name: myName, content: file.name, attachment_url: data.publicUrl, type: 'attachment' }]).select().single();
         if (insertedMsg) setMessages(prev => prev.map(m => m.id === tempId ? insertedMsg : m));
 
-        const base64Data = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => { resolve((reader.result as string).split(',')[1]); };
-            reader.onerror = error => reject(error);
-        });
-
-        setIsAiThinking(true);
-        void sendMediatorStatus(true);
-        const roles = { initiator: isRespondent ? partnerName : myName, respondent: isRespondent ? myName : partnerName };
-        const historyForAI = messages.concat([tempMsg]).map(m => ({ sender: m.sender_name || m.sender, text: m.content || m.text, role: m.sender_id || m.role }));
-        const aiResponse = await geminiService.generateMediatorResponse(historyForAI, caseData.title, roles, { mimeType: file.type, data: base64Data });
-        
-        setIsAiThinking(false);
-        void sendMediatorStatus(false);
-        if (aiResponse.includes('[TRIGGER:VSO]')) {
-            const cleanResponse = aiResponse.replace('[TRIGGER:VSO]', '').trim();
-            if (cleanResponse) await supabase.from('messages').insert([{ case_id: caseData.id, sender_id: 'mediator', sender_name: 'Mediator', content: cleanResponse + " [TRIGGER:VSO]", type: 'system' }]);
-            fetchCaseData();
-            setShowVSOModal(true);
-        } else {
-            await supabase.from('messages').insert([{ case_id: caseData.id, sender_id: 'mediator', sender_name: 'Mediator', content: aiResponse, type: 'text' }]);
-        }
+        // De mediator analyseert de bijlage server-side (Supabase webhook -> Netlify Function);
+        // die haalt het bestand zelf op via de opgeslagen URL. Geen AI-call in de browser.
       }
-    } catch (error) { console.error("Upload failed", error); alert("Upload mislukt."); setIsAiThinking(false); void sendMediatorStatus(false); fetchMessages(); } finally { setIsUploading(false); if (fileInputRef.current) fileInputRef.current.value = ''; }
+    } catch (error) { console.error("Upload failed", error); alert("Upload mislukt."); fetchMessages(); } finally { setIsUploading(false); if (fileInputRef.current) fileInputRef.current.value = ''; }
   };
 
   const handleSendMessage = async () => {
@@ -425,23 +395,9 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
     if (error) { console.error("Failed to send", error); fetchMessages(); return; }
     if (insertedMsg) setMessages(prev => prev.map(m => m.id === tempId ? insertedMsg : m));
 
-    setIsAiThinking(true);
-    void sendMediatorStatus(true); 
-    const roles = { initiator: isRespondent ? partnerName : myName, respondent: isRespondent ? myName : partnerName };
-    const historyForAI = messages.concat([tempMsg]).map(m => ({ sender: m.sender_name || m.sender, text: m.content || m.text, role: m.sender_id || m.role }));
-    try {
-        const aiResponse = await geminiService.generateMediatorResponse(historyForAI, caseData.title, roles);
-        setIsAiThinking(false);
-        void sendMediatorStatus(false); 
-        if (aiResponse.includes('[TRIGGER:VSO]')) {
-            const cleanResponse = aiResponse.replace('[TRIGGER:VSO]', '').trim();
-            if (cleanResponse) await supabase.from('messages').insert([{ case_id: caseData.id, sender_id: 'mediator', sender_name: 'Mediator', content: cleanResponse + " [TRIGGER:VSO]", type: 'system' }]);
-            fetchCaseData();
-            setShowVSOModal(true);
-        } else {
-            await supabase.from('messages').insert([{ case_id: caseData.id, sender_id: 'mediator', sender_name: 'Mediator', content: aiResponse, type: 'text' }]);
-        }
-    } catch (err) { console.error(err); setIsAiThinking(false); void sendMediatorStatus(false); }
+    // De mediator-reactie wordt server-side gegenereerd (Supabase webhook -> Netlify Function)
+    // en komt via de realtime-subscription binnen. De "denkt na"-indicator volgt het veld
+    // mediator_busy op het dossier. Geen AI-call meer in de browser.
   };
 
   const handleGenerateVSO = async () => {
