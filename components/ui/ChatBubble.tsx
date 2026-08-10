@@ -32,6 +32,8 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
   const [translatedText, setTranslatedText] = useState<string | null>(null);
   const [showTranslation, setShowTranslation] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
+  // Tijdelijke (verlopende) link voor de bijlage; de bucket is privé.
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
 
   useEffect(() => {
     // Auto-translate if requested and not own message
@@ -39,6 +41,30 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
       performTranslation();
     }
   }, [autoTranslateTo, isOwn, text]);
+
+  useEffect(() => {
+    let active = true;
+    const url = attachment?.url;
+    if (!url) { setResolvedUrl(null); return; }
+    // Oude berichten kunnen nog een volledige (publieke) URL bevatten -> direct gebruiken.
+    if (/^https?:\/\//i.test(url)) { setResolvedUrl(url); return; }
+    // Nieuw formaat: een opslagpad. Vraag een tijdelijke signed link aan de server.
+    setResolvedUrl(null);
+    (async () => {
+      try {
+        const res = await fetch('/.netlify/functions/sign-attachment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: url }),
+        });
+        const data = await res.json();
+        if (active && data?.url) setResolvedUrl(data.url);
+      } catch (e) {
+        console.error('Kon bijlage-link niet ophalen', e);
+      }
+    })();
+    return () => { active = false; };
+  }, [attachment?.url]);
 
   const performTranslation = async () => {
     if (!text) return;
@@ -78,10 +104,20 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
     const isImage = attachment.type.startsWith('image/');
     const isVideo = attachment.type.startsWith('video/');
 
+    // Bijlage-link wordt nog opgehaald (tijdelijke signed URL) -> laadindicator tonen.
+    if (!resolvedUrl) {
+      return (
+        <div className={`mt-2 flex items-center gap-2 p-3 rounded-xl border ${isOwn ? 'bg-blue-700 border-blue-500 text-blue-100' : 'bg-slate-50 border-slate-200 text-slate-400'}`}>
+          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin opacity-70" />
+          <span className="text-[10px] font-bold truncate">{attachment.name}</span>
+        </div>
+      );
+    }
+
     if (isImage) {
       return (
         <div className={`mt-2 rounded-xl overflow-hidden border shadow-sm ${isOwn ? 'bg-blue-700 border-blue-500' : 'bg-slate-50 border-slate-100'}`}>
-          <img src={attachment.url} alt={attachment.name} className="max-w-full h-auto block" />
+          <img src={resolvedUrl} alt={attachment.name} className="max-w-full h-auto block" />
           <div className={`px-3 py-2 ${isOwn ? 'bg-blue-800/50' : 'bg-white/80'} backdrop-blur-sm border-t ${isOwn ? 'border-blue-500' : 'border-slate-100'} flex items-center justify-between`}>
             <span className={`text-[10px] font-bold truncate ${isOwn ? 'text-blue-100' : 'text-slate-500'}`}>{attachment.name}</span>
           </div>
@@ -93,7 +129,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
       return (
         <div className="mt-2 rounded-xl overflow-hidden border border-slate-100 shadow-sm bg-slate-900">
           <video controls className="w-full block">
-            <source src={attachment.url} type={attachment.type} />
+            <source src={resolvedUrl} type={attachment.type} />
           </video>
           <div className="px-3 py-2 bg-slate-800 flex items-center justify-between">
             <span className="text-[10px] font-bold text-slate-300 truncate">{attachment.name}</span>
@@ -103,8 +139,8 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
     }
 
     return (
-      <a 
-        href={attachment.url} 
+      <a
+        href={resolvedUrl}
         download={attachment.name}
         className={`
           mt-2 flex items-center gap-3 p-3 rounded-xl border transition-colors

@@ -150,13 +150,28 @@ export default async (req: Request): Promise<Response> => {
     // 7. Prompt-onderdelen samenstellen
     const parts: any[] = [{ text: buildPrompt(caseTitle, initiatorName, respondentName, history) }];
 
-    // 8. Bijlage meesturen indien het triggerbericht een upload is
+    // 8. Bijlage meesturen indien het triggerbericht een upload is.
+    //    De bucket is privé: we halen het bestand op met de service-role (download op pad).
+    //    Oude berichten kunnen nog een publieke URL bevatten -> die ondersteunen we ook.
     if (record.type === 'attachment' && record.attachment_url) {
       try {
-        const fileRes = await fetch(record.attachment_url);
-        if (fileRes.ok) {
-          const buf = Buffer.from(await fileRes.arrayBuffer());
-          const mimeType = fileRes.headers.get('content-type') || 'application/octet-stream';
+        const val: string = record.attachment_url;
+        let buf: Buffer | null = null;
+        let mimeType = 'application/octet-stream';
+        if (/^https?:\/\//i.test(val)) {
+          const fileRes = await fetch(val);
+          if (fileRes.ok) {
+            buf = Buffer.from(await fileRes.arrayBuffer());
+            mimeType = fileRes.headers.get('content-type') || mimeType;
+          }
+        } else {
+          const { data: fileData, error: dlError } = await supabase.storage.from('chat-uploads').download(val);
+          if (!dlError && fileData) {
+            buf = Buffer.from(await fileData.arrayBuffer());
+            mimeType = fileData.type || mimeType;
+          }
+        }
+        if (buf) {
           parts.push({ inlineData: { mimeType, data: buf.toString('base64') } });
           parts.push({ text: '\n[Systeem info: De bovenstaande bijlage is zojuist toegevoegd aan het gesprek. Betrek dit in je reactie.]' });
         }

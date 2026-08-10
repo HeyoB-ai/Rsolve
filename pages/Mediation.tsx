@@ -365,18 +365,15 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
       const filePath = `${caseData.id}/${fileName}`;
       const { error: uploadError } = await supabase.storage.from('chat-uploads').upload(filePath, file);
       if (uploadError) throw uploadError;
-      const { data } = supabase.storage.from('chat-uploads').getPublicUrl(filePath);
 
-      if (data?.publicUrl) {
-        const tempId = 'temp-' + Date.now();
-        const tempMsg = { id: tempId, case_id: caseData.id, sender_id: myRole, sender_name: myName, content: file.name, attachment_url: data.publicUrl, type: 'attachment', created_at: new Date().toISOString() };
-        setMessages(prev => [...prev, tempMsg]);
-        const { data: insertedMsg } = await supabase.from('messages').insert([{ case_id: caseData.id, sender_id: myRole, sender_name: myName, content: file.name, attachment_url: data.publicUrl, type: 'attachment' }]).select().single();
-        if (insertedMsg) setMessages(prev => prev.map(m => m.id === tempId ? insertedMsg : m));
-
-        // De mediator analyseert de bijlage server-side (Supabase webhook -> Netlify Function);
-        // die haalt het bestand zelf op via de opgeslagen URL. Geen AI-call in de browser.
-      }
+      // Sla het OPSLAGPAD op i.p.v. een permanente publieke URL. De bucket is privé;
+      // weergave gebeurt via tijdelijke signed links (functie sign-attachment) en de
+      // mediator haalt het bestand server-side op met de service-role. Geen AI-call in de browser.
+      const tempId = 'temp-' + Date.now();
+      const tempMsg = { id: tempId, case_id: caseData.id, sender_id: myRole, sender_name: myName, content: file.name, attachment_url: filePath, type: 'attachment', created_at: new Date().toISOString() };
+      setMessages(prev => [...prev, tempMsg]);
+      const { data: insertedMsg } = await supabase.from('messages').insert([{ case_id: caseData.id, sender_id: myRole, sender_name: myName, content: file.name, attachment_url: filePath, type: 'attachment' }]).select().single();
+      if (insertedMsg) setMessages(prev => prev.map(m => m.id === tempId ? insertedMsg : m));
     } catch (error) { console.error("Upload failed", error); alert("Upload mislukt."); fetchMessages(); } finally { setIsUploading(false); if (fileInputRef.current) fileInputRef.current.value = ''; }
   };
 
