@@ -74,7 +74,7 @@ type TranslationKey =
   | 'language_title' | 'language_text' | 'when_title' | 'when_text' | 'why_title'
   | 'why_1' | 'why_2' | 'why_3' | 'why_4' | 'why_5' | 'why_6'
   | 'how_title' | 'how_step_1' | 'how_step_2' | 'how_step_3' | 'how_step_4'
-  | 'faq_title' | 'faq_1_q' | 'faq_1_a' | 'faq_2_q' | 'faq_2_a' | 'faq_3_q' | 'faq_3_a' | 'faq_4_q' | 'faq_4_a'
+  | 'faq_title' | 'faq_1_q' | 'faq_1_a' | 'faq_2_q' | 'faq_2_a' | 'faq_3_q' | 'faq_3_a' | 'faq_4_q' | 'faq_4_a' | 'faq_5_q' | 'faq_5_a'
   | 'footer_payoff' | 'footer_expats'
   | 'dossier' | 'items_collected' | 'no_evidence' | 'view_download' | 'online' | 'waiting'
   | 'placeholder' | 'settings' | 'app_lang' | 'close' | 'dossier_status' | 'invitation_sent'
@@ -138,6 +138,8 @@ const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   faq_3_a: "You only pay once. If they refuse mediation, you have proof you tried to solve it.",
   faq_4_q: "Who is Rsolve for?",
   faq_4_a: "Everyone. Employees, employers, neighbors, and partners.",
+  faq_5_q: "What if the other party doesn't comply with the settlement agreement?",
+  faq_5_a: "A settlement agreement records your arrangements in a legally binding way. If the other party still fails to comply, there is often no other route than going to court, and hiring a lawyer is usually necessary. The good news: in many cases it is precisely the party that breaks the agreement who ends up losing — a signed agreement is strong evidence. That's why putting your arrangements in a settlement agreement is always an important step in the right direction.",
   footer_payoff: "Rsolve. Solving conflict without the hassle.",
   footer_expats: "Suitable for expats and international workers.",
   dossier: "Evidence File",
@@ -291,6 +293,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     faq_3_a: "Je betaalt eenmalig voor het dossier. Reageert de ander niet? Dan heb jij in elk geval dossieropbouw dat je hebt geprobeerd het op te lossen.",
     faq_4_q: "Voor wie is Rsolve?",
     faq_4_a: "Voor iedereen: werknemers, werkgevers, buren, ex-partners en zakelijke relaties.",
+    faq_5_q: "Wat als de tegenpartij zich niet aan de vaststellingsovereenkomst houdt?",
+    faq_5_a: "Een vaststellingsovereenkomst legt jullie afspraken juridisch bindend vast. Houdt de andere partij zich er toch niet aan, dan blijft er vaak geen andere weg over dan die naar de rechter en is het inschakelen van een advocaat meestal noodzakelijk. Het goede nieuws: in veel gevallen zal juist de partij die zich niet aan de afspraken houdt de zaak verliezen — een ondertekende VSO staat immers sterk als bewijs. Daarom is het vastleggen van je afspraken in een VSO altijd al een belangrijke stap in de goede richting.",
     footer_payoff: "Rsolve. Conflict oplossen zonder gedoe.",
     footer_expats: "Ook geschikt voor expats en internationale werknemers.",
     dossier: "Bewijs Dossier",
@@ -449,6 +453,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     faq_3_a: "Pagas una vez. Si no responden, tienes prueba de haber intentado resolverlo.",
     faq_4_q: "¿Para quién es Rsolve?",
     faq_4_a: "Para todos: empleados, empleadores, vecinos y parejas.",
+    faq_5_q: "¿Qué pasa si la otra parte no cumple el acuerdo de conciliación?",
+    faq_5_a: "Un acuerdo de conciliación fija vuestros acuerdos de forma jurídicamente vinculante. Si la otra parte aun así no lo cumple, a menudo no queda otra vía que acudir a los tribunales, y normalmente es necesario contratar a un abogado. La buena noticia: en muchos casos es precisamente la parte que incumple el acuerdo la que acaba perdiendo, ya que un acuerdo firmado constituye una prueba sólida. Por eso, dejar vuestros acuerdos por escrito en un acuerdo de conciliación siempre es un paso importante en la dirección correcta.",
     footer_payoff: "Rsolve. Resolver conflictos sin líos.",
     footer_expats: "También apto para expatriados.",
     payment_received: "¡Pago Recibido!",
@@ -536,6 +542,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     faq_3_a: "Sie zahlen nur einmal. Wenn sie Mediation ablehnen, haben Sie einen Beweis, dass Sie versucht haben, es zu lösen.",
     faq_4_q: "Für wen ist Rsolve?",
     faq_4_a: "Jeden. Arbeitnehmer, Arbeitgeber, Nachbarn und Partner.",
+    faq_5_q: "Was, wenn sich die Gegenpartei nicht an die Vergleichsvereinbarung hält?",
+    faq_5_a: "Eine Vergleichsvereinbarung hält Ihre Absprachen rechtsverbindlich fest. Hält sich die andere Partei trotzdem nicht daran, bleibt oft nur der Weg zum Gericht, und die Einschaltung eines Anwalts ist meist notwendig. Die gute Nachricht: In vielen Fällen verliert gerade die Partei, die sich nicht an die Absprachen hält — eine unterschriebene Vereinbarung ist ein starkes Beweismittel. Deshalb ist das Festhalten Ihrer Absprachen in einer Vergleichsvereinbarung immer schon ein wichtiger Schritt in die richtige Richtung.",
     footer_payoff: "Rsolve. Konflikte lösen ohne Ärger.",
     footer_expats: "Geeignet für Expats und internationale Arbeitnehmer.",
     payment_received: "Zahlung erhalten!",
@@ -624,6 +632,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     faq_3_a: "Vous ne payez qu'une seule fois. S'ils refusent la médiation, vous avez la preuve que vous avez essayé de résoudre le problème.",
     faq_4_q: "Pour qui est Rsolve ?",
     faq_4_a: "Tout le monde. Employés, employeurs, voisins et partenaires.",
+    faq_5_q: "Que se passe-t-il si l'autre partie ne respecte pas l'accord transactionnel ?",
+    faq_5_a: "Un accord transactionnel fixe vos arrangements de manière juridiquement contraignante. Si l'autre partie ne le respecte pas malgré tout, il ne reste souvent d'autre voie que celle du tribunal, et le recours à un avocat est généralement nécessaire. La bonne nouvelle : dans de nombreux cas, c'est justement la partie qui ne respecte pas l'accord qui finira par perdre — un accord signé constitue une preuve solide. C'est pourquoi consigner vos arrangements dans un accord transactionnel est toujours un pas important dans la bonne direction.",
     footer_payoff: "Rsolve. Résoudre les conflits sans tracas.",
     footer_expats: "Convient aux expatriés et aux travailleurs internationaux.",
     payment_received: "Paiement reçu !",
@@ -718,6 +728,8 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     faq_3_a: "Sadece bir kez ödeme yaparsınız. Arabuluculuğu reddederlerse, çözmeye çalıştığınıza dair kanıtınız olur.",
     faq_4_q: "Rsolve kimin için?",
     faq_4_a: "Herkes. Çalışanlar, işverenler, komşular ve ortaklar.",
+    faq_5_q: "Karşı taraf sulh sözleşmesine uymazsa ne olur?",
+    faq_5_a: "Sulh sözleşmesi, üzerinde anlaştığınız hususları hukuken bağlayıcı şekilde kayıt altına alır. Karşı taraf yine de uymazsa, çoğu zaman mahkemeye başvurmaktan başka yol kalmaz ve genellikle bir avukata başvurmak gerekir. İyi haber: birçok durumda anlaşmaya uymayan taraf davayı kaybeder — imzalı bir sözleşme güçlü bir delildir. Bu yüzden anlaştığınız hususları bir sulh sözleşmesinde kayıt altına almak her zaman doğru yönde atılmış önemli bir adımdır.",
     footer_payoff: "Rsolve. Çatışmayı zahmetsizce çözme.",
     footer_expats: "Gurbetçiler ve uluslararası çalışanlar için uygundur.",
     payment_received: "Ödeme Alındı!",

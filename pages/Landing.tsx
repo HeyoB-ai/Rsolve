@@ -260,7 +260,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
            <div className="max-w-2xl mx-auto space-y-12">
               <h2 className="text-3xl font-black text-center text-slate-900">{t('faq_title')}</h2>
               <div className="space-y-6">
-                 {[1, 2, 3, 4].map(n => (
+                 {[1, 2, 3, 4, 5].map(n => (
                     <div key={n} className="border-b border-slate-100 pb-6">
                        <h3 className="text-lg font-black text-slate-900 mb-2">{t(`faq_${n}_q` as any)}</h3>
                        <p className="text-slate-600 font-medium">{t(`faq_${n}_a` as any)}</p>
