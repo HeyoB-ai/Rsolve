@@ -159,7 +159,7 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
   return (
     <div className="min-h-screen bg-slate-100 p-6 md:p-12 flex flex-col items-center animate-in fade-in duration-700">
       <div className="w-full max-w-3xl space-y-8">
-        <header className="flex justify-between items-center print:hidden">
+        <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 print:hidden">
           <div className="flex items-center gap-3">
             <Logo className="w-12 h-12" />
             <div>
@@ -183,16 +183,16 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
           </div>
         </header>
 
-        <Card className="bg-white p-12 md:p-20 shadow-2xl border-none relative overflow-hidden print:p-0 print:shadow-none rounded-[2px] min-h-[1000px]">
+        <Card className="bg-white p-5 sm:p-12 md:p-20 shadow-2xl border-none relative overflow-hidden print:p-0 print:shadow-none rounded-[2px] min-h-[600px] md:min-h-[1000px]">
           {/* Watermark */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] rotate-[15deg] select-none pointer-events-none w-full flex justify-center">
             <Logo className="w-[600px] h-[600px]" />
           </div>
 
           <div className="prose prose-slate max-w-none relative z-10">
-            <div className="text-center mb-16 border-b-2 border-slate-100 pb-10">
-              <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-2">{t('settlement_agreement')}</h2>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em]">{t('legal_accord')}</p>
+            <div className="text-center mb-10 sm:mb-16 border-b-2 border-slate-100 pb-6 sm:pb-10">
+              <h2 className="text-lg sm:text-3xl font-black text-slate-900 uppercase tracking-tight mb-2 break-words">{t('settlement_agreement')}</h2>
+              <p className="text-[9px] sm:text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] sm:tracking-[0.4em]">{t('legal_accord')}</p>
             </div>
 
             <section className="mb-12">
@@ -219,7 +219,7 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
 
             <section className="mb-12">
               <h3 className="text-xs font-black text-slate-900 mb-4 uppercase tracking-widest border-l-4 border-blue-600 pl-3">{t('section_terms')}</h3>
-              <div className="text-base text-slate-800 leading-loose whitespace-pre-wrap bg-blue-50/30 p-10 rounded-2xl border border-blue-100 font-serif shadow-inner">
+              <div className="text-base text-slate-800 leading-loose whitespace-pre-wrap bg-blue-50/30 p-5 sm:p-10 rounded-2xl border border-blue-100 font-serif shadow-inner break-words">
                 {data.terms || t('no_terms')}
               </div>
             </section>
@@ -231,7 +231,7 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
               </p>
             </section>
 
-            <div className="grid grid-cols-2 gap-16 mt-32">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-16 mt-16 sm:mt-32">
               {/* PARTY A / INITIATOR SIGNATURE BLOCK */}
               <div className="border-t-2 border-slate-900 pt-8 text-center relative">
                 <p className="text-[10px] font-black text-slate-400 mb-12 uppercase tracking-[0.3em]">
