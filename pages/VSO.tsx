@@ -26,26 +26,50 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
 
   // Load initial state and subscribe to changes
   useEffect(() => {
+    // Werk de status bij zonder een reeds gezette handtekening te wissen
+    // (voorkomt geflikker tussen de optimistische update en de database).
+    const applyCase = (c: any) => {
+      if (!c) return;
+      setCaseState((prev: any) => {
+        if (!prev) return c;
+        return {
+          ...c,
+          initiator_signature: c.initiator_signature || prev.initiator_signature,
+          respondent_signature: c.respondent_signature || prev.respondent_signature,
+          initiator_signed_at: c.initiator_signed_at || prev.initiator_signed_at,
+          respondent_signed_at: c.respondent_signed_at || prev.respondent_signed_at,
+        };
+      });
+    };
+
     const fetchCase = async () => {
       const { data: c } = await supabase.from('cases').select('*').eq('id', data.caseId).single();
-      if (c) setCaseState(c);
+      applyCase(c);
     };
 
     fetchCase();
 
     const channel = supabase.channel(`vso-${data.caseId}`)
-      .on('postgres_changes', { 
-        event: 'UPDATE', 
-        schema: 'public', 
-        table: 'cases', 
-        filter: `id=eq.${data.caseId}` 
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'cases',
+        filter: `id=eq.${data.caseId}`
       }, (payload: any) => {
-        setCaseState(payload.new);
+        applyCase(payload.new);
       })
       .subscribe();
 
+    // Fallback: pol de handtekeningstatus elke paar seconden, zodat beide partijen
+    // elkaars handtekening zien ook als realtime (nog) niet actief is voor deze tabel.
+    const interval = setInterval(fetchCase, 3000);
+    const onVisible = () => { if (document.visibilityState === 'visible') fetchCase(); };
+    document.addEventListener('visibilitychange', onVisible);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
     };
   }, [data.caseId]);
 
