@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Logo } from '../components/ui/Logo';
@@ -18,25 +18,78 @@ interface PaymentProps {
 const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLanguage }) => {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedBank, setSelectedBank] = useState('');
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
-  
+  const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+
   // Promo Code States
   const [showPromoInput, setShowPromoInput] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [promoError, setPromoError] = useState<string | null>(null);
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
 
-  const banks = ['ING', 'Rabobank', 'ABN AMRO', 'SNS', 'ASN Bank', 'RegioBank', 'Triodos Bank', 'Knab', 'Bunq', 'Revolut'];
+  // Terugkeer van Stripe Checkout: controleer server-side of er echt betaald is
+  // voordat we toegang verlenen (niet manipuleerbaar in de browser).
+  useEffect(() => {
+    if (searchParams.get('canceled')) {
+      localStorage.removeItem('rsolve_pending_order');
+      setStatusMsg('Betaling geannuleerd. Je kunt het opnieuw proberen.');
+      return;
+    }
+    if (!searchParams.get('paid')) return;
+    const orderId = localStorage.getItem('rsolve_pending_order');
+    if (!orderId) return;
 
-  const handlePayment = () => {
-    if (!selectedBank) return;
-    
     setIsProcessing(true);
-    setTimeout(() => {
-      onSuccess();
-      navigate('/invite-partner');
-    }, 2000);
+    let tries = 0;
+    const check = async () => {
+      tries++;
+      try {
+        const res = await fetch('/.netlify/functions/payment-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId }),
+        });
+        const data = await res.json();
+        if (data?.paid) {
+          localStorage.removeItem('rsolve_pending_order');
+          onSuccess();
+          navigate('/invite-partner');
+          return;
+        }
+      } catch { /* opnieuw proberen */ }
+      if (tries < 10) {
+        setTimeout(check, 1500);
+      } else {
+        setIsProcessing(false);
+        setStatusMsg('We konden de betaling nog niet bevestigen. Ververs de pagina of probeer het opnieuw.');
+      }
+    };
+    check();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handlePayment = async () => {
+    setIsProcessing(true);
+    setStatusMsg(null);
+    try {
+      const res = await fetch('/.netlify/functions/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ origin: window.location.origin }),
+      });
+      const data = await res.json();
+      if (data?.url && data?.orderId) {
+        localStorage.setItem('rsolve_pending_order', data.orderId);
+        window.location.href = data.url; // door naar Stripe Checkout
+      } else {
+        throw new Error('geen checkout-url');
+      }
+    } catch (e) {
+      console.error('Checkout starten mislukt', e);
+      setIsProcessing(false);
+      setStatusMsg('Kon de betaling niet starten. Probeer het later opnieuw.');
+    }
   };
 
   const handleVerifyPromoCode = async () => {
@@ -109,30 +162,27 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
           <div className="p-8 space-y-6">
             {!showPromoInput ? (
               <>
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1 text-center">{t('pay_via_ideal')}</label>
-                  <select 
-                    value={selectedBank}
-                    onChange={(e) => setSelectedBank(e.target.value)}
-                    className="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 font-bold text-slate-700 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
-                  >
-                    <option value="" disabled>{t('choosing_bank')}</option>
-                    {banks.map(bank => <option key={bank} value={bank}>{bank}</option>)}
-                  </select>
+                <div className="text-center space-y-1">
+                  <p className="text-sm font-bold text-slate-600">Eenmalige toegang tot je dossier</p>
+                  <p className="text-[11px] text-slate-400 font-medium">Je betaalt veilig via iDEAL of creditcard.</p>
                 </div>
 
                 <div className="space-y-4">
-                  <Button 
-                    size="lg" 
-                    className="w-full rounded-2xl py-6 text-xl font-black shadow-lg" 
+                  <Button
+                    size="lg"
+                    className="w-full rounded-2xl py-6 text-xl font-black shadow-lg"
                     onClick={handlePayment}
-                    disabled={!selectedBank || isProcessing}
+                    disabled={isProcessing}
                     isLoading={isProcessing}
                   >
                     {t('pay_btn')}
                   </Button>
-                  
-                  <button 
+
+                  {statusMsg && (
+                    <p className="text-center text-xs font-bold text-amber-600 leading-relaxed">{statusMsg}</p>
+                  )}
+
+                  <button
                     onClick={() => setShowPromoInput(true)}
                     className="w-full text-center text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-700 transition-colors py-2"
                   >

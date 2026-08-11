@@ -61,6 +61,14 @@ const App: React.FC = () => {
     else localStorage.removeItem('rsolve_final_vso');
   }, [finalVSO]);
 
+  // Terugkeer van Stripe Checkout: /payment-complete?... doorsturen naar de hash-route /#/payment
+  useEffect(() => {
+    if (window.location.pathname.startsWith('/payment-complete')) {
+      const search = window.location.search || '';
+      window.location.replace('/#/payment' + search);
+    }
+  }, []);
+
   const handleReset = () => {
     setFinalVSO(null);
     setActiveCase(null);
