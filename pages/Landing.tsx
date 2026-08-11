@@ -45,7 +45,13 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
         <Logo showText={true} className="w-10 h-10" />
         
         <div className="flex items-center gap-4">
-            <button 
+            <a
+                href="/#/zakelijk"
+                className="hidden md:block text-sm font-bold text-slate-600 hover:text-[#0b50da] transition-colors"
+            >
+                Voor bedrijven
+            </a>
+            <button
                 onClick={handleStartProcess}
                 className="hidden md:block text-sm font-bold text-[#0b50da] hover:underline"
             >
@@ -205,6 +211,30 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                  ))}
               </div>
            </div>
+        </section>
+
+        {/* Zakelijk / bundels banner */}
+        <section className="px-6 py-16 bg-white">
+          <div className="max-w-[1440px] mx-auto">
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#0b50da] to-blue-700 text-white p-10 md:p-14 shadow-2xl shadow-blue-500/20">
+              <div className="absolute top-0 right-0 w-72 h-72 bg-white rounded-full blur-[120px] opacity-10 -translate-y-1/3 translate-x-1/3 pointer-events-none"></div>
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-8 md:justify-between">
+                <div className="max-w-xl">
+                  <span className="inline-block text-[10px] font-black uppercase tracking-[0.3em] bg-white/15 px-3 py-1 rounded-full mb-4">Voor organisaties</span>
+                  <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-tight mb-3">Bundel toegangscodes — tot 50% korting</h2>
+                  <p className="text-blue-100 font-medium leading-relaxed">
+                    Werkgever, verhuurder of vereniging? Koop toegangscodes in bundel en deel ze uit wanneer er een conflict speelt — voordeliger dan losse dossiers.
+                  </p>
+                </div>
+                <a
+                  href="/#/zakelijk"
+                  className="shrink-0 bg-white text-[#0b50da] px-8 py-4 rounded-full text-lg font-black hover:bg-blue-50 transition-all shadow-xl active:scale-95 text-center whitespace-nowrap"
+                >
+                  Bekijk bundels
+                </a>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* How it works */}
