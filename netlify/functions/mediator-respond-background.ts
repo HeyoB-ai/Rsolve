@@ -98,24 +98,33 @@ export default async (req: Request): Promise<Response> => {
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
     auth: { persistSession: false },
   });
+  console.log('[mediator] DB-host:', SUPABASE_URL, '| dossier:', caseId);
 
   // 4. Lock pakken (atomair): alleen als er niet al een generatie loopt
-  //    of als een oude lock is verlopen.
-  const staleCutoff = new Date(Date.now() - LOCK_TIMEOUT_MS).toISOString();
-  const { data: locked, error: lockError } = await supabase
-    .from('cases')
-    .update({ mediator_busy: true, mediator_busy_at: new Date().toISOString() })
-    .eq('id', caseId)
-    .or(`mediator_busy.eq.false,mediator_busy_at.lt.${staleCutoff}`)
-    .select('id');
+  //    of als een oude lock is verlopen. BELANGRIJK: het slot is alleen een
+  //    optimalisatie tegen dubbele antwoorden. Als het om welke reden dan ook
+  //    faalt (bv. schema-cache), gaan we tóch door -> liever een (mogelijk
+  //    dubbel) antwoord dan een stille mediator.
+  let lockAcquired = false;
+  try {
+    const staleCutoff = new Date(Date.now() - LOCK_TIMEOUT_MS).toISOString();
+    const { data: locked, error: lockError } = await supabase
+      .from('cases')
+      .update({ mediator_busy: true, mediator_busy_at: new Date().toISOString() })
+      .eq('id', caseId)
+      .or(`mediator_busy.eq.false,mediator_busy_at.lt.${staleCutoff}`)
+      .select('id');
 
-  if (lockError) {
-    console.error('[mediator] Lock-fout:', lockError.message);
-    return new Response('Lock error', { status: 500 });
-  }
-  if (!locked || locked.length === 0) {
-    // Er loopt al een generatie voor dit dossier -> netjes stoppen.
-    return new Response('Already generating', { status: 200 });
+    if (lockError) {
+      console.error('[mediator] Slot overslaan (kon niet zetten), ga door:', lockError.message);
+    } else if (!locked || locked.length === 0) {
+      // Er loopt al een generatie voor dit dossier -> netjes stoppen.
+      return new Response('Already generating', { status: 200 });
+    } else {
+      lockAcquired = true;
+    }
+  } catch (e: any) {
+    console.error('[mediator] Slot-uitzondering, ga door:', e?.message || e);
   }
 
   try {
@@ -224,10 +233,17 @@ export default async (req: Request): Promise<Response> => {
     console.error('[mediator] Onverwachte fout:', e);
     return new Response('Error', { status: 500 });
   } finally {
-    // 11. Lock altijd vrijgeven
-    await supabase
-      .from('cases')
-      .update({ mediator_busy: false, mediator_busy_at: new Date().toISOString() })
-      .eq('id', caseId);
+    // 11. Lock vrijgeven (alleen als we 'm echt hadden, en fouten hier nooit
+    //     de functie laten crashen).
+    if (lockAcquired) {
+      try {
+        await supabase
+          .from('cases')
+          .update({ mediator_busy: false, mediator_busy_at: new Date().toISOString() })
+          .eq('id', caseId);
+      } catch (e: any) {
+        console.error('[mediator] Slot vrijgeven mislukt:', e?.message || e);
+      }
+    }
   }
 };
