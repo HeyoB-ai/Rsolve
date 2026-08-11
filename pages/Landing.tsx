@@ -254,6 +254,19 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
            </div>
         </section>
 
+        {/* Footer met links */}
+        <footer className="bg-white border-t border-slate-200 py-10 px-6">
+          <div className="max-w-3xl mx-auto flex flex-col items-center gap-4 text-center">
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
+              <a href="/#/contact" className="hover:text-[#0b50da] transition-colors">Contact</a>
+              <a href="/#/kosten" className="hover:text-[#0b50da] transition-colors">Tarieven</a>
+              <a href="/#/privacy" className="hover:text-[#0b50da] transition-colors">Privacy</a>
+              <a href="/#/terms" className="hover:text-[#0b50da] transition-colors">Voorwaarden</a>
+            </div>
+            <p className="text-[11px] text-slate-400 font-medium">© Clareco bv — Rsolve</p>
+          </div>
+        </footer>
+
       </main>
 
       <LanguageSelector 
