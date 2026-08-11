@@ -11,6 +11,7 @@ import Payment from './pages/Payment';
 import JoinCase from './pages/JoinCase';
 import InvitePartner from './pages/InvitePartner';
 import Contact from './pages/Contact';
+import Zakelijk from './pages/Zakelijk';
 
 // Marketing Boilerplates (Placeholder voor content)
 const MarketingPage = ({ title, content }: { title: string, content: string }) => (
@@ -139,6 +140,7 @@ const App: React.FC = () => {
             <Route path="/privacy" element={<MarketingPage title="Privacybeleid" content="Jouw gegevens zijn veilig. Gesprekken zijn versleuteld en we gebruiken AI-modellen die voldoen aan de strengste privacy-eisen (GDPR)." />} />
             <Route path="/terms" element={<MarketingPage title="Voorwaarden" content="Door gebruik te maken van Rsolve ga je akkoord met onze gebruikersvoorwaarden. We bieden ondersteuning bij bemiddeling, geen juridisch advies." />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/zakelijk" element={<Zakelijk />} />
 
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
