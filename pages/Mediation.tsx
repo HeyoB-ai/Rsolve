@@ -503,7 +503,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 sender={m.sender_name}
                 senderRole={m.sender_id === 'mediator' ? 'mediator' : undefined} 
                 timestamp={new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
-                autoTranslateTo={appLanguage !== 'nl' ? appLanguage : null}
+                autoTranslateTo={appLanguage}
                 targetLanguageName={UI_TRANSLATIONS[appLanguage]?.label || 'Nederlands'}
               />
             );

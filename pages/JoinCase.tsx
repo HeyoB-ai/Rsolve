@@ -5,7 +5,16 @@ import { Card } from '../components/ui/Card';
 import { Logo } from '../components/ui/Logo';
 import { supabase } from '../lib/supabase';
 import { LanguageSelector } from '../components/ui/LanguageSelector';
-import { ICONS } from '../constants';
+import { ICONS, UI_TRANSLATIONS } from '../constants';
+
+const QUICK_LANGS: { code: string; flag: string }[] = [
+  { code: 'nl', flag: '🇳🇱' },
+  { code: 'en', flag: '🇬🇧' },
+  { code: 'tr', flag: '🇹🇷' },
+  { code: 'ar', flag: '🇸🇦' },
+  { code: 'pl', flag: '🇵🇱' },
+  { code: 'es', flag: '🇪🇸' },
+];
 
 interface JoinCaseProps {
   t: (key: string, params?: any) => string;
@@ -91,6 +100,31 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLangu
       </button>
 
       <div className="w-full max-w-md space-y-8 text-center">
+        {/* Taalkeuze bij binnenkomst — ieder leest en schrijft in de eigen taal */}
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center gap-2 text-slate-400">
+            <ICONS.Globe className="w-4 h-4" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Kies je taal · Choose language</span>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {QUICK_LANGS.map(({ code, flag }) => (
+              <button
+                key={code}
+                onClick={() => setAppLanguage(code)}
+                className={`px-3 py-1.5 rounded-full text-sm font-bold border transition-all ${appLanguage === code ? 'bg-[#0b50da] text-white border-[#0b50da]' : 'bg-white text-slate-500 border-slate-200 hover:border-[#0b50da]'}`}
+              >
+                <span className="mr-1">{flag}</span>{UI_TRANSLATIONS[code]?.label || code}
+              </button>
+            ))}
+            <button
+              onClick={() => setIsLangModalOpen(true)}
+              className="px-3 py-1.5 rounded-full text-sm font-bold text-[#0b50da] hover:bg-blue-50 border border-transparent"
+            >
+              + {t('plus_more')}
+            </button>
+          </div>
+        </div>
+
         <Logo className="w-24 h-24 mx-auto mb-4" />
         
         <div className="space-y-4">

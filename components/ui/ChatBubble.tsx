@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { geminiService } from '../../services/geminiService';
 import { ICONS } from '../../constants';
 
+// Sessiebrede cache voor vertalingen, zodat dezelfde tekst niet steeds opnieuw
+// naar de vertaal-API gaat (zuiniger en sneller).
+const translationMemo = new Map<string, string>();
+
 interface Attachment {
   name: string;
   type: string;
@@ -36,11 +40,15 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    // Auto-translate if requested and not own message
-    if (autoTranslateTo && !isOwn && text && !translatedText && !isTranslating) {
+    // Toon berichten van de ander en van de mediator automatisch in de taal van de
+    // lezer. De mediator schrijft in het Nederlands, dus voor een Nederlandse lezer
+    // slaan we die vertaling over (voorkomt een onnodige call).
+    const isMediatorMsg = senderRole === 'mediator';
+    const skip = isMediatorMsg && autoTranslateTo === 'nl';
+    if (autoTranslateTo && !isOwn && text && !skip && !translatedText && !isTranslating) {
       performTranslation();
     }
-  }, [autoTranslateTo, isOwn, text]);
+  }, [autoTranslateTo, isOwn, text, senderRole]);
 
   useEffect(() => {
     let active = true;
@@ -68,9 +76,17 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
 
   const performTranslation = async () => {
     if (!text) return;
+    const cacheKey = `${targetLanguageName}::${text}`;
+    const cached = translationMemo.get(cacheKey);
+    if (cached !== undefined) {
+      setTranslatedText(cached);
+      setShowTranslation(true);
+      return;
+    }
     setIsTranslating(true);
     try {
       const result = await geminiService.translateText(text, targetLanguageName);
+      translationMemo.set(cacheKey, result);
       setTranslatedText(result);
       setShowTranslation(true); // Default to showing translation once ready
     } catch (error) {
