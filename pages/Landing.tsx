@@ -46,6 +46,12 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
         
         <div className="flex items-center gap-4">
             <a
+                href="/#/kosten-conflict"
+                className="hidden md:block text-sm font-bold text-slate-600 hover:text-[#0b50da] transition-colors"
+            >
+                Kosten van conflict
+            </a>
+            <a
                 href="/#/zakelijk"
                 className="hidden md:block text-sm font-bold text-slate-600 hover:text-[#0b50da] transition-colors"
             >
@@ -93,6 +99,12 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                    <ICONS.Clock className="w-4 h-4" />
                    <span>{t('micro_time')}</span>
                 </div>
+                <a
+                  href="/#/kosten-conflict"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border-2 border-slate-200 text-slate-700 px-8 py-3.5 rounded-full text-base font-black hover:border-[#0b50da] hover:text-[#0b50da] transition-all active:scale-95 mt-2"
+                >
+                  Wat kosten conflicten écht? <span aria-hidden>→</span>
+                </a>
               </div>
             </div>
             
@@ -282,20 +294,6 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                 {t('start_btn')}
               </button>
            </div>
-        </section>
-
-        {/* Knop naar het achtergrondartikel */}
-        <section className="px-6 pb-14 bg-white">
-          <div className="max-w-[1440px] mx-auto">
-            <a
-              href="/#/kosten-conflict"
-              className="inline-flex items-center gap-3 bg-slate-900 text-white px-7 py-4 rounded-full font-black text-sm sm:text-base hover:bg-slate-800 transition-all active:scale-95 shadow-lg"
-            >
-              <span className="w-2 h-2 rounded-full bg-blue-400 shrink-0"></span>
-              Wat kosten conflicten op de werkvloer écht? Lees het artikel
-              <span aria-hidden className="text-blue-400">→</span>
-            </a>
-          </div>
         </section>
 
         {/* Footer met links */}
