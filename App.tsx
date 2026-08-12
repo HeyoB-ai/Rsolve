@@ -12,6 +12,7 @@ import JoinCase from './pages/JoinCase';
 import InvitePartner from './pages/InvitePartner';
 import Contact from './pages/Contact';
 import Zakelijk from './pages/Zakelijk';
+import KostenConflict from './pages/KostenConflict';
 
 // Marketing Boilerplates (Placeholder voor content)
 const MarketingPage = ({ title, content }: { title: string, content: string }) => (
@@ -150,6 +151,7 @@ const App: React.FC = () => {
             <Route path="/terms" element={<MarketingPage title="Voorwaarden" content="Door gebruik te maken van Rsolve ga je akkoord met onze gebruikersvoorwaarden. We bieden ondersteuning bij bemiddeling, geen juridisch advies." />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/zakelijk" element={<Zakelijk />} />
+            <Route path="/kosten-conflict" element={<KostenConflict />} />
 
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
