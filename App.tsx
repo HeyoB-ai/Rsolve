@@ -13,6 +13,7 @@ import InvitePartner from './pages/InvitePartner';
 import Contact from './pages/Contact';
 import Zakelijk from './pages/Zakelijk';
 import KostenConflict from './pages/KostenConflict';
+import JuridischeHulp from './pages/JuridischeHulp';
 
 // Marketing Boilerplates (Placeholder voor content)
 const MarketingPage = ({ title, content }: { title: string, content: string }) => (
@@ -152,6 +153,7 @@ const App: React.FC = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/zakelijk" element={<Zakelijk />} />
             <Route path="/kosten-conflict" element={<KostenConflict />} />
+            <Route path="/juridische-hulp" element={<JuridischeHulp />} />
 
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

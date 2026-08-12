@@ -279,6 +279,16 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
                     </div>
                  ))}
               </div>
+
+              <div className="text-center pt-4">
+                <p className="text-slate-600 font-medium mb-4">Reageert de ander niet, of houdt iemand zich niet aan de afspraken?</p>
+                <a
+                  href="/#/juridische-hulp"
+                  className="inline-flex items-center gap-2 bg-slate-900 text-white px-7 py-4 rounded-full font-black text-sm hover:bg-slate-800 transition-all active:scale-95 shadow-lg"
+                >
+                  Juridische hulp aanvragen <span aria-hidden className="text-blue-400">→</span>
+                </a>
+              </div>
            </div>
         </section>
 
@@ -302,6 +312,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
               <a href="/#/zakelijk" className="hover:text-[#0b50da] transition-colors">Voor bedrijven</a>
               <a href="/#/kosten-conflict" className="hover:text-[#0b50da] transition-colors">Wat conflicten kosten</a>
+              <a href="/#/juridische-hulp" className="hover:text-[#0b50da] transition-colors">Juridische hulp</a>
               <a href="/#/contact" className="hover:text-[#0b50da] transition-colors">Contact</a>
               <a href="/#/kosten" className="hover:text-[#0b50da] transition-colors">Tarieven</a>
               <a href="/#/privacy" className="hover:text-[#0b50da] transition-colors">Privacy</a>
