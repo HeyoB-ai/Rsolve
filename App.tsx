@@ -28,7 +28,16 @@ const MarketingPage = ({ title, content }: { title: string, content: string }) =
 
 const App: React.FC = () => {
   const [appLanguage, setAppLanguage] = useState<string>(() => {
-    return localStorage.getItem('rsolve_app_lang') || 'nl';
+    // Eerder gekozen taal heeft altijd voorrang.
+    const saved = localStorage.getItem('rsolve_app_lang');
+    if (saved) return saved;
+    // Geen keuze opgeslagen -> neem de taal van de telefoon/browser over,
+    // mits die door de app ondersteund wordt. Anders val terug op Nederlands.
+    try {
+      const detected = (navigator.language || 'nl').slice(0, 2).toLowerCase();
+      if (UI_TRANSLATIONS[detected]) return detected;
+    } catch (e) { /* navigator niet beschikbaar */ }
+    return 'nl';
   });
 
   const [activeCase, setActiveCase] = useState<any>(() => {
