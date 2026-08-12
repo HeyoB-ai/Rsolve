@@ -284,6 +284,20 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
            </div>
         </section>
 
+        {/* Knop naar het achtergrondartikel */}
+        <section className="px-6 pb-14 bg-white">
+          <div className="max-w-[1440px] mx-auto">
+            <a
+              href="/#/kosten-conflict"
+              className="inline-flex items-center gap-3 bg-slate-900 text-white px-7 py-4 rounded-full font-black text-sm sm:text-base hover:bg-slate-800 transition-all active:scale-95 shadow-lg"
+            >
+              <span className="w-2 h-2 rounded-full bg-blue-400 shrink-0"></span>
+              Wat kosten conflicten op de werkvloer écht? Lees het artikel
+              <span aria-hidden className="text-blue-400">→</span>
+            </a>
+          </div>
+        </section>
+
         {/* Footer met links */}
         <footer className="bg-white border-t border-slate-200 py-10 px-6">
           <div className="max-w-3xl mx-auto flex flex-col items-center gap-4 text-center">

@@ -12,7 +12,15 @@ const KostenConflict: React.FC = () => {
   return (
     <div className="min-h-screen bg-white text-slate-800 animate-in fade-in duration-500">
       {/* Header */}
-      <header className="bg-slate-900 text-white px-6 pt-16 pb-20">
+      <header className="bg-slate-900 text-white px-6 pt-6 pb-20">
+        <div className="max-w-3xl mx-auto">
+          <a
+            href="/#/"
+            className="inline-flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-white transition-colors mb-10"
+          >
+            <span aria-hidden>←</span> Terug naar home
+          </a>
+        </div>
         <div className="max-w-3xl mx-auto text-center">
           <Logo className="w-14 h-14 mx-auto mb-6" />
           <span className="inline-block text-[10px] font-black uppercase tracking-[0.3em] text-blue-300 bg-white/10 px-3 py-1 rounded-full mb-5">Achtergrond</span>
