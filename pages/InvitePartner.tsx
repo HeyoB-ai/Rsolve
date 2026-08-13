@@ -9,6 +9,12 @@ import { Logo } from '../components/ui/Logo';
 import { supabase } from '../lib/supabase';
 import { LanguageSelector } from '../components/ui/LanguageSelector';
 
+// Geheim per-partij token: identificeert deze partij later server-side bij een export.
+const genToken = () => {
+  try { return (crypto as any).randomUUID().replace(/-/g, ''); }
+  catch { return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + Date.now().toString(36); }
+};
+
 interface InvitePartnerProps {
   onComplete: (data: any) => void;
   t: (key: string, params?: any) => string;
@@ -24,6 +30,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t, appLanguag
     otherParty: ''
   });
   const [caseId, setCaseId] = useState<string | null>(null);
+  const [caseToken, setCaseToken] = useState<string | null>(null);
   const [showInvite, setShowInvite] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -36,15 +43,17 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t, appLanguag
     
     setIsSaving(true);
     const newId = Math.random().toString(36).substr(2, 9);
-    
+    const token = genToken();
+
     // Opslaan in Supabase
     const { error } = await supabase.from('cases').insert([{
       id: newId,
       title: formData.title,
       initiator_name: formData.yourName,
       other_party: formData.otherParty,
-      initiator_id: 'local-user', 
-      respondent_joined: false
+      initiator_id: 'local-user',
+      respondent_joined: false,
+      initiator_token: token
     }]);
 
     if (!error) {
@@ -64,6 +73,7 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
       }]);
 
       setCaseId(newId);
+      setCaseToken(token);
       setShowInvite(true);
     } else {
       alert("Er ging iets mis bij het aanmaken van het dossier.");
@@ -78,12 +88,13 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
   };
 
   const handleStartMediation = () => {
-    const dataToSave = { 
+    const dataToSave = {
       id: caseId,
       title: formData.title,
       initiatorName: formData.yourName,
       otherParty: formData.otherParty,
-      isRespondent: false 
+      isRespondent: false,
+      token: caseToken
     };
     onComplete(dataToSave);
     navigate('/mediation');

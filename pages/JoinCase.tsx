@@ -16,6 +16,12 @@ const QUICK_LANGS: { code: string; flag: string }[] = [
   { code: 'es', flag: '🇪🇸' },
 ];
 
+// Geheim per-partij token: identificeert deze partij later server-side bij een export.
+const genToken = () => {
+  try { return (crypto as any).randomUUID().replace(/-/g, ''); }
+  catch { return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + Date.now().toString(36); }
+};
+
 interface JoinCaseProps {
   t: (key: string, params?: any) => string;
   onJoin: (data: any) => void;
@@ -54,9 +60,10 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLangu
     setIsJoining(true);
     
     try {
+      const token = genToken();
       await supabase
         .from('cases')
-        .update({ respondent_joined: true })
+        .update({ respondent_joined: true, respondent_token: token })
         .eq('id', id);
 
       await supabase.from('messages').insert([{
@@ -73,7 +80,8 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLangu
         initiatorName: caseInfo.initiator_name, // Neem de naam van de initiator over
         otherParty: caseInfo.initiator_name || "Initiator",
         respondentName: caseInfo.other_party,
-        isRespondent: true
+        isRespondent: true,
+        token: token
       };
 
       onJoin(activeCaseData);
