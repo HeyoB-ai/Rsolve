@@ -48,6 +48,41 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const [isGeneratingVSO, setIsGeneratingVSO] = useState(false);
   const [vsoTerms, setVsoTerms] = useState('');
 
+  // --- TIJDELIJK (Fase 2): test-knop voor Rsolve Pro dossier-export ---
+  const [showExportTest, setShowExportTest] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportResult, setExportResult] = useState<any>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const handleTestExport = async () => {
+    setShowExportTest(true);
+    setExportLoading(true);
+    setExportResult(null);
+    setExportError(null);
+    try {
+      const res = await fetch('/.netlify/functions/export-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: caseData.token || '',
+          type: 'summary',
+          language: appLanguage,
+          languageName: UI_TRANSLATIONS[appLanguage]?.label || 'Nederlands',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.ok) {
+        setExportError(data?.error || `HTTP ${res.status}`);
+      } else {
+        setExportResult(data);
+      }
+    } catch (e: any) {
+      setExportError(e?.message || 'network_error');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   // --- REFS ---
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -472,6 +507,10 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             <button onClick={() => setShowLangSelector(true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
               <ICONS.Globe className="w-5 h-5" />
             </button>
+            {/* TIJDELIJK (Fase 2): test Rsolve Pro dossier-export */}
+            <button onClick={handleTestExport} className="px-2 py-1.5 text-[10px] font-black text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors uppercase tracking-wider">
+               Pro-test
+            </button>
             <button onClick={() => setShowLeaveModal(true)} className="px-3 py-1.5 text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors uppercase tracking-wider">
                {t('leave_btn_label') || "Stop"}
             </button>
@@ -647,9 +686,73 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           </div>
         )}
 
-        <LanguageSelector 
-          isOpen={showLangSelector} 
-          onClose={() => setShowLangSelector(false)} 
+        {/* TIJDELIJK (Fase 2): resultaat van de dossier-export-test */}
+        {showExportTest && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in rounded-[24px]">
+            <Card className="w-full max-w-md p-6 space-y-4 relative overflow-hidden text-left">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-black text-slate-900">Rsolve Pro — dossier-test</h2>
+                <button onClick={() => setShowExportTest(false)} className="text-slate-400 hover:text-slate-700 text-lg font-black px-2">×</button>
+              </div>
+
+              {exportLoading && (
+                <div className="py-8 text-center space-y-3">
+                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-600 animate-pulse w-2/3 rounded-full"></div>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium">Dossier wordt server-side samengesteld…</p>
+                </div>
+              )}
+
+              {exportError && !exportLoading && (
+                <div className="bg-red-50 p-4 rounded-xl border border-red-100">
+                  <p className="text-xs font-black text-red-700 uppercase tracking-wider mb-1">Geweigerd / fout</p>
+                  <p className="text-xs text-red-800 font-mono break-all">{exportError}</p>
+                  <p className="text-[10px] text-red-500 mt-2">Bij een oud dossier zonder token is dit verwacht (server-side autorisatie).</p>
+                </div>
+              )}
+
+              {exportResult && !exportLoading && (
+                <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                      <span className="block text-slate-400 font-bold uppercase tracking-wider text-[9px]">Dossiernr.</span>
+                      <span className="font-mono font-bold text-slate-800">{exportResult.export_no}</span>
+                    </div>
+                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                      <span className="block text-slate-400 font-bold uppercase tracking-wider text-[9px]">Rol</span>
+                      <span className="font-bold text-slate-800">{exportResult.role}</span>
+                    </div>
+                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 col-span-2">
+                      <span className="block text-slate-400 font-bold uppercase tracking-wider text-[9px]">SHA-256 integriteitshash</span>
+                      <span className="font-mono text-[9px] text-slate-600 break-all">{exportResult.hash}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 text-[10px] text-slate-500 font-bold">
+                    <span>Berichten: {exportResult.counts?.messages}</span>
+                    <span>·</span>
+                    <span>Bijlagen: {exportResult.counts?.attachments}</span>
+                    <span>·</span>
+                    <span>Eigen notities: {exportResult.counts?.confidential_own}</span>
+                    <span>·</span>
+                    <span>AI: {exportResult.ai_ok ? 'ok' : 'n.v.t.'}</span>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                    <span className="block text-blue-500 font-black uppercase tracking-wider text-[9px] mb-1">Professionele samenvatting (AI)</span>
+                    <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                      {exportResult.ai_summary?.professional_summary || '(leeg)'}
+                    </p>
+                  </div>
+                  <p className="text-[9px] text-slate-400 italic leading-relaxed">{exportResult.disclaimer}</p>
+                </div>
+              )}
+            </Card>
+          </div>
+        )}
+
+        <LanguageSelector
+          isOpen={showLangSelector}
+          onClose={() => setShowLangSelector(false)}
           currentLang={appLanguage} 
           onSetLang={setAppLanguage} 
           t={t}
