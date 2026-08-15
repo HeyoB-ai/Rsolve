@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from './Button';
 import { UI_TRANSLATIONS } from '../../constants';
 
@@ -48,6 +48,7 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
   const [consent, setConsent] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState<string>('');
+  const activeRef = useRef<string | null>(null); // stopt de poll bij sluiten/opnieuw openen
 
   useEffect(() => {
     if (isOpen) {
@@ -57,37 +58,79 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
       setConsent(false);
       setResult(null);
       setErrorMsg('');
+    } else {
+      activeRef.current = null;
     }
+    return () => { activeRef.current = null; };
   }, [isOpen, appLanguage]);
 
   if (!isOpen) return null;
 
+  const genExportNo = () =>
+    `RP-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
+  // De export draait als achtergrondfunctie (geen 10s-limiet). We starten hem en
+  // pollen daarna 'export-status' tot het dossier klaar is of faalt.
   const generate = async () => {
     setStep('generating');
     setErrorMsg('');
+    const reqId = genExportNo();
+    activeRef.current = reqId;
+    const payload = {
+      token: caseData?.token || '',
+      type: docType,
+      language: docLang,
+      languageName: UI_TRANSLATIONS[docLang]?.label || 'Nederlands',
+      export_no: reqId,
+    };
+
     try {
-      const res = await fetch('/.netlify/functions/export-generate', {
+      await fetch('/.netlify/functions/export-generate-background', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token: caseData?.token || '',
-          type: docType,
-          language: docLang,
-          languageName: UI_TRANSLATIONS[docLang]?.label || 'Nederlands',
-        }),
+        body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      if (!res.ok || !data?.ok) {
-        setErrorMsg(String(data?.error || `HTTP ${res.status}`));
-        setStep('error');
-        return;
-      }
-      setResult(data);
-      setStep('result');
     } catch (e: any) {
       setErrorMsg(e?.message || 'network_error');
       setStep('error');
+      return;
     }
+
+    const startedAt = Date.now();
+    const POLL_TIMEOUT_MS = 180000; // 3 minuten
+    const POLL_INTERVAL_MS = 2500;
+
+    const poll = async () => {
+      if (activeRef.current !== reqId) return; // wizard gesloten/opnieuw gestart
+      if (Date.now() - startedAt > POLL_TIMEOUT_MS) {
+        setErrorMsg('timeout');
+        setStep('error');
+        return;
+      }
+      try {
+        const res = await fetch('/.netlify/functions/export-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: caseData?.token || '', export_no: reqId }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (activeRef.current !== reqId) return;
+        if (data?.status === 'rendered') {
+          setResult(data);
+          setStep('result');
+          return;
+        }
+        if (data?.status === 'failed') {
+          setErrorMsg(String(data?.error || 'generation_failed'));
+          setStep('error');
+          return;
+        }
+        setTimeout(poll, POLL_INTERVAL_MS); // pending/processing → blijf pollen
+      } catch {
+        setTimeout(poll, 3500); // tijdelijke fout → doorgaan tot de timeout
+      }
+    };
+    setTimeout(poll, POLL_INTERVAL_MS);
   };
 
   const StepDots = () => {
