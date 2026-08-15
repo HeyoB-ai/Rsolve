@@ -743,6 +743,20 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                       {exportResult.ai_summary?.professional_summary || '(leeg)'}
                     </p>
                   </div>
+                  {exportResult.pdf_ready && exportResult.pdf_url ? (
+                    <a
+                      href={exportResult.pdf_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl transition-colors text-sm shadow-lg"
+                    >
+                      Download PDF-dossier
+                    </a>
+                  ) : (
+                    <p className="text-[10px] text-amber-600 font-bold">
+                      PDF niet beschikbaar{exportResult.pdf_error ? `: ${exportResult.pdf_error}` : ''}
+                    </p>
+                  )}
                   <p className="text-[9px] text-slate-400 italic leading-relaxed">{exportResult.disclaimer}</p>
                 </div>
               )}
