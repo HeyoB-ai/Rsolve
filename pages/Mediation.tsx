@@ -8,6 +8,7 @@ import { geminiService } from '../services/geminiService';
 import { supabase } from '../lib/supabase';
 import { Card } from '../components/ui/Card';
 import { LanguageSelector } from '../components/ui/LanguageSelector';
+import { RsolveProWizard } from '../components/ui/RsolveProWizard';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 // --- CONSTANTS ---
@@ -48,40 +49,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
   const [isGeneratingVSO, setIsGeneratingVSO] = useState(false);
   const [vsoTerms, setVsoTerms] = useState('');
 
-  // --- TIJDELIJK (Fase 2): test-knop voor Rsolve Pro dossier-export ---
-  const [showExportTest, setShowExportTest] = useState(false);
-  const [exportLoading, setExportLoading] = useState(false);
-  const [exportResult, setExportResult] = useState<any>(null);
-  const [exportError, setExportError] = useState<string | null>(null);
-
-  const handleTestExport = async () => {
-    setShowExportTest(true);
-    setExportLoading(true);
-    setExportResult(null);
-    setExportError(null);
-    try {
-      const res = await fetch('/.netlify/functions/export-generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token: caseData.token || '',
-          type: 'summary',
-          language: appLanguage,
-          languageName: UI_TRANSLATIONS[appLanguage]?.label || 'Nederlands',
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data?.ok) {
-        setExportError(data?.error || `HTTP ${res.status}`);
-      } else {
-        setExportResult(data);
-      }
-    } catch (e: any) {
-      setExportError(e?.message || 'network_error');
-    } finally {
-      setExportLoading(false);
-    }
-  };
+  // --- Rsolve Pro (Fase 4): wizard voor het overdrachtsdossier ---
+  const [showProWizard, setShowProWizard] = useState(false);
 
   // --- REFS ---
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -507,9 +476,9 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             <button onClick={() => setShowLangSelector(true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
               <ICONS.Globe className="w-5 h-5" />
             </button>
-            {/* TIJDELIJK (Fase 2): test Rsolve Pro dossier-export */}
-            <button onClick={handleTestExport} className="px-2 py-1.5 text-[10px] font-black text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors uppercase tracking-wider">
-               Pro-test
+            {/* Rsolve Pro — overdrachtsdossier genereren */}
+            <button onClick={() => setShowProWizard(true)} className="px-2.5 py-1.5 text-[10px] font-black text-white bg-[#0b50da] hover:bg-blue-700 rounded-lg transition-colors uppercase tracking-wider shadow-sm">
+               {t('pro_header_btn')}
             </button>
             <button onClick={() => setShowLeaveModal(true)} className="px-3 py-1.5 text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors uppercase tracking-wider">
                {t('leave_btn_label') || "Stop"}
@@ -638,6 +607,22 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                   </p>
                 </div>
                 <p className="text-xs text-slate-400 mt-4 font-medium">{t('leave_modal_desc')}</p>
+
+                {/* Upsell: overdrachtsdossier voordat je stopt (geen oplossing bereikt) */}
+                <div className="mt-4 bg-blue-50 p-4 rounded-xl border border-blue-100 text-left">
+                  <div className="flex gap-2 mb-1.5 items-center">
+                    <span className="text-[10px] font-black text-[#0b50da] bg-white px-1.5 py-0.5 rounded uppercase tracking-wider">Rsolve Pro</span>
+                    <span className="text-xs font-black text-blue-800">{t('pro_upsell_title')}</span>
+                  </div>
+                  <p className="text-xs text-blue-900/80 font-medium leading-relaxed mb-3">{t('pro_upsell_text')}</p>
+                  <Button
+                    size="sm"
+                    className="w-full rounded-xl bg-[#0b50da] hover:bg-blue-700"
+                    onClick={() => { setShowLeaveModal(false); setShowProWizard(true); }}
+                  >
+                    {t('pro_upsell_btn')}
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Button variant="outline" onClick={() => setShowLeaveModal(false)}>{t('leave_cancel')}</Button>
@@ -686,83 +671,14 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           </div>
         )}
 
-        {/* TIJDELIJK (Fase 2): resultaat van de dossier-export-test */}
-        {showExportTest && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in rounded-[24px]">
-            <Card className="w-full max-w-md p-6 space-y-4 relative overflow-hidden text-left">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-black text-slate-900">Rsolve Pro — dossier-test</h2>
-                <button onClick={() => setShowExportTest(false)} className="text-slate-400 hover:text-slate-700 text-lg font-black px-2">×</button>
-              </div>
-
-              {exportLoading && (
-                <div className="py-8 text-center space-y-3">
-                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-600 animate-pulse w-2/3 rounded-full"></div>
-                  </div>
-                  <p className="text-xs text-slate-500 font-medium">Dossier wordt server-side samengesteld…</p>
-                </div>
-              )}
-
-              {exportError && !exportLoading && (
-                <div className="bg-red-50 p-4 rounded-xl border border-red-100">
-                  <p className="text-xs font-black text-red-700 uppercase tracking-wider mb-1">Geweigerd / fout</p>
-                  <p className="text-xs text-red-800 font-mono break-all">{exportError}</p>
-                  <p className="text-[10px] text-red-500 mt-2">Bij een oud dossier zonder token is dit verwacht (server-side autorisatie).</p>
-                </div>
-              )}
-
-              {exportResult && !exportLoading && (
-                <div className="space-y-3 max-h-[60vh] overflow-y-auto">
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                      <span className="block text-slate-400 font-bold uppercase tracking-wider text-[9px]">Dossiernr.</span>
-                      <span className="font-mono font-bold text-slate-800">{exportResult.export_no}</span>
-                    </div>
-                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                      <span className="block text-slate-400 font-bold uppercase tracking-wider text-[9px]">Rol</span>
-                      <span className="font-bold text-slate-800">{exportResult.role}</span>
-                    </div>
-                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 col-span-2">
-                      <span className="block text-slate-400 font-bold uppercase tracking-wider text-[9px]">SHA-256 integriteitshash</span>
-                      <span className="font-mono text-[9px] text-slate-600 break-all">{exportResult.hash}</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 text-[10px] text-slate-500 font-bold">
-                    <span>Berichten: {exportResult.counts?.messages}</span>
-                    <span>·</span>
-                    <span>Bijlagen: {exportResult.counts?.attachments}</span>
-                    <span>·</span>
-                    <span>Eigen notities: {exportResult.counts?.confidential_own}</span>
-                    <span>·</span>
-                    <span>AI: {exportResult.ai_ok ? 'ok' : 'n.v.t.'}</span>
-                  </div>
-                  <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
-                    <span className="block text-blue-500 font-black uppercase tracking-wider text-[9px] mb-1">Professionele samenvatting (AI)</span>
-                    <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
-                      {exportResult.ai_summary?.professional_summary || '(leeg)'}
-                    </p>
-                  </div>
-                  {exportResult.pdf_ready && exportResult.pdf_url ? (
-                    <a
-                      href={exportResult.pdf_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl transition-colors text-sm shadow-lg"
-                    >
-                      Download PDF-dossier
-                    </a>
-                  ) : (
-                    <p className="text-[10px] text-amber-600 font-bold">
-                      PDF niet beschikbaar{exportResult.pdf_error ? `: ${exportResult.pdf_error}` : ''}
-                    </p>
-                  )}
-                  <p className="text-[9px] text-slate-400 italic leading-relaxed">{exportResult.disclaimer}</p>
-                </div>
-              )}
-            </Card>
-          </div>
-        )}
+        {/* Rsolve Pro — begeleide wizard voor het overdrachtsdossier */}
+        <RsolveProWizard
+          isOpen={showProWizard}
+          onClose={() => setShowProWizard(false)}
+          caseData={caseData}
+          appLanguage={appLanguage}
+          t={t}
+        />
 
         <LanguageSelector
           isOpen={showLangSelector}
