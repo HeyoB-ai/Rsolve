@@ -241,10 +241,30 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
           )}
 
           {step === 'generating' && (
-            <div className="py-10 text-center space-y-4">
-              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div className="h-full bg-[#0b50da] animate-pulse w-2/3 rounded-full" />
-              </div>
+            <div className="py-10 text-center space-y-5">
+              <style>{`@keyframes rp-clock-spin { to { transform: rotate(360deg); } }`}</style>
+              <svg viewBox="0 0 64 64" className="w-20 h-20 mx-auto" role="img" aria-label="loading">
+                <circle cx="32" cy="32" r="28" fill="#eff6ff" stroke="#dbeafe" strokeWidth="4" />
+                <g stroke="#bfdbfe" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="32" y1="9" x2="32" y2="14" />
+                  <line x1="32" y1="55" x2="32" y2="50" />
+                  <line x1="9" y1="32" x2="14" y2="32" />
+                  <line x1="55" y1="32" x2="50" y2="32" />
+                </g>
+                {/* uur-wijzer (langzaam) */}
+                <line
+                  x1="32" y1="32" x2="43" y2="32"
+                  stroke="#93c5fd" strokeWidth="3.5" strokeLinecap="round"
+                  style={{ transformBox: 'view-box', transformOrigin: '32px 32px', animation: 'rp-clock-spin 6s linear infinite' }}
+                />
+                {/* minuut-wijzer (sneller) */}
+                <line
+                  x1="32" y1="32" x2="32" y2="16"
+                  stroke="#0b50da" strokeWidth="3.5" strokeLinecap="round"
+                  style={{ transformBox: 'view-box', transformOrigin: '32px 32px', animation: 'rp-clock-spin 1.6s linear infinite' }}
+                />
+                <circle cx="32" cy="32" r="3" fill="#0b50da" />
+              </svg>
               <p className="text-sm text-slate-500 font-medium">{t('pro_generating')}</p>
             </div>
           )}
