@@ -107,7 +107,15 @@ type TranslationKey =
   | 'pro_next' | 'pro_back' | 'pro_close' | 'pro_retry'
   | 'pro_error_title' | 'pro_error_text' | 'pro_result_title' | 'pro_result_docnr' | 'pro_result_items' | 'pro_result_hash'
   | 'pro_download_btn' | 'pro_pdf_unavailable'
-  | 'pro_upsell_title' | 'pro_upsell_text' | 'pro_upsell_btn';
+  | 'pro_upsell_title' | 'pro_upsell_text' | 'pro_upsell_btn'
+  // Rsolve — "Stap verder" (juridische doorverwijzing)
+  | 'sv_offer_title' | 'sv_offer_text' | 'sv_offer_yes' | 'sv_offer_no'
+  | 'sv_income_title' | 'sv_income_text' | 'sv_income_lawyer' | 'sv_income_lawyer_desc' | 'sv_income_low' | 'sv_income_low_desc'
+  | 'sv_loket_title' | 'sv_loket_text' | 'sv_loket_note' | 'sv_loket_link_btn' | 'sv_loket_dossier_btn'
+  | 'sv_contact_title' | 'sv_contact_text' | 'sv_contact_name' | 'sv_contact_email' | 'sv_contact_phone'
+  | 'sv_consent_text' | 'sv_processing' | 'sv_processing_btn' | 'sv_submit_btn'
+  | 'sv_done_title' | 'sv_done_text' | 'sv_done_download'
+  | 'sv_error_title' | 'sv_error_text' | 'sv_back' | 'sv_close' | 'sv_download_dossier';
 
 const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   label: "English",
@@ -296,7 +304,40 @@ const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   pro_pdf_unavailable: "PDF unavailable",
   pro_upsell_title: "No solution yet?",
   pro_upsell_text: "Generate a professional handover file to give to a lawyer, mediator or HR. It shows that you tried to resolve it together.",
-  pro_upsell_btn: "Create handover file"
+  pro_upsell_btn: "Create handover file",
+  // Stap verder (legal referral)
+  sv_offer_title: "Shall we take a step further?",
+  sv_offer_text: "This conversation seems to have stalled. Would you like to take a step further and look for legal help?",
+  sv_offer_yes: "Yes, find legal help",
+  sv_offer_no: "No, go back",
+  sv_income_title: "Which help suits you?",
+  sv_income_text: "To point you to the right help: can you afford a lawyer, or is your income too low?",
+  sv_income_lawyer: "I'm looking for a lawyer",
+  sv_income_lawyer_desc: "We anonymously present your case to a specialised law firm that matches your issue.",
+  sv_income_low: "My income is low",
+  sv_income_low_desc: "You can get free legal help from Het Juridisch Loket (the Dutch legal aid desk).",
+  sv_loket_title: "Free legal help",
+  sv_loket_text: "With a lower income you can turn to Het Juridisch Loket free of charge. They give independent legal advice and can help you further.",
+  sv_loket_note: "You can generate your case file below to take along to your appointment.",
+  sv_loket_link_btn: "Go to Het Juridisch Loket",
+  sv_loket_dossier_btn: "Create my file to take along",
+  sv_contact_title: "Your details",
+  sv_contact_text: "Leave your details so a matching law firm can contact you. We first share only an anonymous summary; your full file follows only once a firm takes on the case and you agree.",
+  sv_contact_name: "Your name",
+  sv_contact_email: "Email address",
+  sv_contact_phone: "Phone (optional)",
+  sv_consent_text: "I agree that Rsolve shares an anonymised summary of my case with a specialised law firm. Full details are shared only after a firm wants to take on the case and I have agreed.",
+  sv_processing: "We are preparing your request securely...",
+  sv_processing_btn: "Preparing...",
+  sv_submit_btn: "Send request",
+  sv_done_title: "Request received",
+  sv_done_text: "We will present an anonymous summary of your case to a specialised law firm. They will contact you via Rsolve. You can download your own file below.",
+  sv_done_download: "Download my file",
+  sv_error_title: "Something went wrong",
+  sv_error_text: "Your request could not be sent. Please try again in a moment.",
+  sv_back: "Back",
+  sv_close: "Close",
+  sv_download_dossier: "Download my file"
 };
 
 // Partial overrides for other languages (using English as fallback for missing keys)
@@ -489,7 +530,40 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     pro_pdf_unavailable: "PDF niet beschikbaar",
     pro_upsell_title: "Nog geen oplossing?",
     pro_upsell_text: "Genereer een professioneel overdrachtsdossier om aan een advocaat, mediator of HR te geven. Het laat zien dat je hebt geprobeerd om het samen op te lossen.",
-    pro_upsell_btn: "Maak overdrachtsdossier"
+    pro_upsell_btn: "Maak overdrachtsdossier",
+    // Stap verder (juridische doorverwijzing)
+    sv_offer_title: "Zullen we een stap verder gaan?",
+    sv_offer_text: "Dit gesprek lijkt vast te lopen. Wil je een stap verder gaan en juridische hulp zoeken?",
+    sv_offer_yes: "Ja, zoek juridische hulp",
+    sv_offer_no: "Nee, ga terug",
+    sv_income_title: "Welke hulp past bij jou?",
+    sv_income_text: "Om je de juiste hulp te wijzen: kun je een advocaat betalen, of is je inkomen te laag?",
+    sv_income_lawyer: "Ik zoek een advocaat",
+    sv_income_lawyer_desc: "We bieden je zaak anoniem aan bij een gespecialiseerd advocatenkantoor dat bij je kwestie past.",
+    sv_income_low: "Mijn inkomen is laag",
+    sv_income_low_desc: "Je kunt gratis terecht bij Het Juridisch Loket voor onafhankelijk juridisch advies.",
+    sv_loket_title: "Gratis juridische hulp",
+    sv_loket_text: "Met een lager inkomen kun je kosteloos terecht bij Het Juridisch Loket. Zij geven onafhankelijk juridisch advies en kunnen je verder helpen.",
+    sv_loket_note: "Je kunt hieronder je dossier aanmaken om mee te nemen naar je afspraak.",
+    sv_loket_link_btn: "Naar Het Juridisch Loket",
+    sv_loket_dossier_btn: "Maak mijn dossier om mee te nemen",
+    sv_contact_title: "Jouw gegevens",
+    sv_contact_text: "Laat je gegevens achter zodat een passend advocatenkantoor contact met je kan opnemen. We delen eerst alleen een anonieme samenvatting; je volledige dossier volgt pas als een kantoor de zaak wil oppakken en jij akkoord gaat.",
+    sv_contact_name: "Je naam",
+    sv_contact_email: "E-mailadres",
+    sv_contact_phone: "Telefoon (optioneel)",
+    sv_consent_text: "Ik geef toestemming dat Rsolve een geanonimiseerde samenvatting van mijn zaak deelt met een gespecialiseerd advocatenkantoor. Volledige gegevens worden pas gedeeld nadat een kantoor de zaak wil oppakken en ik daarmee akkoord ben gegaan.",
+    sv_processing: "We stellen je aanvraag veilig samen...",
+    sv_processing_btn: "Bezig met samenstellen...",
+    sv_submit_btn: "Verstuur aanvraag",
+    sv_done_title: "Aanvraag ontvangen",
+    sv_done_text: "We bieden een anonieme samenvatting van je zaak aan bij een gespecialiseerd advocatenkantoor. Zij nemen via Rsolve contact met je op. Je kunt hieronder je eigen dossier downloaden.",
+    sv_done_download: "Download mijn dossier",
+    sv_error_title: "Er ging iets mis",
+    sv_error_text: "Je aanvraag kon niet worden verstuurd. Probeer het zo dadelijk opnieuw.",
+    sv_back: "Terug",
+    sv_close: "Sluiten",
+    sv_download_dossier: "Download mijn dossier"
   }),
   en: BASE_TRANSLATIONS,
   es: createLang("Español", {

@@ -42,6 +42,8 @@ const SUMMARY_KEYS = [
   'conflict_description', 'chronology', 'standpoint_a', 'standpoint_b',
   'interests_a', 'interests_b', 'agreements', 'disagreements', 'amounts_dates',
   'proposals', 'partial_agreement', 'current_status', 'open_questions', 'professional_summary',
+  // Voor de 'stap verder'-flow (juridische doorverwijzing):
+  'category', 'anonymized_teaser',
 ];
 
 // -- Tekst-sanering: StandardFont (WinAnsi) dekt Latijn-1 volledig; overige
@@ -491,8 +493,14 @@ Retourneer UITSLUITEND geldige JSON met exact deze sleutels:
  "partial_agreement": string,
  "current_status": string,
  "open_questions": [string],
- "professional_summary": string
+ "professional_summary": string,
+ "category": "arbeidsconflict"|"huurgeschil"|"burenconflict"|"familie_relatie"|"zakelijk_contract"|"geld_lening"|"consument"|"overig",
+ "anonymized_teaser": string
 }
+
+EXTRA VELDEN:
+- "category": kies de één best passende categorie uit de lijst hierboven.
+- "anonymized_teaser": een KORTE, VOLLEDIG GEANONIMISEERDE omschrijving (max 4 zinnen) waarmee een advocaat kan beoordelen of hij de zaak wil oppakken, ZONDER dat iemand te identificeren is. Dit is geen pseudonimisering: laat namen, bedrijfsnamen, adressen, exacte bedragen, exacte data en unieke/zeldzame details WEG. Beschrijf alleen: het type geschil, de kern van wat er speelt, en wat de verzoekende partij zoekt. Voorbeeld-stijl: "Een werknemer heeft een arbeidsconflict met de werkgever over een beëindiging; er is bemiddeld maar partijen komen er niet uit. Verzoeker zoekt advies over zijn rechtspositie." Gebruik globale, niet-herleidbare formuleringen.
 
 GESPREK (Partij A = ${initiatorName}, Partij B = ${respondentName}):
 ${transcript}`;

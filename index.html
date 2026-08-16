@@ -30,6 +30,17 @@
       <input type="text" name="onderwerp" />
       <textarea name="bericht"></textarea>
     </form>
+    <!-- Verborgen formulier voor de "stap verder"-flow: interne inbox met de GEANONIMISEERDE teaser -->
+    <form name="stap-verder-aanvraag" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="text" name="naam" />
+      <input type="email" name="email" />
+      <input type="tel" name="telefoon" />
+      <input type="text" name="route" />
+      <input type="text" name="thema" />
+      <input type="text" name="dossiernr" />
+      <input type="text" name="case_ref" />
+      <textarea name="anonieme_samenvatting"></textarea>
+    </form>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
 </body>

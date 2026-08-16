@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase';
 import { Card } from '../components/ui/Card';
 import { LanguageSelector } from '../components/ui/LanguageSelector';
 import { RsolveProWizard } from '../components/ui/RsolveProWizard';
+import { StapVerderFlow } from '../components/ui/StapVerderFlow';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 // --- CONSTANTS ---
@@ -51,6 +52,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   // --- Rsolve Pro (Fase 4): wizard voor het overdrachtsdossier ---
   const [showProWizard, setShowProWizard] = useState(false);
+  // --- "Stap verder": juridische doorverwijzing bij een vastgelopen gesprek ---
+  const [showStapVerder, setShowStapVerder] = useState(false);
 
   // --- REFS ---
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -608,19 +611,19 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 </div>
                 <p className="text-xs text-slate-400 mt-4 font-medium">{t('leave_modal_desc')}</p>
 
-                {/* Upsell: overdrachtsdossier voordat je stopt (geen oplossing bereikt) */}
+                {/* Bij vastlopen: bied een stap verder aan (juridische hulp) */}
                 <div className="mt-4 bg-blue-50 p-4 rounded-xl border border-blue-100 text-left">
                   <div className="flex gap-2 mb-1.5 items-center">
-                    <span className="text-[10px] font-black text-[#0b50da] bg-white px-1.5 py-0.5 rounded uppercase tracking-wider">Rsolve Pro</span>
-                    <span className="text-xs font-black text-blue-800">{t('pro_upsell_title')}</span>
+                    <span className="text-[10px] font-black text-[#0b50da] bg-white px-1.5 py-0.5 rounded uppercase tracking-wider">Rsolve</span>
+                    <span className="text-xs font-black text-blue-800">{t('sv_offer_title')}</span>
                   </div>
-                  <p className="text-xs text-blue-900/80 font-medium leading-relaxed mb-3">{t('pro_upsell_text')}</p>
+                  <p className="text-xs text-blue-900/80 font-medium leading-relaxed mb-3">{t('sv_offer_text')}</p>
                   <Button
                     size="sm"
                     className="w-full rounded-xl bg-[#0b50da] hover:bg-blue-700"
-                    onClick={() => { setShowLeaveModal(false); setShowProWizard(true); }}
+                    onClick={() => { setShowLeaveModal(false); setShowStapVerder(true); }}
                   >
-                    {t('pro_upsell_btn')}
+                    {t('sv_offer_yes')}
                   </Button>
                 </div>
               </div>
@@ -675,6 +678,15 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         <RsolveProWizard
           isOpen={showProWizard}
           onClose={() => setShowProWizard(false)}
+          caseData={caseData}
+          appLanguage={appLanguage}
+          t={t}
+        />
+
+        {/* "Stap verder" — juridische doorverwijzing bij vastgelopen gesprek */}
+        <StapVerderFlow
+          isOpen={showStapVerder}
+          onClose={() => setShowStapVerder(false)}
           caseData={caseData}
           appLanguage={appLanguage}
           t={t}
