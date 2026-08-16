@@ -41,6 +41,17 @@
       <input type="text" name="case_ref" />
       <textarea name="anonieme_samenvatting"></textarea>
     </form>
+    <!-- Verborgen formulier voor partneraanmeldingen (advocaten/juristen die willen adverteren) -->
+    <form name="partner-aanmelding" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="text" name="kantoornaam" />
+      <input type="text" name="contactpersoon" />
+      <input type="email" name="email" />
+      <input type="tel" name="telefoon" />
+      <input type="text" name="rechtsgebieden" />
+      <input type="text" name="regio" />
+      <input type="text" name="website" />
+      <textarea name="bericht"></textarea>
+    </form>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
 </body>

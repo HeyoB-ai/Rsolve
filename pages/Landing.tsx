@@ -313,6 +313,7 @@ const Landing: React.FC<LandingProps> = ({ appLanguage, setAppLanguage, t, setHa
               <a href="/#/zakelijk" className="hover:text-[#0b50da] transition-colors">Voor bedrijven</a>
               <a href="/#/kosten-conflict" className="hover:text-[#0b50da] transition-colors">Wat conflicten kosten</a>
               <a href="/#/juridische-hulp" className="hover:text-[#0b50da] transition-colors">Juridische hulp</a>
+              <a href="/#/partners" className="hover:text-[#0b50da] transition-colors">Voor advocaten</a>
               <a href="/#/contact" className="hover:text-[#0b50da] transition-colors">Contact</a>
               <a href="/#/kosten" className="hover:text-[#0b50da] transition-colors">Tarieven</a>
               <a href="/#/privacy" className="hover:text-[#0b50da] transition-colors">Privacy</a>
