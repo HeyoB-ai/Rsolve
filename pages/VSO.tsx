@@ -43,7 +43,12 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
     };
 
     const fetchCase = async () => {
-      const { data: c } = await supabase.from('cases').select('*').eq('id', data.caseId).single();
+      // Alleen de handtekening-status ophalen — nooit de geheime tokens.
+      const { data: c } = await supabase
+        .from('cases')
+        .select('id, initiator_signature, respondent_signature, initiator_signed_at, respondent_signed_at')
+        .eq('id', data.caseId)
+        .single();
       applyCase(c);
     };
 

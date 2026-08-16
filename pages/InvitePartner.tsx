@@ -15,6 +15,12 @@ const genToken = () => {
   catch { return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + Date.now().toString(36); }
 };
 
+// Dossier-ID: cryptografisch sterke, niet-raadbare id (i.p.v. het zwakke Math.random).
+const genId = () => {
+  try { return (crypto as any).randomUUID().replace(/-/g, '').slice(0, 12); }
+  catch { return Math.random().toString(36).slice(2, 11); }
+};
+
 interface InvitePartnerProps {
   onComplete: (data: any) => void;
   t: (key: string, params?: any) => string;
@@ -42,7 +48,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t, appLanguag
     if (!formData.title || !formData.otherParty || !formData.yourName) return;
     
     setIsSaving(true);
-    const newId = Math.random().toString(36).substr(2, 9);
+    const newId = genId();
     const token = genToken();
 
     // Opslaan in Supabase

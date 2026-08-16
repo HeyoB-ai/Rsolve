@@ -40,9 +40,10 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLangu
   useEffect(() => {
     const fetchCase = async () => {
       if (!id) return;
+      // Alleen de velden die de uitnodigingspagina nodig heeft — nooit de geheime tokens.
       const { data, error } = await supabase
         .from('cases')
-        .select('*')
+        .select('id, title, initiator_name, other_party, respondent_joined, created_at')
         .eq('id', id)
         .single();
       
