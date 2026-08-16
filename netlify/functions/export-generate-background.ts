@@ -399,6 +399,27 @@ export default async (req: Request): Promise<Response> => {
     }
   };
 
+  // Rate limiting per IP — beschermt tegen misbruik en AI-kosten.
+  // Fail-open: als de check faalt (bijv. functie nog niet aangemaakt), gaan we door.
+  const clientIp =
+    req.headers.get('x-nf-client-connection-ip') ||
+    (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() ||
+    'onbekend';
+  try {
+    const { data: allowed, error: rlErr } = await supabase.rpc('rl_check', {
+      p_key: `export:${clientIp}`, p_max: 10, p_window_seconds: 600,
+    });
+    if (!rlErr && allowed === false) {
+      await writeStatus({
+        export_no: exportNo, case_id: caseId, requested_by_role: role, type, language,
+        status: 'failed', version: 1, consent_version: CONSENT_VERSION,
+      }, { ok: false, export_no: exportNo, status: 'failed', error: 'rate_limited' });
+      return json({ ok: false, status: 'rate_limited' }, 202);
+    }
+  } catch (e: any) {
+    console.error('[export-bg] rate-limit-check faalde (doorgaan):', e?.message || e);
+  }
+
   // Vroege 'processing'-status zodat de wizard meteen voortgang ziet.
   await writeStatus({
     export_no: exportNo, case_id: caseId, requested_by_role: role, type, language,
