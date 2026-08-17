@@ -100,10 +100,10 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLangu
   if (!caseInfo) return <div className="p-6 text-center animate-pulse uppercase tracking-widest font-black">{t('loading')}</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500 relative">
-      <button 
+    <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500 relative">
+      <button
         onClick={() => setIsLangModalOpen(true)}
-        className="absolute top-6 right-6 p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-[#0b50da]"
+        className="absolute top-6 right-6 p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-400 hover:text-cyan-400"
       >
         <ICONS.Globe className="w-5 h-5" />
       </button>
@@ -120,14 +120,14 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLangu
               <button
                 key={code}
                 onClick={() => setAppLanguage(code)}
-                className={`px-3 py-1.5 rounded-full text-sm font-bold border transition-all ${appLanguage === code ? 'bg-[#0b50da] text-white border-[#0b50da]' : 'bg-white text-slate-500 border-slate-200 hover:border-[#0b50da]'}`}
+                className={`px-3 py-1.5 rounded-full text-sm font-bold border transition-all ${appLanguage === code ? 'bg-cyan-500 text-slate-950 border-cyan-500' : 'bg-slate-800 text-slate-300 border-slate-700 hover:border-cyan-400'}`}
               >
                 <span className="mr-1">{flag}</span>{UI_TRANSLATIONS[code]?.label || code}
               </button>
             ))}
             <button
               onClick={() => setIsLangModalOpen(true)}
-              className="px-3 py-1.5 rounded-full text-sm font-bold text-[#0b50da] hover:bg-blue-50 border border-transparent"
+              className="px-3 py-1.5 rounded-full text-sm font-bold text-cyan-400 hover:bg-slate-800 border border-transparent"
             >
               + {t('plus_more')}
             </button>
@@ -137,17 +137,17 @@ const JoinCase: React.FC<JoinCaseProps> = ({ t, onJoin, appLanguage, setAppLangu
         <Logo className="w-24 h-24 mx-auto mb-4" />
         
         <div className="space-y-4">
-          <h1 className="text-3xl font-black text-slate-900 leading-tight">{t('invited_header')}</h1>
-          <p className="text-slate-500 font-medium px-4">
-            <span className="font-black text-slate-900">{caseInfo.initiator_name}</span> wil een conflict met je oplossen via Rsolve: <br/>
-            <span className="text-blue-600 font-bold italic">"{caseInfo.title}"</span>
+          <h1 className="text-3xl font-black text-white leading-tight">{t('invited_header')}</h1>
+          <p className="text-slate-400 font-medium px-4">
+            <span className="font-black text-white">{caseInfo.initiator_name}</span> wil een conflict met je oplossen via Rsolve: <br/>
+            <span className="text-cyan-400 font-bold italic">"{caseInfo.title}"</span>
           </p>
         </div>
 
-        <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">
-          <Button 
-            size="lg" 
-            className="w-full py-6 text-xl rounded-2xl shadow-xl shadow-blue-100" 
+        <Card className="p-8 space-y-6 shadow-2xl rounded-[32px]">
+          <Button
+            size="lg"
+            className="w-full py-6 text-xl rounded-2xl shadow-xl"
             onClick={handleJoin}
             isLoading={isJoining}
           >

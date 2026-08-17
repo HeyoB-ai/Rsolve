@@ -139,7 +139,7 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
     return (
       <div className="flex items-center justify-center gap-1.5">
         {order.map((s, i) => (
-          <span key={s} className={`h-1.5 rounded-full transition-all ${i <= idx ? 'w-6 bg-[#0b50da]' : 'w-1.5 bg-slate-200'}`} />
+          <span key={s} className={`h-1.5 rounded-full transition-all ${i <= idx ? 'w-6 bg-[#00E5FF]' : 'w-1.5 bg-slate-700'}`} />
         ))}
       </div>
     );
@@ -147,16 +147,16 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
 
   return (
     <div className="absolute inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in rounded-[24px]">
-      <div className="w-full max-w-md bg-white rounded-[28px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="w-full max-w-md bg-slate-900 rounded-[28px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-6 pt-6 pb-4 border-b border-slate-100 shrink-0">
+        <div className="px-6 pt-6 pb-4 border-b border-slate-800 shrink-0">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black tracking-tight text-[#0b50da] bg-blue-50 px-2 py-1 rounded-lg uppercase">Rsolve Pro</span>
+              <span className="text-xs font-black tracking-tight text-[#00E5FF] bg-cyan-500/10 px-2 py-1 rounded-lg uppercase">Rsolve Pro</span>
             </div>
-            <button onClick={onClose} className="text-slate-400 hover:text-slate-700 text-2xl leading-none font-light px-1">×</button>
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-2xl leading-none font-light px-1">×</button>
           </div>
-          <h2 className="text-lg font-black text-slate-900">{t('pro_wizard_title')}</h2>
+          <h2 className="text-lg font-black text-white">{t('pro_wizard_title')}</h2>
           {(step === 'type' || step === 'language' || step === 'review' || step === 'consent') && (
             <div className="mt-3"><StepDots /></div>
           )}
@@ -174,11 +174,11 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
                 <button
                   key={opt.key}
                   onClick={() => setDocType(opt.key as 'summary' | 'full')}
-                  className={`w-full text-left p-4 rounded-2xl border-2 transition-all ${docType === opt.key ? 'border-[#0b50da] bg-blue-50/50' : 'border-slate-200 hover:border-slate-300'}`}
+                  className={`w-full text-left p-4 rounded-2xl border-2 transition-all ${docType === opt.key ? 'border-[#00E5FF] bg-cyan-500/10' : 'border-slate-700 hover:border-slate-300'}`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-black text-slate-900 text-sm">{opt.label}</span>
-                    <span className={`w-4 h-4 rounded-full border-2 ${docType === opt.key ? 'border-[#0b50da] bg-[#0b50da]' : 'border-slate-300'}`} />
+                    <span className="font-black text-white text-sm">{opt.label}</span>
+                    <span className={`w-4 h-4 rounded-full border-2 ${docType === opt.key ? 'border-[#00E5FF] bg-[#00E5FF]' : 'border-slate-300'}`} />
                   </div>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">{opt.desc}</p>
                 </button>
@@ -193,7 +193,7 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
               <select
                 value={docLang}
                 onChange={(e) => setDocLang(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-[#0b50da] focus:ring-4 focus:ring-blue-50/50"
+                className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3.5 text-sm font-bold text-slate-100 focus:outline-none focus:border-[#00E5FF] focus:ring-4 focus:ring-cyan-400/20"
               >
                 {LANG_OPTIONS.map((l) => (
                   <option key={l.code} value={l.code}>{l.label}</option>
@@ -208,16 +208,16 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
               <p className="text-sm text-slate-500 font-medium">{t('pro_review_intro')}</p>
               <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">{t('pro_review_included_title')}</p>
-                <ul className="space-y-1.5 text-xs text-slate-700">
+                <ul className="space-y-1.5 text-xs text-slate-200">
                   <li className="flex gap-2"><span className="text-emerald-500 font-black">✓</span>{t('pro_review_inc_conversation')}</li>
                   <li className="flex gap-2"><span className="text-emerald-500 font-black">✓</span>{t('pro_review_inc_summary')}</li>
                   <li className="flex gap-2"><span className="text-emerald-500 font-black">✓</span>{t('pro_review_inc_own_notes')}</li>
                   <li className="flex gap-2"><span className="text-emerald-500 font-black">✓</span>{t('pro_review_inc_hash')}</li>
                 </ul>
               </div>
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+              <div className="bg-slate-800 border border-slate-700 rounded-2xl p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">{t('pro_review_excluded_title')}</p>
-                <ul className="space-y-1.5 text-xs text-slate-600">
+                <ul className="space-y-1.5 text-xs text-slate-300">
                   <li className="flex gap-2"><span className="text-slate-400 font-black">✕</span>{t('pro_review_exc_other_notes')}</li>
                   <li className="flex gap-2"><span className="text-slate-400 font-black">✕</span>{t('pro_review_exc_judgment')}</li>
                 </ul>
@@ -227,15 +227,15 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
 
           {step === 'consent' && (
             <div className="space-y-4">
-              <p className="text-sm text-slate-600 font-medium leading-relaxed">{t('pro_consent_text')}</p>
+              <p className="text-sm text-slate-300 font-medium leading-relaxed">{t('pro_consent_text')}</p>
               <button
                 onClick={() => setConsent((c) => !c)}
-                className={`w-full flex items-start gap-3 text-left p-4 rounded-2xl border-2 transition-all ${consent ? 'border-[#0b50da] bg-blue-50/50' : 'border-slate-200'}`}
+                className={`w-full flex items-start gap-3 text-left p-4 rounded-2xl border-2 transition-all ${consent ? 'border-[#00E5FF] bg-cyan-500/10' : 'border-slate-700'}`}
               >
-                <span className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${consent ? 'border-[#0b50da] bg-[#0b50da] text-white' : 'border-slate-300'}`}>
+                <span className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${consent ? 'border-[#00E5FF] bg-[#00E5FF] text-slate-950' : 'border-slate-300'}`}>
                   {consent && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5"><polyline points="20 6 9 17 4 12" /></svg>}
                 </span>
-                <span className="text-xs text-slate-700 font-medium leading-relaxed">{t('pro_consent_checkbox')}</span>
+                <span className="text-xs text-slate-200 font-medium leading-relaxed">{t('pro_consent_checkbox')}</span>
               </button>
             </div>
           )}
@@ -260,10 +260,10 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
                 {/* minuut-wijzer (sneller) */}
                 <line
                   x1="32" y1="32" x2="32" y2="16"
-                  stroke="#0b50da" strokeWidth="3.5" strokeLinecap="round"
+                  stroke="#00E5FF" strokeWidth="3.5" strokeLinecap="round"
                   style={{ transformBox: 'view-box', transformOrigin: '32px 32px', animation: 'rp-clock-spin 1.6s linear infinite' }}
                 />
-                <circle cx="32" cy="32" r="3" fill="#0b50da" />
+                <circle cx="32" cy="32" r="3" fill="#00E5FF" />
               </svg>
               <p className="text-sm text-slate-500 font-medium">{t('pro_generating')}</p>
             </div>
@@ -284,24 +284,24 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
               <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
               </div>
-              <p className="text-center text-sm font-black text-slate-900">{t('pro_result_title')}</p>
+              <p className="text-center text-sm font-black text-white">{t('pro_result_title')}</p>
               <div className="grid grid-cols-2 gap-2 text-[11px]">
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                <div className="bg-slate-800 p-2.5 rounded-xl border border-slate-800">
                   <span className="block text-slate-400 font-bold uppercase tracking-wider text-[9px]">{t('pro_result_docnr')}</span>
-                  <span className="font-mono font-bold text-slate-800">{result.export_no}</span>
+                  <span className="font-mono font-bold text-slate-100">{result.export_no}</span>
                 </div>
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                <div className="bg-slate-800 p-2.5 rounded-xl border border-slate-800">
                   <span className="block text-slate-400 font-bold uppercase tracking-wider text-[9px]">{t('pro_result_items')}</span>
-                  <span className="font-bold text-slate-800">{result.counts?.messages ?? 0}</span>
+                  <span className="font-bold text-slate-100">{result.counts?.messages ?? 0}</span>
                 </div>
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 col-span-2">
+                <div className="bg-slate-800 p-2.5 rounded-xl border border-slate-800 col-span-2">
                   <span className="block text-slate-400 font-bold uppercase tracking-wider text-[9px]">{t('pro_result_hash')}</span>
                   <span className="font-mono text-[9px] text-slate-500 break-all">{result.hash}</span>
                 </div>
               </div>
               {result.ai_summary?.professional_summary && (
-                <div className="bg-blue-50/60 p-3 rounded-xl border border-blue-100 max-h-40 overflow-y-auto">
-                  <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">{result.ai_summary.professional_summary}</p>
+                <div className="bg-cyan-500/10 p-3 rounded-xl border border-cyan-400/20 max-h-40 overflow-y-auto">
+                  <p className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">{result.ai_summary.professional_summary}</p>
                 </div>
               )}
               <p className="text-[9px] text-slate-400 italic leading-relaxed">{result.disclaimer}</p>
@@ -310,7 +310,7 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
         </div>
 
         {/* Footer / navigation */}
-        <div className="px-6 py-4 border-t border-slate-100 shrink-0 bg-white">
+        <div className="px-6 py-4 border-t border-slate-800 shrink-0 bg-slate-900">
           {step === 'type' && (
             <Button size="lg" className="w-full rounded-2xl" onClick={() => setStep('language')}>{t('pro_next')}</Button>
           )}
@@ -346,7 +346,7 @@ export const RsolveProWizard: React.FC<RsolveProWizardProps> = ({ isOpen, onClos
               {result.pdf_ready && result.pdf_base64 ? (
                 <button
                   onClick={() => downloadPdf(result.pdf_base64, result.export_no)}
-                  className="block w-full text-center bg-[#0b50da] hover:bg-blue-700 text-white font-black py-3.5 rounded-2xl transition-colors text-sm shadow-lg"
+                  className="block w-full text-center bg-[#00E5FF] hover:bg-cyan-400 text-slate-950 font-black py-3.5 rounded-2xl transition-colors text-sm shadow-lg"
                 >
                   {t('pro_download_btn')}
                 </button>

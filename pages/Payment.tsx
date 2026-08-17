@@ -133,10 +133,10 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center p-6 pt-12 animate-in fade-in duration-500 relative">
-      <button 
+    <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-6 pt-12 animate-in fade-in duration-500 relative">
+      <button
         onClick={() => setIsLangModalOpen(true)}
-        className="absolute top-6 right-6 p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-[#0b50da]"
+        className="absolute top-6 right-6 p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-400 hover:text-cyan-400"
       >
         <ICONS.Globe className="w-5 h-5" />
       </button>
@@ -144,18 +144,18 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <Logo className="w-20 h-20 mx-auto mb-6" />
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">{t('payment_title')}</h1>
-          <p className="text-sm text-slate-500 font-medium">{t('payment_desc')}</p>
+          <h1 className="text-2xl font-black text-white tracking-tight">{t('payment_title')}</h1>
+          <p className="text-sm text-slate-400 font-medium">{t('payment_desc')}</p>
         </div>
 
-        <Card className="p-0 overflow-hidden border-none shadow-2xl rounded-[32px] bg-white">
-          <div className="bg-slate-900 text-white p-8">
+        <Card className="p-0 overflow-hidden shadow-2xl rounded-[32px]">
+          <div className="bg-slate-950 text-white p-8 border-b border-slate-800">
             <div className="flex justify-between items-end">
               <div>
                 <h2 className="text-lg font-black mb-1 italic">Rsolve Access</h2>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{t('secure_trans')}</p>
               </div>
-              <div className="text-3xl font-black text-blue-400">€3,99</div>
+              <div className="text-3xl font-black text-cyan-400">€3,99</div>
             </div>
           </div>
 
@@ -163,7 +163,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
             {!showPromoInput ? (
               <>
                 <div className="text-center space-y-1">
-                  <p className="text-sm font-bold text-slate-600">Eenmalige toegang tot je dossier</p>
+                  <p className="text-sm font-bold text-slate-200">Eenmalige toegang tot je dossier</p>
                   <p className="text-[11px] text-slate-400 font-medium">Je betaalt veilig via iDEAL of creditcard.</p>
                 </div>
 
@@ -184,7 +184,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
 
                   <button
                     onClick={() => setShowPromoInput(true)}
-                    className="w-full text-center text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-700 transition-colors py-2"
+                    className="w-full text-center text-[10px] font-black text-cyan-400 uppercase tracking-widest hover:text-cyan-300 transition-colors py-2"
                   >
                     {t('have_code')}
                   </button>
@@ -237,9 +237,9 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
       </div>
 
       {isProcessing && (
-        <div className="fixed inset-0 bg-white/95 z-50 flex flex-col items-center justify-center">
-           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-           <p className="font-black text-slate-900 uppercase tracking-widest text-center">
+        <div className="fixed inset-0 bg-slate-950/95 z-50 flex flex-col items-center justify-center">
+           <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+           <p className="font-black text-white uppercase tracking-widest text-center">
              {showPromoInput ? t('validating') : t('validating')}
            </p>
         </div>

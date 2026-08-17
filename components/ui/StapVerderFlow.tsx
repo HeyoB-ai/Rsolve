@@ -52,9 +52,9 @@ const ClockLoader: React.FC = () => (
       </g>
       <line x1="32" y1="32" x2="43" y2="32" stroke="#93c5fd" strokeWidth="3.5" strokeLinecap="round"
         style={{ transformBox: 'view-box', transformOrigin: '32px 32px', animation: 'rp-clock-spin 6s linear infinite' }} />
-      <line x1="32" y1="32" x2="32" y2="16" stroke="#0b50da" strokeWidth="3.5" strokeLinecap="round"
+      <line x1="32" y1="32" x2="32" y2="16" stroke="#00E5FF" strokeWidth="3.5" strokeLinecap="round"
         style={{ transformBox: 'view-box', transformOrigin: '32px 32px', animation: 'rp-clock-spin 1.6s linear infinite' }} />
-      <circle cx="32" cy="32" r="3" fill="#0b50da" />
+      <circle cx="32" cy="32" r="3" fill="#00E5FF" />
     </svg>
   </>
 );
@@ -163,15 +163,15 @@ export const StapVerderFlow: React.FC<StapVerderFlowProps> = ({ isOpen, onClose,
     }
   };
 
-  const inputClass = 'w-full p-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 focus:outline-none focus:border-[#0b50da] transition-all';
+  const inputClass = 'w-full p-3.5 rounded-2xl border-2 border-slate-700 bg-slate-800 text-sm font-medium text-slate-200 focus:outline-none focus:border-[#00E5FF] transition-all';
 
   return (
     <div className="absolute inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in rounded-[24px]">
-      <div className="w-full max-w-md bg-white rounded-[28px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="w-full max-w-md bg-slate-900 rounded-[28px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-6 pt-6 pb-4 border-b border-slate-100 shrink-0 flex items-center justify-between">
-          <span className="text-xs font-black tracking-tight text-[#0b50da] bg-blue-50 px-2 py-1 rounded-lg uppercase">Rsolve</span>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 text-2xl leading-none font-light px-1">×</button>
+        <div className="px-6 pt-6 pb-4 border-b border-slate-800 shrink-0 flex items-center justify-between">
+          <span className="text-xs font-black tracking-tight text-[#00E5FF] bg-cyan-500/10 px-2 py-1 rounded-lg uppercase">Rsolve</span>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-2xl leading-none font-light px-1">×</button>
         </div>
 
         <div className="px-6 py-5 overflow-y-auto">
@@ -180,21 +180,21 @@ export const StapVerderFlow: React.FC<StapVerderFlowProps> = ({ isOpen, onClose,
               <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /></svg>
               </div>
-              <h2 className="text-lg font-black text-slate-900">{t('sv_offer_title')}</h2>
+              <h2 className="text-lg font-black text-white">{t('sv_offer_title')}</h2>
               <p className="text-sm text-slate-500 font-medium leading-relaxed">{t('sv_offer_text')}</p>
             </div>
           )}
 
           {step === 'income' && (
             <div className="space-y-3">
-              <h2 className="text-lg font-black text-slate-900">{t('sv_income_title')}</h2>
+              <h2 className="text-lg font-black text-white">{t('sv_income_title')}</h2>
               <p className="text-sm text-slate-500 font-medium">{t('sv_income_text')}</p>
-              <button onClick={() => setStep('contact')} className="w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-[#0b50da] transition-all">
-                <span className="font-black text-slate-900 text-sm">{t('sv_income_lawyer')}</span>
+              <button onClick={() => setStep('contact')} className="w-full text-left p-4 rounded-2xl border-2 border-slate-700 hover:border-[#00E5FF] transition-all">
+                <span className="font-black text-white text-sm">{t('sv_income_lawyer')}</span>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">{t('sv_income_lawyer_desc')}</p>
               </button>
-              <button onClick={() => setStep('loket')} className="w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-[#0b50da] transition-all">
-                <span className="font-black text-slate-900 text-sm">{t('sv_income_low')}</span>
+              <button onClick={() => setStep('loket')} className="w-full text-left p-4 rounded-2xl border-2 border-slate-700 hover:border-[#00E5FF] transition-all">
+                <span className="font-black text-white text-sm">{t('sv_income_low')}</span>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">{t('sv_income_low_desc')}</p>
               </button>
             </div>
@@ -205,27 +205,27 @@ export const StapVerderFlow: React.FC<StapVerderFlowProps> = ({ isOpen, onClose,
               <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
               </div>
-              <h2 className="text-lg font-black text-slate-900 text-center">{t('sv_loket_title')}</h2>
-              <p className="text-sm text-slate-600 font-medium leading-relaxed">{t('sv_loket_text')}</p>
+              <h2 className="text-lg font-black text-white text-center">{t('sv_loket_title')}</h2>
+              <p className="text-sm text-slate-300 font-medium leading-relaxed">{t('sv_loket_text')}</p>
               <p className="text-xs text-slate-400 leading-relaxed">{t('sv_loket_note')}</p>
             </div>
           )}
 
           {step === 'contact' && (
             <div className="space-y-3">
-              <h2 className="text-lg font-black text-slate-900">{t('sv_contact_title')}</h2>
+              <h2 className="text-lg font-black text-white">{t('sv_contact_title')}</h2>
               <p className="text-sm text-slate-500 font-medium leading-relaxed">{t('sv_contact_text')}</p>
               <input className={inputClass} placeholder={t('sv_contact_name')} value={form.naam} onChange={(e) => setForm({ ...form, naam: e.target.value })} />
               <input className={inputClass} type="email" placeholder={t('sv_contact_email')} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               <input className={inputClass} type="tel" placeholder={t('sv_contact_phone')} value={form.telefoon} onChange={(e) => setForm({ ...form, telefoon: e.target.value })} />
               <button
                 onClick={() => setConsent((c) => !c)}
-                className={`w-full flex items-start gap-3 text-left p-4 rounded-2xl border-2 transition-all ${consent ? 'border-[#0b50da] bg-blue-50/50' : 'border-slate-200'}`}
+                className={`w-full flex items-start gap-3 text-left p-4 rounded-2xl border-2 transition-all ${consent ? 'border-[#00E5FF] bg-cyan-500/10' : 'border-slate-700'}`}
               >
-                <span className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${consent ? 'border-[#0b50da] bg-[#0b50da] text-white' : 'border-slate-300'}`}>
+                <span className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${consent ? 'border-[#00E5FF] bg-[#00E5FF] text-slate-950' : 'border-slate-300'}`}>
                   {consent && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5"><polyline points="20 6 9 17 4 12" /></svg>}
                 </span>
-                <span className="text-xs text-slate-700 font-medium leading-relaxed">{t('sv_consent_text')}</span>
+                <span className="text-xs text-slate-200 font-medium leading-relaxed">{t('sv_consent_text')}</span>
               </button>
             </div>
           )}
@@ -242,7 +242,7 @@ export const StapVerderFlow: React.FC<StapVerderFlowProps> = ({ isOpen, onClose,
               <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
               </div>
-              <h2 className="text-lg font-black text-slate-900">{t('sv_done_title')}</h2>
+              <h2 className="text-lg font-black text-white">{t('sv_done_title')}</h2>
               <p className="text-sm text-slate-500 font-medium leading-relaxed">{t('sv_done_text')}</p>
             </div>
           )}
@@ -259,7 +259,7 @@ export const StapVerderFlow: React.FC<StapVerderFlowProps> = ({ isOpen, onClose,
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 shrink-0 bg-white">
+        <div className="px-6 py-4 border-t border-slate-800 shrink-0 bg-slate-900">
           {step === 'offer' && (
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" size="lg" className="rounded-2xl" onClick={onClose}>{t('sv_offer_no')}</Button>
@@ -272,7 +272,7 @@ export const StapVerderFlow: React.FC<StapVerderFlowProps> = ({ isOpen, onClose,
           {step === 'loket' && (
             <div className="space-y-2">
               <a href={JURIDISCH_LOKET_URL} target="_blank" rel="noopener noreferrer"
-                className="block w-full text-center bg-[#0b50da] hover:bg-blue-700 text-white font-black py-3.5 rounded-2xl transition-colors text-sm shadow-lg">
+                className="block w-full text-center bg-[#00E5FF] hover:bg-cyan-400 text-slate-950 font-black py-3.5 rounded-2xl transition-colors text-sm shadow-lg">
                 {t('sv_loket_link_btn')}
               </a>
               {result?.pdf_ready && result?.pdf_base64 ? (

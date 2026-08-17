@@ -32,26 +32,26 @@ const JuridischeHulp: React.FC = () => {
   };
 
   const inputClass =
-    'w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 font-medium text-slate-700 focus:outline-none focus:border-[#0b50da] transition-all';
+    'w-full p-4 rounded-2xl border-2 border-slate-700 bg-slate-800 font-medium text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-all';
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center p-6 pt-14 pb-20 animate-in fade-in duration-500">
+    <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-6 pt-14 pb-20 animate-in fade-in duration-500">
       <div className="w-full max-w-lg space-y-8">
         <div className="text-center">
           <Logo className="w-16 h-16 mx-auto mb-6" />
-          <span className="inline-block text-[10px] font-black uppercase tracking-[0.3em] text-[#0b50da] bg-blue-50 px-3 py-1 rounded-full mb-4">Juridische hulp</span>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Advocaat nodig? Wij denken mee.</h1>
-          <p className="text-slate-500 font-medium mt-4 leading-relaxed">
+          <span className="inline-block text-[10px] font-black uppercase tracking-[0.3em] text-cyan-300 bg-cyan-500/10 px-3 py-1 rounded-full mb-4">Juridische hulp</span>
+          <h1 className="text-3xl font-black text-white tracking-tight">Advocaat nodig? Wij denken mee.</h1>
+          <p className="text-slate-400 font-medium mt-4 leading-relaxed">
             Reageert de andere partij niet, of houdt iemand zich niet aan de afspraken? Dan is juridische hulp soms de enige weg. Rsolve werkt samen met een netwerk van betrouwbare advocaten. Laat je gegevens achter, dan stellen we je vrijblijvend een passende advocaat voor.
           </p>
         </div>
 
         {status === 'ok' ? (
-          <div className="bg-white rounded-[28px] shadow-xl border border-slate-100 p-10 text-center space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-2xl font-black">✓</div>
-            <h2 className="text-xl font-black text-slate-900">Aanvraag ontvangen</h2>
-            <p className="text-slate-500 font-medium">Bedankt. We nemen zo snel mogelijk contact met je op met een passend voorstel.</p>
-            <a href="/#/" className="inline-block text-[#0b50da] font-bold text-sm hover:underline pt-2">← Terug naar home</a>
+          <div className="bg-slate-900 rounded-[28px] shadow-xl border border-slate-800 p-10 text-center space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center mx-auto text-2xl font-black">✓</div>
+            <h2 className="text-xl font-black text-white">Aanvraag ontvangen</h2>
+            <p className="text-slate-400 font-medium">Bedankt. We nemen zo snel mogelijk contact met je op met een passend voorstel.</p>
+            <a href="/#/" className="inline-block text-cyan-400 font-bold text-sm hover:underline pt-2">← Terug naar home</a>
           </div>
         ) : (
           <form
@@ -60,7 +60,7 @@ const JuridischeHulp: React.FC = () => {
             data-netlify="true"
             netlify-honeypot="bot-field"
             onSubmit={handleSubmit}
-            className="bg-white rounded-[28px] shadow-xl border border-slate-100 p-8 space-y-4"
+            className="bg-slate-900 rounded-[28px] shadow-xl border border-slate-800 p-8 space-y-4"
           >
             <input type="hidden" name="form-name" value="lawyer-request" />
             <p className="hidden">

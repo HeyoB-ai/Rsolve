@@ -107,10 +107,10 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500 relative">
-      <button 
+    <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 animate-in fade-in duration-500 relative">
+      <button
         onClick={() => setIsLangModalOpen(true)}
-        className="absolute top-6 right-6 p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-[#0b50da]"
+        className="absolute top-6 right-6 p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-400 hover:text-cyan-400"
       >
         <ICONS.Globe className="w-5 h-5" />
       </button>
@@ -122,11 +122,11 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
                <ICONS.Check className="w-10 h-10 text-white" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight">{t('payment_received')}</h1>
-              <p className="text-slate-500 font-medium">{t('lets_start')}</p>
+              <h1 className="text-3xl font-black text-white tracking-tight">{t('payment_received')}</h1>
+              <p className="text-slate-400 font-medium">{t('lets_start')}</p>
             </div>
 
-            <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">
+            <Card className="p-8 space-y-6 shadow-2xl rounded-[32px]">
               <Input 
                 label={t('label_your_name')}
                 placeholder={t('placeholder_name')}
@@ -160,11 +160,11 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
           <div className="space-y-8 text-center animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="space-y-4">
               <Logo className="w-20 h-20 mx-auto mb-2" />
-              <h1 className="text-3xl font-black tracking-tight text-slate-900 leading-tight">{t('invite_header', {name: formData.otherParty})}</h1>
-              <p className="text-slate-500 font-medium px-4">{t('invite_desc')}</p>
+              <h1 className="text-3xl font-black tracking-tight text-white leading-tight">{t('invite_header', {name: formData.otherParty})}</h1>
+              <p className="text-slate-400 font-medium px-4">{t('invite_desc')}</p>
             </div>
 
-            <Card className="p-8 space-y-6 bg-white border-none shadow-2xl rounded-[32px]">
+            <Card className="p-8 space-y-6 shadow-2xl rounded-[32px]">
                <div className="space-y-4">
                   <Button 
                     onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Goedendag, om ons conflict "${formData.title}" op te lossen heb ik een online mediator van Rsolve ingeschakeld. Hij helpt ons via een beveiligde chat om tot een eerlijke oplossing te komen zonder advocaten. Deelname is gratis voor jou. Klik hier: ${inviteLink}`)}`, '_blank')}
@@ -175,10 +175,10 @@ Zodra jullie er allebei zijn, help ik jullie stap voor stap door het proces.`;
 
                   <button 
                     onClick={copyInviteLink}
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between"
+                    className="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl flex items-center justify-between"
                   >
                     <code className="text-[10px] text-slate-400 font-mono truncate mr-2">{inviteLink}</code>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 shrink-0">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400 shrink-0">
                       {hasCopied ? t('copied') : t('copy')}
                     </span>
                   </button>

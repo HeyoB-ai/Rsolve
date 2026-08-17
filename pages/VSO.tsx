@@ -162,33 +162,34 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
   const haveISigned = (amISigningAsInitiator && initiatorSigned) || (amISigningAsRespondent && respondentSigned);
 
   return (
-    <div className="min-h-screen bg-slate-100 p-6 md:p-12 flex flex-col items-center animate-in fade-in duration-700">
+    <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 p-6 md:p-12 flex flex-col items-center animate-in fade-in duration-700">
       <div className="w-full max-w-3xl space-y-8">
         <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 print:hidden">
           <div className="flex items-center gap-3">
             <Logo className="w-12 h-12" />
             <div>
-              <h1 className="text-xl font-bold text-slate-900">{t('vso_title')}</h1>
-              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">{t('legal_doc')}</p>
+              <h1 className="text-xl font-bold text-white">{t('vso_title')}</h1>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{t('legal_doc')}</p>
             </div>
           </div>
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={downloadChatHistory} 
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={downloadChatHistory}
               isLoading={isDownloadingLog}
-              className="rounded-xl border-slate-200 hidden md:inline-flex"
+              className="rounded-xl hidden md:inline-flex"
             >
               <ICONS.Folder className="w-4 h-4 mr-2" /> {t('download_chat')}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => window.print()} className="rounded-xl border-slate-200">
+            <Button variant="outline" size="sm" onClick={() => window.print()} className="rounded-xl">
               <ICONS.File className="w-4 h-4 mr-2" /> {t('download_pdf')}
             </Button>
           </div>
         </header>
 
-        <Card className="bg-white p-5 sm:p-12 md:p-20 shadow-2xl border-none relative overflow-hidden print:p-0 print:shadow-none rounded-[2px] min-h-[600px] md:min-h-[1000px]">
+        {/* Het VSO-document blijft bewust 'papier'-wit (ook in de donkere app), zoals een officieel document / PDF. */}
+        <div className="bg-white text-slate-900 p-5 sm:p-12 md:p-20 shadow-2xl relative overflow-hidden print:p-0 print:shadow-none rounded-[4px] min-h-[600px] md:min-h-[1000px]">
           {/* Watermark */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] rotate-[15deg] select-none pointer-events-none w-full flex justify-center">
             <Logo className="w-[600px] h-[600px]" />
@@ -324,7 +325,7 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
               </div>
             </div>
           </div>
-        </Card>
+        </div>
 
         <footer className="py-20 flex flex-col items-center gap-8 print:hidden">
           {bothSigned && (
