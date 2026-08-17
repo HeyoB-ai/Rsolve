@@ -506,9 +506,15 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 key={m.id} 
                 text={m.content} 
                 attachment={getAttachmentFromMessage(m)}
-                isOwn={isMe} 
+                isOwn={isMe}
                 sender={m.sender_name}
-                senderRole={m.sender_id === 'mediator' ? 'mediator' : undefined} 
+                senderRole={
+                  m.sender_id === 'mediator' ? 'mediator'
+                  : m.sender_id === 'initiator' ? 'initiator'
+                  : m.sender_id === 'respondent' ? 'respondent'
+                  : m.sender_id === 'local-user' ? myRole
+                  : undefined
+                }
                 timestamp={new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
                 autoTranslateTo={appLanguage}
                 targetLanguageName={UI_TRANSLATIONS[appLanguage]?.label || 'Nederlands'}

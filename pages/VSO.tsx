@@ -18,6 +18,7 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
   const [signatureName, setSignatureName] = useState('');
   const [isSigning, setIsSigning] = useState(false);
   const [isDownloadingLog, setIsDownloadingLog] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   // Identity logic - Ensure boolean type
   const isRespondent = !!data.isRespondent;
@@ -150,6 +151,131 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
     }
   };
 
+  // Genereert een echte, downloadbare PDF van de vaststellingsovereenkomst.
+  // Vervangt window.print() (dat op mobiel/veel browsers niet betrouwbaar werkt).
+  const downloadVsoPdf = async () => {
+    setIsDownloadingPdf(true);
+    try {
+      const { PDFDocument, StandardFonts, rgb } = await import('pdf-lib');
+      const pdf = await PDFDocument.create();
+      const helv = await pdf.embedFont(StandardFonts.Helvetica);
+      const helvB = await pdf.embedFont(StandardFonts.HelveticaBold);
+      const helvI = await pdf.embedFont(StandardFonts.HelveticaOblique);
+
+      const PW = 595.28, PH = 841.89, margin = 56;
+      const contentW = PW - margin * 2;
+      let page = pdf.addPage([PW, PH]);
+      let y = PH - margin;
+
+      const slate = rgb(0.06, 0.09, 0.16);
+      const gray = rgb(0.2, 0.25, 0.33);
+      const muted = rgb(0.58, 0.64, 0.72);
+      const accent = rgb(0.145, 0.388, 0.922);
+      const hair = rgb(0.89, 0.91, 0.94);
+
+      // Standaard PDF-fonts ondersteunen alleen Latin-1 (WinAnsi); transliteer veelvoorkomende tekens.
+      const wa = (s: any) => String(s ?? '')
+        .replace(/[‘’‚‹›]/g, "'")
+        .replace(/[“”„«»]/g, '"')
+        .replace(/[–—]/g, '-')
+        .replace(/…/g, '...')
+        .replace(/[•●]/g, '-')
+        .replace(/ /g, ' ')
+        .replace(/[^\x00-\xFF]/g, '?');
+
+      const room = (needed: number) => { if (y - needed < margin) { page = pdf.addPage([PW, PH]); y = PH - margin; } };
+
+      const wrap = (text: string, font: any, size: number, maxW: number) => {
+        const out: string[] = [];
+        String(text).split('\n').forEach((raw) => {
+          const words = raw.split(/\s+/);
+          let line = '';
+          words.forEach((w) => {
+            const test = line ? line + ' ' + w : w;
+            if (font.widthOfTextAtSize(wa(test), size) > maxW && line) { out.push(line); line = w; }
+            else line = test;
+          });
+          out.push(line);
+        });
+        return out;
+      };
+
+      const para = (text: string, opts: any = {}) => {
+        const { font = helv, size = 11, color = gray, gap = 10, lh = 1.45 } = opts;
+        wrap(text, font, size, contentW).forEach((ln) => {
+          room(size * lh); y -= size * lh;
+          page.drawText(wa(ln), { x: margin, y, size, font, color });
+        });
+        y -= gap;
+      };
+
+      const heading = (text: string) => {
+        room(32); y -= 16;
+        page.drawText(wa(text.toUpperCase()), { x: margin, y, size: 11, font: helvB, color: slate });
+        y -= 6;
+        page.drawLine({ start: { x: margin, y }, end: { x: margin + 42, y }, thickness: 2, color: accent });
+        y -= 14;
+      };
+
+      // Titelblok
+      const title = t('settlement_agreement');
+      y -= 24;
+      page.drawText(wa(title), { x: (PW - helvB.widthOfTextAtSize(wa(title), 20)) / 2, y, size: 20, font: helvB, color: slate });
+      y -= 16;
+      const sub = t('legal_accord');
+      page.drawText(wa(sub), { x: (PW - helv.widthOfTextAtSize(wa(sub), 9)) / 2, y, size: 9, font: helv, color: muted });
+      y -= 12;
+      page.drawLine({ start: { x: margin, y }, end: { x: PW - margin, y }, thickness: 1, color: hair });
+      y -= 6;
+
+      heading(t('section_parties'));
+      para(`${t('party_a')} (Initiator): ${initiatorName}`, { font: helvB, color: slate, gap: 4 });
+      para(`${t('party_b')} (Respondent): ${respondentName}`, { font: helvB, color: slate, gap: 16 });
+
+      heading(t('section_dispute'));
+      para(t('dispute_desc'), { font: helvI, gap: 4 });
+      para(`"${data.title}"`, { font: helvB, color: slate, gap: 16 });
+
+      heading(t('section_terms'));
+      para(data.terms || t('no_terms'), { gap: 16 });
+
+      heading(t('section_final'));
+      para(t('final_text'), { font: helvI, size: 9, color: muted, gap: 24 });
+
+      // Handtekeningblok
+      room(90); y -= 30;
+      const colW = (contentW - 40) / 2;
+      const leftX = margin, rightX = margin + colW + 40;
+      page.drawLine({ start: { x: leftX, y }, end: { x: leftX + colW, y }, thickness: 1.2, color: slate });
+      page.drawLine({ start: { x: rightX, y }, end: { x: rightX + colW, y }, thickness: 1.2, color: slate });
+      y -= 14;
+      page.drawText(wa(t('sign_party_a')), { x: leftX, y, size: 8, font: helvB, color: muted });
+      page.drawText(wa(t('sign_party_b')), { x: rightX, y, size: 8, font: helvB, color: muted });
+      y -= 22;
+      page.drawText(wa(initiatorSigned || ''), { x: leftX, y, size: 16, font: helvI, color: accent });
+      page.drawText(wa(respondentSigned || ''), { x: rightX, y, size: 16, font: helvI, color: accent });
+      y -= 13;
+      const iDate = caseState?.initiator_signed_at ? new Date(caseState.initiator_signed_at).toLocaleDateString('nl-NL') : '';
+      const rDate = caseState?.respondent_signed_at ? new Date(caseState.respondent_signed_at).toLocaleDateString('nl-NL') : '';
+      page.drawText(wa(`${t('digital_sign')} - ${t('date')} ${iDate}`), { x: leftX, y, size: 7, font: helv, color: muted });
+      page.drawText(wa(`${t('digital_sign')} - ${t('date')} ${rDate}`), { x: rightX, y, size: 7, font: helv, color: muted });
+
+      const bytes = await pdf.save();
+      const blob = new Blob([bytes as any], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vaststellingsovereenkomst-${String(data.title || 'dossier').replace(/\s+/g, '-').toLowerCase()}.pdf`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('PDF download mislukt:', e);
+      alert('Kon het dossier niet downloaden. Probeer het opnieuw.');
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
+
   const initiatorSigned = caseState?.initiator_signature;
   const respondentSigned = caseState?.respondent_signature;
   const bothSigned = initiatorSigned && respondentSigned;
@@ -182,7 +308,7 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
             >
               <ICONS.Folder className="w-4 h-4 mr-2" /> {t('download_chat')}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => window.print()} className="rounded-xl">
+            <Button variant="outline" size="sm" onClick={downloadVsoPdf} isLoading={isDownloadingPdf} className="rounded-xl">
               <ICONS.File className="w-4 h-4 mr-2" /> {t('download_pdf')}
             </Button>
           </div>
@@ -338,14 +464,14 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
         <footer className="py-20 flex flex-col items-center gap-8 print:hidden">
           {bothSigned && (
             <div className="bg-slate-900 text-white p-10 rounded-[32px] text-center max-w-sm shadow-2xl relative overflow-hidden group animate-in slide-in-from-bottom-8">
-              <div className="absolute inset-0 bg-blue-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500 opacity-20"></div>
-              <ICONS.Check className="w-12 h-12 text-blue-400 mx-auto mb-4" />
+              <div className="absolute inset-0 bg-cyan-500 translate-y-full group-hover:translate-y-0 transition-transform duration-500 opacity-10 pointer-events-none"></div>
+              <ICONS.Check className="w-12 h-12 text-cyan-400 mx-auto mb-4" />
               <p className="text-lg font-black mb-2 uppercase tracking-tight">{t('congrats')}</p>
               <p className="text-xs text-slate-400 leading-relaxed font-medium mb-6">
                  {t('signed_desc')}
               </p>
               <div className="space-y-3">
-                <Button variant="primary" className="w-full rounded-2xl py-4 bg-blue-600 border-none shadow-xl" onClick={() => window.print()}>
+                <Button variant="primary" className="w-full rounded-2xl py-4 border-none shadow-xl relative z-10" onClick={downloadVsoPdf} isLoading={isDownloadingPdf}>
                    {t('download_dossier')}
                 </Button>
                 <button 
