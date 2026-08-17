@@ -165,6 +165,14 @@ export const StapVerderFlow: React.FC<StapVerderFlowProps> = ({ isOpen, onClose,
 
   const inputClass = 'w-full p-3.5 rounded-2xl border-2 border-slate-700 bg-slate-800 text-sm font-medium text-slate-200 focus:outline-none focus:border-[#00E5FF] transition-all';
 
+  // Bijkomend voordeel: een gedocumenteerde mediationpoging die je later kunt aantonen.
+  const proofNote = (
+    <div className="flex items-start gap-2 text-left bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-3">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-emerald-400 shrink-0 mt-0.5"><path d="M20 6 9 17l-5-5" /></svg>
+      <p className="text-xs text-emerald-200/90 font-medium leading-relaxed">{t('sv_proof_note')}</p>
+    </div>
+  );
+
   return (
     <div className="absolute inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in rounded-[24px]">
       <div className="w-full max-w-md bg-slate-900 rounded-[28px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
@@ -182,6 +190,7 @@ export const StapVerderFlow: React.FC<StapVerderFlowProps> = ({ isOpen, onClose,
               </div>
               <h2 className="text-lg font-black text-white">{t('sv_offer_title')}</h2>
               <p className="text-sm text-slate-500 font-medium leading-relaxed">{t('sv_offer_text')}</p>
+              {proofNote}
             </div>
           )}
 
@@ -208,6 +217,7 @@ export const StapVerderFlow: React.FC<StapVerderFlowProps> = ({ isOpen, onClose,
               <h2 className="text-lg font-black text-white text-center">{t('sv_loket_title')}</h2>
               <p className="text-sm text-slate-300 font-medium leading-relaxed">{t('sv_loket_text')}</p>
               <p className="text-xs text-slate-400 leading-relaxed">{t('sv_loket_note')}</p>
+              {proofNote}
             </div>
           )}
 
@@ -244,6 +254,7 @@ export const StapVerderFlow: React.FC<StapVerderFlowProps> = ({ isOpen, onClose,
               </div>
               <h2 className="text-lg font-black text-white">{t('sv_done_title')}</h2>
               <p className="text-sm text-slate-500 font-medium leading-relaxed">{t('sv_done_text')}</p>
+              {proofNote}
             </div>
           )}
 

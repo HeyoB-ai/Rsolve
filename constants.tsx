@@ -115,7 +115,7 @@ type TranslationKey =
   | 'sv_contact_title' | 'sv_contact_text' | 'sv_contact_name' | 'sv_contact_email' | 'sv_contact_phone'
   | 'sv_consent_text' | 'sv_processing' | 'sv_processing_btn' | 'sv_submit_btn'
   | 'sv_done_title' | 'sv_done_text' | 'sv_done_download'
-  | 'sv_error_title' | 'sv_error_text' | 'sv_back' | 'sv_close' | 'sv_download_dossier';
+  | 'sv_error_title' | 'sv_error_text' | 'sv_back' | 'sv_close' | 'sv_download_dossier' | 'sv_proof_note';
 
 const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   label: "English",
@@ -318,7 +318,7 @@ const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   sv_income_low_desc: "You can get free legal help from Het Juridisch Loket (the Dutch legal aid desk).",
   sv_loket_title: "Free legal help",
   sv_loket_text: "With a lower income you can turn to Het Juridisch Loket free of charge. They give independent legal advice and can help you further.",
-  sv_loket_note: "You can generate your case file below to take along to your appointment.",
+  sv_loket_note: "Create your case file below and take it straight to Het Juridisch Loket. That way they can immediately see what the case is about — so you don't have to explain everything from scratch.",
   sv_loket_link_btn: "Go to Het Juridisch Loket",
   sv_loket_dossier_btn: "Create my file to take along",
   sv_contact_title: "Your details",
@@ -333,6 +333,7 @@ const BASE_TRANSLATIONS: Record<TranslationKey, string> = {
   sv_done_title: "Request received",
   sv_done_text: "We will present an anonymous summary of your case to a specialised law firm. They will contact you via Rsolve. You can download your own file below.",
   sv_done_download: "Download my file",
+  sv_proof_note: "Handy: with this documented file you can later show that you made a serious attempt to resolve the matter through mediation.",
   sv_error_title: "Something went wrong",
   sv_error_text: "Your request could not be sent. Please try again in a moment.",
   sv_back: "Back",
@@ -544,7 +545,7 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     sv_income_low_desc: "Je kunt gratis terecht bij Het Juridisch Loket voor onafhankelijk juridisch advies.",
     sv_loket_title: "Gratis juridische hulp",
     sv_loket_text: "Met een lager inkomen kun je kosteloos terecht bij Het Juridisch Loket. Zij geven onafhankelijk juridisch advies en kunnen je verder helpen.",
-    sv_loket_note: "Je kunt hieronder je dossier aanmaken om mee te nemen naar je afspraak.",
+    sv_loket_note: "Maak hieronder je dossier aan en ga daarmee direct naar Het Juridisch Loket. Zo ziet HJL meteen wat de zaak inhoudt — je hoeft niet alles opnieuw uit te leggen.",
     sv_loket_link_btn: "Naar Het Juridisch Loket",
     sv_loket_dossier_btn: "Maak mijn dossier om mee te nemen",
     sv_contact_title: "Jouw gegevens",
@@ -559,6 +560,7 @@ export const UI_TRANSLATIONS: Record<string, any> = {
     sv_done_title: "Aanvraag ontvangen",
     sv_done_text: "We bieden een anonieme samenvatting van je zaak aan bij een gespecialiseerd advocatenkantoor. Zij nemen via Rsolve contact met je op. Je kunt hieronder je eigen dossier downloaden.",
     sv_done_download: "Download mijn dossier",
+    sv_proof_note: "Handig: met dit gedocumenteerde dossier kun je later aantonen dat je een serieuze poging hebt gedaan om de zaak via mediation op te lossen.",
     sv_error_title: "Er ging iets mis",
     sv_error_text: "Je aanvraag kon niet worden verstuurd. Probeer het zo dadelijk opnieuw.",
     sv_back: "Terug",
