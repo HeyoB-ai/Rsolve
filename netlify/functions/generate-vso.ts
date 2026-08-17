@@ -44,13 +44,19 @@ export default async (req: Request): Promise<Response> => {
     const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
     const response = await ai.models.generateContent({
       model: GEMINI_MODEL,
-      contents: `Stel een formele Vaststellingsovereenkomst (VSO) op (Art. 7:900 BW) gebaseerd op dit mediation gesprek.
+      contents: `Stel een Vaststellingsovereenkomst (VSO) op die de afspraken van de partijen vastlegt, gebaseerd op dit mediation gesprek.
           Datum van opstellen: ${now}
           Onderwerp: ${caseTitle}
           Gesprek:
           ${convo}
 
-          Geef ENKEL de genummerde artikelen in juridisch correct Nederlands. Geef geen inleiding of slot.`,
+          STRIKTE REGELS:
+          - Baseer je UITSLUITEND op de afspraken die de partijen in het gesprek daadwerkelijk hebben gemaakt. Verzin GEEN extra afspraken, rechten, verplichtingen, bedragen, termijnen of boetes die niet zijn afgesproken.
+          - Dit document legt de EIGEN afspraken van de partijen vast; het is geen juridisch advies of juridisch oordeel. Noem geen wetsartikelen als onderbouwing van de inhoud en presenteer geen wettelijke normen als vaststaand feit.
+          - Schrijf helder en zakelijk in het Nederlands.
+          - Voeg als LAATSTE genummerde artikel altijd deze slotbepaling toe: "Deze overeenkomst legt uitsluitend de door partijen zelf gemaakte afspraken vast en vormt geen juridisch advies of juridische toetsing. Partijen wordt aangeraden de overeenkomst bij twijfel te laten controleren door een jurist of advocaat."
+
+          Geef ENKEL de genummerde artikelen. Geef geen inleiding of afsluitende tekst buiten de artikelen.`,
       config: { temperature: 0.1, safetySettings: SAFETY },
     });
     return new Response(JSON.stringify({ result: response.text?.trim() || 'Kon geen VSO opstellen.' }), { status: 200, headers: CORS });

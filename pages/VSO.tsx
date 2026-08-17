@@ -188,6 +188,14 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
           </div>
         </header>
 
+        {/* Disclaimer vóór ondertekening — geen juridische toets */}
+        <div className="print:hidden bg-amber-500/10 border border-amber-400/25 rounded-2xl p-4 flex gap-3 items-start">
+          <ICONS.Shield className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-100/90 leading-relaxed">
+            <span className="font-bold text-amber-200">Let op:</span> deze vaststellingsovereenkomst legt uitsluitend jullie eigen afspraken vast. Het is <span className="font-semibold">geen juridisch advies en geen juridische toetsing</span>. Laat het document bij twijfel controleren door een jurist of advocaat voordat je tekent.
+          </p>
+        </div>
+
         {/* Het VSO-document blijft bewust 'papier'-wit (ook in de donkere app), zoals een officieel document / PDF. */}
         <div className="bg-white text-slate-900 p-5 sm:p-12 md:p-20 shadow-2xl relative overflow-hidden print:p-0 print:shadow-none rounded-[4px] min-h-[600px] md:min-h-[1000px]">
           {/* Watermark */}
