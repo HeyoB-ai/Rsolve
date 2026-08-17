@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
-import { RSolveLogo } from './RSolveLogo';
 
 interface HeaderProps {
   onStartMediation: () => void;
@@ -15,9 +14,13 @@ export function Header({ onStartMediation, onJoin, brandPrimaryColor }: HeaderPr
     <header className="sticky top-0 z-40 w-full bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
 
-        {/* Brand Logo */}
-        <a href="#" className="flex items-center gap-2 group focus:outline-none">
-          <RSolveLogo size="md" showWordmark={true} customLogoUrl="/assets/rsolve-logo.png" brandPrimaryColor={brandPrimaryColor} />
+        {/* Brand Logo — officiële RSolve-lockup (emblem + wordmark) */}
+        <a href="#" className="flex items-center group focus:outline-none">
+          <img
+            src="/assets/rsolve-logo-header.png"
+            alt="RSolve"
+            className="h-9 sm:h-10 w-auto object-contain select-none"
+          />
         </a>
 
         {/* Navigation */}

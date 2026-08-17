@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, X, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Check, X, ArrowRight, ShieldCheck, Users } from 'lucide-react';
 
 interface CostComparisonProps {
   onStartMediation: () => void;
@@ -165,6 +165,21 @@ export function CostComparison({ onStartMediation, brandPrimaryColor = '#10B981'
             </button>
           </div>
 
+        </div>
+
+        {/* Netwerk-notitie: advocaat/mediator óók via RSolve inschakelbaar */}
+        <div className="bg-slate-900/60 rounded-2xl p-6 sm:p-7 border border-emerald-500/25 max-w-4xl mx-auto mb-14 flex flex-col sm:flex-row gap-5 sm:items-center">
+          <div className="shrink-0 w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+            <Users className="w-6 h-6 text-emerald-400" />
+          </div>
+          <div className="space-y-1.5">
+            <h4 className="font-display text-base font-bold text-white">
+              Toch een advocaat of mediator nodig? Wij schakelen voor u door.
+            </h4>
+            <p className="text-sm text-slate-400 leading-relaxed font-light">
+              Mocht onze bemiddeling onverhoopt niet tot een oplossing leiden, dan hoeft u zelf niet op zoek. U kunt een advocaat of mediator eenvoudig <span className="text-slate-200 font-medium">via RSolve</span> inschakelen: wij beschikken over een netwerk van specialisten dat u — indien gewenst — via ons kunt inschakelen.
+            </p>
+          </div>
         </div>
 
         {/* Interactive Savings Calculator */}
