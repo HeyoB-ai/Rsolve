@@ -107,12 +107,49 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
 
   const isMediator = senderRole === 'mediator';
 
+  // Vaste kleur per partij (rol), zodat je in één oogopslag ziet wie wie is —
+  // consistent met de kleurcodering op de website. Partij A (initiator) = rose,
+  // Partij B (respondent) = emerald, mediator = cyaan (merk).
+  const ROLE_THEME: Record<string, {
+    label: string; own: string; other: string; divider: string; accent: string; btn: string;
+  }> = {
+    initiator: {
+      label: 'text-red-300',
+      own: 'bg-red-950/60 border border-red-800/50 text-red-50 rounded-br-none shadow-sm',
+      other: 'bg-slate-950/70 border border-red-900/60 text-slate-100 rounded-bl-none shadow-sm',
+      divider: 'border-red-800/30',
+      accent: 'text-red-300',
+      btn: 'bg-red-500/10 text-red-200 hover:bg-red-500/20',
+    },
+    respondent: {
+      label: 'text-emerald-300',
+      own: 'bg-emerald-950/60 border border-emerald-800/50 text-emerald-50 rounded-br-none shadow-sm',
+      other: 'bg-slate-950/70 border border-emerald-900/60 text-slate-100 rounded-bl-none shadow-sm',
+      divider: 'border-emerald-800/30',
+      accent: 'text-emerald-300',
+      btn: 'bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/20',
+    },
+    mediator: {
+      label: 'text-cyan-300',
+      own: 'bg-cyan-950/60 border border-cyan-800/50 text-cyan-50 rounded-br-none shadow-sm',
+      other: 'bg-slate-900/70 border border-cyan-800/40 text-slate-100 rounded-bl-none shadow-sm',
+      divider: 'border-cyan-800/30',
+      accent: 'text-cyan-300',
+      btn: 'bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20',
+    },
+    default: {
+      label: 'text-slate-400',
+      own: 'bg-slate-800/80 border border-slate-700 text-slate-100 rounded-br-none shadow-sm',
+      other: 'bg-slate-900/70 border border-slate-700 text-slate-100 rounded-bl-none shadow-sm',
+      divider: 'border-slate-700',
+      accent: 'text-slate-400',
+      btn: 'bg-slate-700/60 text-slate-300 hover:bg-slate-700 hover:text-white',
+    },
+  };
+  const theme = ROLE_THEME[senderRole || 'default'] || ROLE_THEME.default;
+
   // Bepaal bubbel achtergrondkleur en rand
-  const bubbleClasses = isOwn
-    ? 'bg-cyan-500 text-slate-950 rounded-br-none shadow-md'
-    : isMediator
-    ? 'bg-slate-800/70 border border-cyan-400/25 text-slate-100 rounded-bl-none shadow-sm'
-    : 'bg-slate-800/70 border border-slate-700 text-slate-100 rounded-bl-none shadow-sm';
+  const bubbleClasses = isOwn ? theme.own : theme.other;
 
   const renderAttachment = () => {
     if (!attachment) return null;
@@ -123,7 +160,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
     // Bijlage-link wordt nog opgehaald (tijdelijke signed URL) -> laadindicator tonen.
     if (!resolvedUrl) {
       return (
-        <div className={`mt-2 flex items-center gap-2 p-3 rounded-xl border ${isOwn ? 'bg-cyan-600 border-cyan-400 text-slate-900' : 'bg-slate-800 border-slate-700 text-slate-400'}`}>
+        <div className="mt-2 flex items-center gap-2 p-3 rounded-xl border bg-slate-900/70 border-slate-700 text-slate-400">
           <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin opacity-70" />
           <span className="text-[10px] font-bold truncate">{attachment.name}</span>
         </div>
@@ -132,10 +169,10 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
 
     if (isImage) {
       return (
-        <div className={`mt-2 rounded-xl overflow-hidden border shadow-sm ${isOwn ? 'bg-cyan-600 border-cyan-400' : 'bg-slate-800 border-slate-700'}`}>
+        <div className="mt-2 rounded-xl overflow-hidden border shadow-sm bg-slate-900/70 border-slate-700">
           <img src={resolvedUrl} alt={attachment.name} className="max-w-full h-auto block" />
-          <div className={`px-3 py-2 ${isOwn ? 'bg-cyan-700/50' : 'bg-slate-900/80'} backdrop-blur-sm border-t ${isOwn ? 'border-cyan-400' : 'border-slate-700'} flex items-center justify-between`}>
-            <span className={`text-[10px] font-bold truncate ${isOwn ? 'text-slate-900' : 'text-slate-400'}`}>{attachment.name}</span>
+          <div className="px-3 py-2 bg-slate-900/80 backdrop-blur-sm border-t border-slate-700 flex items-center justify-between">
+            <span className="text-[10px] font-bold truncate text-slate-400">{attachment.name}</span>
           </div>
         </div>
       );
@@ -160,10 +197,10 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
         download={attachment.name}
         className={`
           mt-2 flex items-center gap-3 p-3 rounded-xl border transition-colors
-          ${isOwn ? 'bg-cyan-600 border-cyan-400 text-slate-900 hover:bg-cyan-700' : 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'}
+          bg-slate-900/70 border-slate-700 text-slate-200 hover:bg-slate-800
         `}
       >
-        <div className={`p-2 rounded-lg ${isOwn ? 'bg-cyan-700' : 'bg-slate-900'}`}>
+        <div className="p-2 rounded-lg bg-slate-950/60">
           <ICONS.File className="w-5 h-5" />
         </div>
         <div className="flex-1 overflow-hidden">
@@ -179,7 +216,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
   return (
     <div className={`flex flex-col max-w-[85%] ${isOwn ? 'self-end items-end' : 'self-start items-start'} mb-2 animate-in fade-in slide-in-from-bottom-2 duration-300`}>
       {!isOwn && (
-        <span className={`text-[10px] font-black mb-1 ml-2 uppercase tracking-widest ${isMediator ? 'text-cyan-400' : 'text-slate-400'}`}>
+        <span className={`text-[10px] font-black mb-1 ml-2 uppercase tracking-widest ${theme.label}`}>
           {sender}
         </span>
       )}
@@ -198,7 +235,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
 
           {/* Translation Status / Toggle Button */}
           {!isOwn && text && (
-            <div className={`mt-2 pt-2 border-t flex items-center justify-between gap-2 ${isMediator ? 'border-cyan-400/20' : 'border-slate-700'}`}>
+            <div className={`mt-2 pt-2 border-t flex items-center justify-between gap-2 ${theme.divider}`}>
               
               {isTranslating ? (
                 <div className="flex items-center gap-2 text-[10px] opacity-70">
@@ -211,9 +248,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
                   onClick={handleToggle}
                   className={`
                     flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors text-[10px] font-bold uppercase tracking-wider
-                    ${isMediator
-                      ? 'bg-cyan-400/10 text-cyan-300 hover:bg-cyan-400/20'
-                      : 'bg-slate-700/60 text-slate-300 hover:bg-slate-700 hover:text-white'}
+                    ${theme.btn}
                   `}
                 >
                   <ICONS.Translate className="w-3.5 h-3.5" />
@@ -227,7 +262,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({
 
               {/* Indicator if showing translation */}
               {showTranslation && translatedText && !isTranslating && (
-                <span className={`text-[8px] font-black uppercase tracking-widest opacity-50 ${isMediator ? 'text-cyan-400' : 'text-slate-400'}`}>
+                <span className={`text-[8px] font-black uppercase tracking-widest opacity-50 ${theme.accent}`}>
                   Vertaald
                 </span>
               )}
