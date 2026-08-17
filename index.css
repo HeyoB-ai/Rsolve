@@ -68,3 +68,16 @@ body {
     font-size: 16px !important; /* Voorkomt inzoomen op iPhone */
   }
 }
+
+/* ── Rsolve donkere stijl (nieuwe landing) — Inter + strakke koppen ── */
+.rsolve-dark {
+  font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.rsolve-dark h1,
+.rsolve-dark h2,
+.rsolve-dark h3,
+.rsolve-dark h4,
+.rsolve-dark .font-display {
+  font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.025em;
+}
