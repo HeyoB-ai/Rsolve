@@ -179,6 +179,10 @@ export function CostComparison({ onStartMediation, brandPrimaryColor = '#10B981'
             <p className="text-sm text-slate-400 leading-relaxed font-light">
               Mocht onze bemiddeling onverhoopt niet tot een oplossing leiden, dan hoeft u zelf niet op zoek. U kunt een advocaat of mediator eenvoudig <span className="text-slate-200 font-medium">via RSolve</span> inschakelen: wij beschikken over een netwerk van specialisten dat u — indien gewenst — via ons kunt inschakelen.
             </p>
+            <p className="text-sm text-emerald-200/90 leading-relaxed font-light">
+              Verdient u minder dan <span className="font-semibold text-emerald-300">€ 35.400</span> (of <span className="font-semibold text-emerald-300">€ 50.000</span> als u samenwoont of gehuwd bent)? Dan kunt u terecht bij <span className="font-medium text-white">Het Juridisch Loket</span> en komt u vaak in aanmerking voor gesubsidieerde rechtsbijstand. U neemt uw RSolve-dossier gewoon mee, zodat zij direct zien wat de zaak inhoudt.
+              <span className="block text-xs text-slate-500 mt-1">Inkomensgrenzen 2026 (peiljaar 2024), indicatief — de Raad voor Rechtsbijstand bepaalt uw recht.</span>
+            </p>
           </div>
         </div>
 
