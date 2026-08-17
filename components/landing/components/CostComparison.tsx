@@ -9,10 +9,24 @@ interface CostComparisonProps {
 export function CostComparison({ onStartMediation, brandPrimaryColor = '#10B981' }: CostComparisonProps) {
   const [claimAmount, setClaimAmount] = useState<number>(2500);
 
-  const lawyerCost = 2800;
-  const mediatorCost = 1500;
+  // Grenzen van de slider
+  const MIN_CLAIM = 200;
+  const MAX_CLAIM = 15000;
+
+  // Een traditioneel mediationtraject kost doorgaans € 1.200 – € 2.400 (zie kolom hierboven).
+  // Grotere/complexere geschillen kosten meer uren, dus schalen we de kosten binnen die band
+  // mee met het geschilbedrag. Zo beweegt de besparing echt mee met de slider.
+  const TRAD_MIN = 1200;
+  const TRAD_MAX = 2400;
   const rsolveCost = 3.99;
-  const estimatedSavings = Math.max(0, mediatorCost - rsolveCost);
+
+  const ratio = Math.min(1, Math.max(0, (claimAmount - MIN_CLAIM) / (MAX_CLAIM - MIN_CLAIM)));
+  const traditionalCost = TRAD_MIN + ratio * (TRAD_MAX - TRAD_MIN);
+  const estimatedSavings = Math.max(0, traditionalCost - rsolveCost);
+
+  const euro = (n: number) =>
+    n.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const euro0 = (n: number) => Math.round(n).toLocaleString('nl-NL');
 
   return (
     <section id="tarieven" className="py-20 md:py-28 bg-slate-950 border-b border-slate-800/80 scroll-mt-20">
@@ -166,14 +180,14 @@ export function CostComparison({ onStartMediation, brandPrimaryColor = '#10B981'
             </div>
             <div className="text-right">
               <div className="text-xs text-slate-400">Geschatte besparing:</div>
-              <div className="text-2xl font-black text-emerald-400">€{estimatedSavings.toLocaleString('nl-NL')}</div>
+              <div className="text-2xl font-black text-emerald-400">€{euro(estimatedSavings)}</div>
             </div>
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-slate-300">
-              <span>Geschat geschilbedrag: €{claimAmount.toLocaleString('nl-NL')}</span>
-              <span className="text-slate-400">RSolve: €3,99 vast</span>
+              <span>Geschat geschilbedrag: €{euro0(claimAmount)}</span>
+              <span className="text-slate-400">Traditioneel traject: ± €{euro0(traditionalCost)}</span>
             </div>
             <input
               type="range"
