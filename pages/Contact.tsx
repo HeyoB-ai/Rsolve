@@ -2,19 +2,19 @@ import React from 'react';
 import { Logo } from '../components/ui/Logo';
 
 const Contact: React.FC = () => {
-  const iconWrap = 'w-11 h-11 rounded-2xl bg-blue-50 text-[#0b50da] flex items-center justify-center shrink-0';
+  const iconWrap = 'w-11 h-11 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center shrink-0';
   const label = 'text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5';
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center p-6 pt-16 animate-in fade-in duration-500">
+    <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-6 pt-16 animate-in fade-in duration-500">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <Logo className="w-16 h-16 mx-auto mb-6" />
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Contact</h1>
-          <p className="text-sm text-slate-500 font-medium mt-2">Neem gerust contact met ons op.</p>
+          <h1 className="text-3xl font-black text-white tracking-tight">Contact</h1>
+          <p className="text-sm text-slate-400 font-medium mt-2">Neem gerust contact met ons op.</p>
         </div>
 
-        <div className="bg-white rounded-[28px] shadow-xl border border-slate-100 p-8 space-y-6">
+        <div className="bg-slate-900 rounded-[28px] shadow-2xl border border-slate-800 p-8 space-y-6">
           {/* Bedrijf */}
           <div className="flex items-start gap-4">
             <div className={iconWrap}>
@@ -22,7 +22,7 @@ const Contact: React.FC = () => {
             </div>
             <div>
               <p className={label}>Bedrijf</p>
-              <p className="font-bold text-slate-800">Clareco bv</p>
+              <p className="font-bold text-slate-100">Clareco bv</p>
             </div>
           </div>
 
@@ -33,7 +33,7 @@ const Contact: React.FC = () => {
             </div>
             <div>
               <p className={label}>Adres</p>
-              <p className="font-bold text-slate-800 leading-relaxed">Baronielaan 107 A<br />4818 PD Breda</p>
+              <p className="font-bold text-slate-100 leading-relaxed">Baronielaan 107 A<br />4818 PD Breda</p>
             </div>
           </div>
 
@@ -44,13 +44,13 @@ const Contact: React.FC = () => {
             </div>
             <div>
               <p className={label}>Telefoon</p>
-              <p className="font-bold text-slate-800 group-hover:text-[#0b50da] transition-colors">06-57812417</p>
+              <p className="font-bold text-slate-100 group-hover:text-cyan-400 transition-colors">06-57812417</p>
             </div>
           </a>
         </div>
 
         <div className="text-center">
-          <a href="/#/" className="text-[#0b50da] font-bold text-sm hover:underline">← Terug naar home</a>
+          <a href="/#/" className="text-cyan-400 font-bold text-sm hover:underline">← Terug naar home</a>
         </div>
       </div>
     </div>
