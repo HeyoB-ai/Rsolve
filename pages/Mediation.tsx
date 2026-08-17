@@ -479,10 +479,6 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             <button onClick={() => setShowLangSelector(true)} className="p-2 text-slate-400 hover:text-cyan-400 transition-colors">
               <ICONS.Globe className="w-5 h-5" />
             </button>
-            {/* Rsolve Pro — overdrachtsdossier genereren */}
-            <button onClick={() => setShowProWizard(true)} className="px-2.5 py-1.5 text-[10px] font-black text-slate-950 bg-cyan-500 hover:bg-cyan-400 rounded-lg transition-colors uppercase tracking-wider shadow-sm">
-               {t('pro_header_btn')}
-            </button>
             <button onClick={() => setShowLeaveModal(true)} className="px-3 py-1.5 text-xs font-bold text-red-300 bg-red-500/15 hover:bg-red-500/25 rounded-lg transition-colors uppercase tracking-wider">
                {t('leave_btn_label') || "Stop"}
             </button>
