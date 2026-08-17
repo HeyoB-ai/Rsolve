@@ -442,22 +442,22 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
   return (
     // 'touch-none' hier toegevoegd om het bouncen op mobiel te voorkomen in de app
-    <div className="fixed inset-0 bg-slate-50 flex items-center justify-center touch-none">
+    <div className="rsolve-dark fixed inset-0 bg-slate-950 flex items-center justify-center touch-none">
       {/* 
         Container Logic: 
         - Op desktop: Een 'kaart' die gecentreerd is (max-w-3xl) met schaduw.
         - Op mobiel: Full screen (w-full h-full).
       */}
-      <div className="w-full h-full md:max-w-3xl md:h-[90vh] md:max-h-[850px] bg-white md:rounded-[24px] md:shadow-2xl md:overflow-hidden relative flex flex-col border border-slate-100">
-        
+      <div className="w-full h-full md:max-w-3xl md:h-[90vh] md:max-h-[850px] bg-slate-900 md:rounded-[24px] md:shadow-2xl md:overflow-hidden relative flex flex-col border border-slate-800">
+
         {/* Header */}
-        <header className="px-4 py-3 bg-white border-b border-slate-100 flex items-center justify-between shrink-0 z-10 shadow-sm">
+        <header className="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0 z-10">
           <div className="flex items-center gap-3 overflow-hidden">
             <Logo className="w-8 h-8" />
             <div className="flex flex-col overflow-hidden">
-              <h1 className="text-sm font-black text-slate-900 truncate max-w-[150px] sm:max-w-xs">{caseData.title}</h1>
+              <h1 className="text-sm font-black text-white truncate max-w-[150px] sm:max-w-xs">{caseData.title}</h1>
               <div className="flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full transition-colors duration-500 ${partnerOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-300'}`} />
+                <span className={`w-2 h-2 rounded-full transition-colors duration-500 ${partnerOnline ? 'bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-600'}`} />
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">
                   {partnerOnline ? `${partnerName} ${t('online')}` : `${t('waiting')} ${partnerName}...`}
                 </p>
@@ -466,31 +466,31 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           </div>
           
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-slate-50 rounded-full p-1 border border-slate-100">
+            <div className="flex items-center bg-slate-800 rounded-full p-1 border border-slate-700">
                {soundEnabled && (
-                  <button onClick={handleTestAudio} className={`text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-full transition-colors ${audioReady ? 'text-emerald-500 bg-emerald-50' : 'text-amber-600 bg-amber-50 animate-pulse'}`}>
+                  <button onClick={handleTestAudio} className={`text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-full transition-colors ${audioReady ? 'text-emerald-400 bg-emerald-500/10' : 'text-amber-400 bg-amber-500/10 animate-pulse'}`}>
                      {audioReady ? 'Test' : 'Tap'}
                   </button>
                )}
-               <button onClick={toggleSound} className={`p-2 rounded-full transition-all active:scale-95 ${soundEnabled ? 'text-blue-600' : 'text-slate-400'}`}>
+               <button onClick={toggleSound} className={`p-2 rounded-full transition-all active:scale-95 ${soundEnabled ? 'text-cyan-400' : 'text-slate-500'}`}>
                   {soundEnabled ? <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>}
               </button>
             </div>
-            <button onClick={() => setShowLangSelector(true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
+            <button onClick={() => setShowLangSelector(true)} className="p-2 text-slate-400 hover:text-cyan-400 transition-colors">
               <ICONS.Globe className="w-5 h-5" />
             </button>
             {/* Rsolve Pro — overdrachtsdossier genereren */}
-            <button onClick={() => setShowProWizard(true)} className="px-2.5 py-1.5 text-[10px] font-black text-white bg-[#0b50da] hover:bg-blue-700 rounded-lg transition-colors uppercase tracking-wider shadow-sm">
+            <button onClick={() => setShowProWizard(true)} className="px-2.5 py-1.5 text-[10px] font-black text-slate-950 bg-cyan-500 hover:bg-cyan-400 rounded-lg transition-colors uppercase tracking-wider shadow-sm">
                {t('pro_header_btn')}
             </button>
-            <button onClick={() => setShowLeaveModal(true)} className="px-3 py-1.5 text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors uppercase tracking-wider">
+            <button onClick={() => setShowLeaveModal(true)} className="px-3 py-1.5 text-xs font-bold text-red-300 bg-red-500/15 hover:bg-red-500/25 rounded-lg transition-colors uppercase tracking-wider">
                {t('leave_btn_label') || "Stop"}
             </button>
           </div>
         </header>
 
         {/* Messages Container - touch-pan-y allows internal scrolling */}
-        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 scroll-smooth scroll-container bg-slate-50/50 touch-pan-y">
+        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 scroll-smooth scroll-container bg-slate-950/40 touch-pan-y">
           {messages.map((m) => {
             const isMe = m.sender_id === myRole || m.sender_id === 'local-user';
             const isSystem = m.type === 'system';
@@ -499,7 +499,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
               if (!displayContent) return null;
               return (
                 <div key={m.id} className="flex justify-center my-4 animate-in fade-in zoom-in duration-500 px-4">
-                  <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-4 py-2 rounded-xl text-center border border-slate-200 shadow-sm leading-relaxed max-w-xs">
+                  <span className="bg-slate-800/70 text-slate-300 text-[10px] font-bold px-4 py-2 rounded-xl text-center border border-slate-700 leading-relaxed max-w-xs">
                     {displayContent}
                   </span>
                 </div>
@@ -522,8 +522,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
           {(isAiThinking || partnerTyping) && (
             <div className="flex flex-col gap-1 ml-4 mt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
                {partnerTyping && (
-                  <div className="flex items-center gap-2 bg-slate-100 w-fit px-3 py-2 rounded-xl rounded-bl-none shadow-sm">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{partnerName} {t('typing_indicator')}</span>
+                  <div className="flex items-center gap-2 bg-slate-800 w-fit px-3 py-2 rounded-xl rounded-bl-none shadow-sm">
+                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">{partnerName} {t('typing_indicator')}</span>
                     <div className="flex gap-1">
                       <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" />
                       <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce delay-75" />
@@ -532,8 +532,8 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                   </div>
                )}
                {isAiThinking && !partnerTyping && (
-                 <div className="flex items-center gap-2 text-emerald-600 text-[10px] font-bold bg-emerald-50 w-fit px-3 py-2 rounded-full border border-emerald-100">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                 <div className="flex items-center gap-2 text-cyan-300 text-[10px] font-bold bg-cyan-500/10 w-fit px-3 py-2 rounded-full border border-cyan-400/20">
+                    <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse" />
                     <span className="uppercase tracking-wider">{t('mediator_thinking')}</span>
                  </div>
                )}
@@ -544,7 +544,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
 
         {/* Input Area */}
         {/* pb-[env(safe-area-inset-bottom)] zorgt ervoor dat het niet achter de home-bar op iPhone verdwijnt */}
-        <div className="p-4 bg-white border-t border-slate-100 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+        <div className="p-4 bg-slate-900 border-t border-slate-800 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <div className="relative flex items-end gap-2 max-w-4xl mx-auto">
             <input 
               type="file" 
@@ -556,7 +556,7 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
             <Button 
               size="icon" 
               variant="secondary"
-              className="rounded-full w-12 h-12 shrink-0 bg-slate-100 text-slate-500 hover:bg-slate-200"
+              className="rounded-full w-12 h-12 shrink-0 bg-slate-800 text-slate-300 hover:bg-slate-700 border-0"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
             >
@@ -577,12 +577,12 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
                 }
               }}
               placeholder={t('placeholder')}
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-[24px] px-5 py-3.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 resize-none min-h-[48px] max-h-[100px] shadow-inner transition-all"
+              className="flex-1 bg-slate-800 border border-slate-700 text-slate-100 placeholder-slate-500 rounded-[24px] px-5 py-3.5 text-sm focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/15 resize-none min-h-[48px] max-h-[100px] transition-all"
               rows={1}
             />
             <Button 
               size="icon" 
-              className={`rounded-full w-12 h-12 shrink-0 transition-all duration-300 ${inputValue.trim() ? 'bg-blue-600 shadow-lg scale-100 rotate-0' : 'bg-slate-100 text-slate-300 scale-95'}`}
+              className={`rounded-full w-12 h-12 shrink-0 transition-all duration-300 border-0 ${inputValue.trim() ? 'bg-cyan-500 text-slate-950 shadow-lg scale-100 rotate-0' : 'bg-slate-800 text-slate-600 scale-95'}`}
               onClick={handleSendMessage}
               disabled={!inputValue.trim()}
             >
@@ -594,83 +594,82 @@ const Mediation: React.FC<MediationProps> = ({ caseData, appLanguage, setAppLang
         {/* Modals remain absolute within this container */}
         {showLeaveModal && (
           <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/50 backdrop-blur-sm animate-in fade-in rounded-[24px]">
-            <Card className="w-full max-w-sm p-6 text-center space-y-6">
-              <div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto">
+            <div className="w-full max-w-sm p-6 text-center space-y-6 bg-slate-900 border border-slate-800 rounded-[24px] shadow-2xl">
+              <div className="w-12 h-12 bg-red-500/15 text-red-400 rounded-full flex items-center justify-center mx-auto">
                 <ICONS.Zap className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-slate-900">{t('leave_modal_title')}</h2>
-                <div className="mt-4 bg-red-50 p-4 rounded-xl border border-red-100 text-left">
+                <h2 className="text-lg font-black text-white">{t('leave_modal_title')}</h2>
+                <div className="mt-4 bg-red-500/10 p-4 rounded-xl border border-red-500/20 text-left">
                   <div className="flex gap-2 mb-2">
-                      <ICONS.Shield className="w-4 h-4 text-red-600" />
-                      <span className="text-xs font-black text-red-700 uppercase tracking-wider">Juridische Waarschuwing</span>
+                      <ICONS.Shield className="w-4 h-4 text-red-400" />
+                      <span className="text-xs font-black text-red-300 uppercase tracking-wider">Juridische Waarschuwing</span>
                   </div>
-                  <p className="text-xs text-red-800 font-medium leading-relaxed">
+                  <p className="text-xs text-red-200 font-medium leading-relaxed">
                     {t('leave_legal_warning') || "Let op: Het niet meewerken aan een oplossing kan in een eventuele latere rechtszaak in uw nadeel werken."}
                   </p>
                 </div>
                 <p className="text-xs text-slate-400 mt-4 font-medium">{t('leave_modal_desc')}</p>
 
                 {/* Bij vastlopen: bied een stap verder aan (juridische hulp) */}
-                <div className="mt-4 bg-blue-50 p-4 rounded-xl border border-blue-100 text-left">
+                <div className="mt-4 bg-cyan-500/10 p-4 rounded-xl border border-cyan-400/20 text-left">
                   <div className="flex gap-2 mb-1.5 items-center">
-                    <span className="text-[10px] font-black text-[#0b50da] bg-white px-1.5 py-0.5 rounded uppercase tracking-wider">Rsolve</span>
-                    <span className="text-xs font-black text-blue-800">{t('sv_offer_title')}</span>
+                    <span className="text-[10px] font-black text-cyan-300 bg-slate-950 px-1.5 py-0.5 rounded uppercase tracking-wider">Rsolve</span>
+                    <span className="text-xs font-black text-white">{t('sv_offer_title')}</span>
                   </div>
-                  <p className="text-xs text-blue-900/80 font-medium leading-relaxed mb-3">{t('sv_offer_text')}</p>
-                  <Button
-                    size="sm"
-                    className="w-full rounded-xl bg-[#0b50da] hover:bg-blue-700"
+                  <p className="text-xs text-slate-300 font-medium leading-relaxed mb-3">{t('sv_offer_text')}</p>
+                  <button
+                    className="w-full rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-sm font-semibold py-2.5 transition-colors"
                     onClick={() => { setShowLeaveModal(false); setShowStapVerder(true); }}
                   >
                     {t('sv_offer_yes')}
-                  </Button>
+                  </button>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" onClick={() => setShowLeaveModal(false)}>{t('leave_cancel')}</Button>
-                <Button variant="danger" onClick={handleConfirmAbandon} isLoading={isLeaving}>{t('leave_confirm')}</Button>
+                <button onClick={() => setShowLeaveModal(false)} className="rounded-xl border border-slate-700 text-slate-200 hover:bg-slate-800 text-sm font-semibold py-2.5 transition-colors">{t('leave_cancel')}</button>
+                <button onClick={handleConfirmAbandon} disabled={isLeaving} className="rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2.5 transition-colors disabled:opacity-60">{t('leave_confirm')}</button>
               </div>
-            </Card>
+            </div>
           </div>
         )}
 
         {showVSOModal && (
           <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in rounded-[24px]">
-            <Card className="w-full max-w-md p-8 text-center space-y-6 relative overflow-hidden">
+            <div className="w-full max-w-md p-8 text-center space-y-6 relative overflow-hidden bg-slate-900 border border-slate-800 rounded-[24px] shadow-2xl">
               {!vsoTerms ? (
                 <>
-                  <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
+                  <div className="w-16 h-16 bg-cyan-500/15 text-cyan-300 rounded-full flex items-center justify-center mx-auto animate-bounce">
                     <ICONS.File className="w-8 h-8" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-slate-900">{t('vso_modal_title')}</h2>
-                    <p className="text-sm text-slate-500 mt-2">
+                    <h2 className="text-xl font-black text-white">{t('vso_modal_title')}</h2>
+                    <p className="text-sm text-slate-400 mt-2">
                       {isGeneratingVSO ? t('vso_generating') : "De mediator stelt nu een juridisch document op."}
                     </p>
                   </div>
                   {isGeneratingVSO ? (
-                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-600 animate-pulse w-2/3 rounded-full"></div>
+                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div className="h-full bg-cyan-500 animate-pulse w-2/3 rounded-full"></div>
                     </div>
                   ) : (
-                    <Button size="lg" className="w-full shadow-xl" onClick={handleGenerateVSO}>
+                    <button className="w-full rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-sm font-semibold py-3 shadow-lg transition-colors" onClick={handleGenerateVSO}>
                       {t('vso_confirm')}
-                    </Button>
+                    </button>
                   )}
                 </>
               ) : (
                 <div className="animate-in slide-in-from-bottom-8">
-                  <h2 className="text-xl font-black text-slate-900 mb-4">{t('vso_title')}</h2>
-                  <div className="bg-slate-50 p-4 rounded-xl text-left text-xs text-slate-600 max-h-60 overflow-y-auto border border-slate-100 mb-6 font-mono leading-relaxed">
+                  <h2 className="text-xl font-black text-white mb-4">{t('vso_title')}</h2>
+                  <div className="bg-slate-950 p-4 rounded-xl text-left text-xs text-slate-300 max-h-60 overflow-y-auto border border-slate-800 mb-6 font-mono leading-relaxed">
                     {vsoTerms}
                   </div>
-                  <Button size="lg" className="w-full shadow-xl bg-emerald-600 hover:bg-emerald-700" onClick={finalizeVSO}>
+                  <button className="w-full rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold py-3 shadow-lg transition-colors" onClick={finalizeVSO}>
                     {t('finish_btn')}
-                  </Button>
+                  </button>
                 </div>
               )}
-            </Card>
+            </div>
           </div>
         )}
 
