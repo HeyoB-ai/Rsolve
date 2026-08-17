@@ -17,7 +17,7 @@ export function Header({ onStartMediation, onJoin, brandPrimaryColor }: HeaderPr
 
         {/* Brand Logo */}
         <a href="#" className="flex items-center gap-2 group focus:outline-none">
-          <RSolveLogo size="md" showWordmark={true} customLogoUrl={null} brandPrimaryColor={brandPrimaryColor} />
+          <RSolveLogo size="md" showWordmark={true} customLogoUrl="/assets/rsolve-logo.png" brandPrimaryColor={brandPrimaryColor} />
         </a>
 
         {/* Navigation */}
