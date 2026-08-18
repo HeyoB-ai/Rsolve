@@ -31,7 +31,7 @@ const Landing: React.FC<LandingProps> = () => {
 
   return (
     <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-cyan-400 selection:text-slate-950 antialiased">
-      <LangBar onStart={startMediation} />
+      <LangBar />
       <Header onStartMediation={startMediation} brandPrimaryColor={ACCENT} />
       <main className="flex-1">
         <Hero onSelectScenario={setSelectedScenarioId} onStartMediation={startMediation} brandPrimaryColor={ACCENT} />

@@ -61,7 +61,7 @@ const ConflictLanding: React.FC<Props> = ({ data }) => {
   return (
     <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-cyan-400 selection:text-slate-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <LangBar onStart={startMediation} />
+      <LangBar />
       <Header onStartMediation={startMediation} brandPrimaryColor={ACCENT} />
 
       <main className="flex-1">
