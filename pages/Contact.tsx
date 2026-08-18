@@ -50,7 +50,7 @@ const Contact: React.FC = () => {
         </div>
 
         <div className="text-center">
-          <a href="/#/" className="text-cyan-400 font-bold text-sm hover:underline">← Terug naar home</a>
+          <a href="/" className="text-cyan-400 font-bold text-sm hover:underline">← Terug naar home</a>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import RouteSeo from './components/RouteSeo';
 import { UI_TRANSLATIONS } from './constants';
 import { isConfigured } from './lib/supabase';
 
@@ -24,7 +25,7 @@ const MarketingPage = ({ title, content }: { title: string, content: string }) =
       {content.split('\n').map((p, i) => <p key={i} className="mb-4">{p}</p>)}
     </div>
     <div className="mt-12 pt-8 border-t border-slate-100 text-center">
-      <a href="/#/" className="text-primary font-bold hover:underline">Terug naar Home</a>
+      <a href="/" className="text-primary font-bold hover:underline">Terug naar Home</a>
     </div>
   </div>
 );
@@ -75,11 +76,11 @@ const App: React.FC = () => {
     else localStorage.removeItem('rsolve_final_vso');
   }, [finalVSO]);
 
-  // Terugkeer van Stripe Checkout: /payment-complete?... doorsturen naar de hash-route /#/payment
+  // Terugkeer van Stripe Checkout: /payment-complete?... doorsturen naar de route /payment
   useEffect(() => {
     if (window.location.pathname.startsWith('/payment-complete')) {
       const search = window.location.search || '';
-      window.location.replace('/#/payment' + search);
+      window.location.replace('/payment' + search);
     }
   }, []);
 
@@ -88,7 +89,7 @@ const App: React.FC = () => {
     setActiveCase(null);
     setHasPaid(false);
     localStorage.clear();
-    window.location.href = '#/';
+    window.location.href = '/';
   };
 
   const handleAbandon = () => {
@@ -96,7 +97,7 @@ const App: React.FC = () => {
     setHasPaid(false);
     localStorage.removeItem('rsolve_active_case');
     localStorage.removeItem('rsolve_has_paid');
-    window.location.href = '#/';
+    window.location.href = '/';
   };
 
   const t = (key: string, params?: any) => {
@@ -110,7 +111,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <HashRouter>
+    <BrowserRouter>
+      <RouteSeo />
       <div className="flex flex-col min-h-screen bg-white relative">
         {!isConfigured && (
           <div className="bg-red-600 text-white text-[10px] font-black py-2 px-4 text-center z-[200] uppercase tracking-widest">
@@ -161,7 +163,7 @@ const App: React.FC = () => {
           </Routes>
         </main>
       </div>
-    </HashRouter>
+    </BrowserRouter>
   );
 };
 

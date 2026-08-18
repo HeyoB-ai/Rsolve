@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://rsolve.app/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://rsolve.app/zakelijk</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rsolve.app/partners</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rsolve.app/kosten-conflict</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://rsolve.app/juridische-hulp</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://rsolve.app/contact</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://rsolve.app/wat-is-mediation</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://rsolve.app/hoe-werkt-rsolve</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://rsolve.app/kosten</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://rsolve.app/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://rsolve.app/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+</urlset>

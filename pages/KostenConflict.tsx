@@ -15,7 +15,7 @@ const KostenConflict: React.FC = () => {
       <header className="bg-slate-900 text-white px-6 pt-6 pb-20">
         <div className="max-w-3xl mx-auto">
           <a
-            href="/#/"
+            href="/"
             className="inline-flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-white transition-colors mb-10"
           >
             <span aria-hidden>←</span> Terug naar home
@@ -99,10 +99,10 @@ const KostenConflict: React.FC = () => {
           <div className="bg-slate-50 border border-slate-100 rounded-[24px] p-8 text-center">
             <p className="font-black text-slate-900 text-lg mb-4">Los een conflict op vóórdat het escaleert.</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <a href="/#/" className="bg-[#0b50da] text-white px-8 py-4 rounded-full font-black hover:bg-blue-700 transition-all shadow-lg active:scale-95">
+              <a href="/" className="bg-[#0b50da] text-white px-8 py-4 rounded-full font-black hover:bg-blue-700 transition-all shadow-lg active:scale-95">
                 Start met Rsolve
               </a>
-              <a href="/#/zakelijk" className="bg-white border border-slate-200 text-slate-700 px-8 py-4 rounded-full font-black hover:border-[#0b50da] transition-all active:scale-95">
+              <a href="/zakelijk" className="bg-white border border-slate-200 text-slate-700 px-8 py-4 rounded-full font-black hover:border-[#0b50da] transition-all active:scale-95">
                 Voor organisaties
               </a>
             </div>
@@ -131,7 +131,7 @@ const KostenConflict: React.FC = () => {
           </div>
 
           <div className="text-center pt-2">
-            <a href="/#/" className="text-[#0b50da] font-bold text-sm hover:underline">← Terug naar home</a>
+            <a href="/" className="text-[#0b50da] font-bold text-sm hover:underline">← Terug naar home</a>
           </div>
         </div>
       </article>

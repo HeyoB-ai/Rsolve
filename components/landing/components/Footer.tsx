@@ -42,9 +42,9 @@ export function Footer({ brandPrimaryColor = '#10B981' }: FooterProps) {
             <div className="font-semibold text-white uppercase tracking-wider text-xs">Juridisch &amp; Privacy</div>
             <ul className="space-y-2 text-slate-400">
               <li><a href="#veiligheid" className="hover:text-white transition-colors">Art. 7:900 BW Vaststellingsovereenkomst</a></li>
-              <li><a href="/#/juridische-hulp" className="hover:text-white transition-colors">Juridische hulp</a></li>
-              <li><a href="/#/privacy" className="hover:text-white transition-colors">AVG / GDPR Verklaring</a></li>
-              <li><a href="/#/terms" className="hover:text-white transition-colors">Voorwaarden</a></li>
+              <li><a href="/juridische-hulp" className="hover:text-white transition-colors">Juridische hulp</a></li>
+              <li><a href="/privacy" className="hover:text-white transition-colors">AVG / GDPR Verklaring</a></li>
+              <li><a href="/terms" className="hover:text-white transition-colors">Voorwaarden</a></li>
             </ul>
           </div>
 
@@ -52,10 +52,10 @@ export function Footer({ brandPrimaryColor = '#10B981' }: FooterProps) {
           <div className="space-y-3">
             <div className="font-semibold text-white uppercase tracking-wider text-xs">Bedrijf</div>
             <ul className="space-y-2 text-slate-400">
-              <li><a href="/#/zakelijk" className="hover:text-white transition-colors">Voor bedrijven</a></li>
-              <li><a href="/#/partners" className="hover:text-white transition-colors">Voor advocaten</a></li>
-              <li><a href="/#/kosten-conflict" className="hover:text-white transition-colors">Wat conflicten kosten</a></li>
-              <li><a href="/#/contact" className="hover:text-white transition-colors">Contact</a></li>
+              <li><a href="/zakelijk" className="hover:text-white transition-colors">Voor bedrijven</a></li>
+              <li><a href="/partners" className="hover:text-white transition-colors">Voor advocaten</a></li>
+              <li><a href="/kosten-conflict" className="hover:text-white transition-colors">Wat conflicten kosten</a></li>
+              <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
             </ul>
           </div>
 

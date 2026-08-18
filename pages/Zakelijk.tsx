@@ -111,13 +111,13 @@ const Zakelijk: React.FC = () => {
               Bel 06-57812417
             </a>
           </div>
-          <a href="/#/contact" className="inline-block mt-6 text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-colors">
+          <a href="/contact" className="inline-block mt-6 text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-colors">
             Alle contactgegevens →
           </a>
         </section>
 
         <div className="text-center">
-          <a href="/#/" className="text-[#0b50da] font-bold text-sm hover:underline">← Terug naar home</a>
+          <a href="/" className="text-[#0b50da] font-bold text-sm hover:underline">← Terug naar home</a>
         </div>
       </div>
     </div>

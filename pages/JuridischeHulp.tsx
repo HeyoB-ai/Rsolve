@@ -51,7 +51,7 @@ const JuridischeHulp: React.FC = () => {
             <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center mx-auto text-2xl font-black">✓</div>
             <h2 className="text-xl font-black text-white">Aanvraag ontvangen</h2>
             <p className="text-slate-400 font-medium">Bedankt. We nemen zo snel mogelijk contact met je op met een passend voorstel.</p>
-            <a href="/#/" className="inline-block text-cyan-400 font-bold text-sm hover:underline pt-2">← Terug naar home</a>
+            <a href="/" className="inline-block text-cyan-400 font-bold text-sm hover:underline pt-2">← Terug naar home</a>
           </div>
         ) : (
           <form
@@ -108,7 +108,7 @@ const JuridischeHulp: React.FC = () => {
         )}
 
         <div className="text-center">
-          <a href="/#/" className="text-[#0b50da] font-bold text-sm hover:underline">← Terug naar home</a>
+          <a href="/" className="text-[#0b50da] font-bold text-sm hover:underline">← Terug naar home</a>
         </div>
       </div>
     </div>

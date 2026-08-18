@@ -42,7 +42,7 @@ const InvitePartner: React.FC<InvitePartnerProps> = ({ onComplete, t, appLanguag
   const [isSaving, setIsSaving] = useState(false);
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
 
-  const inviteLink = `${window.location.origin}/#/invite/${caseId}`;
+  const inviteLink = `${window.location.origin}/invite/${caseId}`;
 
   const handleSetupComplete = async () => {
     if (!formData.title || !formData.otherParty || !formData.yourName) return;

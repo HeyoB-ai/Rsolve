@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Privé app-routes niet indexeren
+Disallow: /mediation
+Disallow: /vso
+Disallow: /payment
+Disallow: /payment-complete
+Disallow: /invite
+Disallow: /invite-partner
+
+Sitemap: https://rsolve.app/sitemap.xml
