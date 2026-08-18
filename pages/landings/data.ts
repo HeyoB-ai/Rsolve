@@ -21,11 +21,13 @@ export interface LandingContent {
   kicker: string;
   h1: string;
   intro: string;
-  problem: LandingSection;
-  help: LandingSection;
-  costs: LandingSection;
-  privacy: LandingSection;
-  limits: LandingSection;
+  // Secties zijn optioneel, zodat het sjabloon ook past voor informatie- en tariefpagina's.
+  problem?: LandingSection;
+  help?: LandingSection;
+  showProcess?: boolean; // toon het 4-stappenproces (default: true)
+  costs?: LandingSection;
+  privacy?: LandingSection;
+  limits?: LandingSection;
   faq: LandingFAQ[];
   cta: { heading: string; body: string; button: string };
   related: { label: string; to: string }[];
@@ -350,6 +352,213 @@ export const LANDINGS: Record<string, LandingContent> = {
       { label: 'Burenruzie oplossen', to: '/burenruzie-oplossen' },
       { label: 'Juridische hulp nodig?', to: '/juridische-hulp' },
       { label: 'Wat een conflict kost', to: '/kosten-conflict' },
+    ],
+  },
+
+  '/wat-is-mediation': {
+    slug: '/wat-is-mediation',
+    seoTitle: 'Wat is mediation? Uitleg en hoe het online werkt',
+    metaDescription:
+      'Wat is mediation, hoe werkt het en wanneer kies je ervoor? Heldere uitleg plus hoe Rsolve mediation met een AI-mediator online, snel en betaalbaar maakt.',
+    kicker: 'Mediation uitgelegd',
+    h1: 'Wat is mediation — en hoe werkt het online?',
+    intro:
+      'Mediation is een manier om een conflict op te lossen met hulp van een neutrale, onafhankelijke derde: de mediator. Die kiest geen partij en oordeelt niet, maar helpt beide betrokkenen om weer met elkaar in gesprek te komen en samen tot afspraken te komen. Anders dan bij een rechter bepaal je de uitkomst dus zelf. Op deze pagina leggen we uit hoe mediation werkt en hoe Rsolve het toegankelijk maakt.',
+    problem: {
+      heading: 'Wat is mediation precies?',
+      body:
+        'Bij mediation begeleidt een neutrale mediator het gesprek tussen partijen die er samen niet meer uitkomen. De kern zit in een paar principes:',
+      bullets: [
+        'Vrijwillig: beide partijen doen mee omdat ze willen, niemand wordt gedwongen.',
+        'Neutraal: de mediator staat aan niemands kant en velt geen oordeel.',
+        'Vertrouwelijk: wat besproken wordt, blijft binnen de mediation.',
+        'Gericht op belangen: niet op wie gelijk heeft, maar op wat beide partijen echt nodig hebben.',
+      ],
+    },
+    help: {
+      heading: 'Wat maakt online AI-mediation anders?',
+      body:
+        'Klassieke mediation is effectief, maar vraagt dat beide partijen tegelijk fysiek of via videocall bijeenkomen, kost al snel honderden euro’s per uur en heeft wachttijd. Rsolve brengt diezelfde methode online met een neutrale AI-mediator, zodat het voor iedereen direct toegankelijk is.',
+      bullets: [
+        'Asynchroon: ieder reageert in eigen tijd, geen gezamenlijke afspraak nodig.',
+        'Direct te starten en meestal binnen 10 minuten tot afspraken.',
+        'Meertalig: iedereen typt in de eigen taal, de mediator vertaalt neutraal.',
+        'Eén vast tarief van € 3,99 in plaats van een uurtarief.',
+      ],
+    },
+    costs: SHARED_COSTS,
+    privacy: SHARED_PRIVACY,
+    limits: {
+      heading: 'Wanneer is mediation niet de juiste route?',
+      body:
+        'Mediation werkt goed als beide partijen bereid zijn er samen uit te komen. In sommige situaties is een andere weg passender.',
+      bullets: [
+        'Bij strafbare feiten, (dreiging met) geweld of een onveilige situatie: schakel de politie of hulpverlening in.',
+        'Bij een groot machtsverschil of afhankelijkheid waardoor vrij onderhandelen niet kan.',
+        'Bij lopende juridische termijnen (bijv. bezwaar of ontslag): win eerst juridisch advies in — Rsolve geeft geen juridisch advies.',
+      ],
+    },
+    faq: [
+      {
+        q: 'Is mediation verplicht?',
+        a: 'Nee, mediation is altijd vrijwillig. Beide partijen kiezen er zelf voor. Wel kan een rechter partijen soms aanraden het eerst met mediation te proberen.',
+      },
+      {
+        q: 'Is de uitkomst van mediation bindend?',
+        a: 'De afspraken die je samen maakt kun je vastleggen in een vaststellingsovereenkomst (art. 7:900 BW), die je allebei ondertekent. Die legt jullie eigen afspraken bindend vast; het is geen juridisch oordeel.',
+      },
+      {
+        q: 'Wat is het verschil met naar de rechter gaan?',
+        a: 'Een rechter beslist vóór je; bij mediation beslis je samen. Mediation is doorgaans sneller, goedkoper en houdt de onderlinge relatie beter intact.',
+      },
+      {
+        q: 'Kan mediation echt online?',
+        a: 'Ja. Bij Rsolve verloopt de mediation volledig online en schriftelijk, met een neutrale AI-mediator die het gesprek begeleidt en de toon bewaakt.',
+      },
+    ],
+    cta: {
+      heading: 'Probeer online mediation zelf',
+      body: 'Start een neutraal dossier en ervaar hoe snel een conflict tot werkbare afspraken kan komen.',
+      button: 'Start bemiddeling (€3,99)',
+    },
+    related: [
+      { label: 'Hoe werkt Rsolve?', to: '/hoe-werkt-rsolve' },
+      { label: 'Wat kost het?', to: '/kosten' },
+      { label: 'Arbeidsconflict oplossen', to: '/arbeidsconflict-oplossen' },
+    ],
+  },
+
+  '/hoe-werkt-rsolve': {
+    slug: '/hoe-werkt-rsolve',
+    seoTitle: 'Hoe werkt Rsolve? Van conflict naar akkoord',
+    metaDescription:
+      'Hoe werkt Rsolve? In vier stappen begeleidt een neutrale AI-mediator beide partijen van conflict naar een bindende vaststellingsovereenkomst. Vast tarief € 3,99.',
+    kicker: 'Zo werkt Rsolve',
+    h1: 'Hoe werkt Rsolve? Van conflict naar bindend akkoord',
+    intro:
+      'Rsolve is een online platform dat twee partijen met behulp van een neutrale AI-mediator naar een oplossing begeleidt. Je hoeft niets te installeren en niet tegelijk online te zijn. Hieronder zie je precies hoe het proces verloopt, wat de AI-mediator voor je doet en waar het geschikt voor is.',
+    problem: {
+      heading: 'Voor wie en welke conflicten?',
+      body:
+        'Rsolve is bedoeld voor alledaagse conflicten tussen twee partijen die er samen willen uitkomen, zoals:',
+      bullets: [
+        'Burengeschillen over geluid, schutting, bomen of de erfgrens.',
+        'Zakelijke kwesties zoals onbetaalde facturen of onduidelijke afspraken.',
+        'Huurgeschillen over de borg, servicekosten of onderhoud.',
+        'Conflicten op het werk of met een werkgever.',
+      ],
+    },
+    help: {
+      heading: 'Wat de AI-mediator voor je doet',
+      body:
+        'De AI-mediator is neutraal en kiest geen partij. Hij leest wat beide kanten inbrengen, haalt de emotionele lading uit verwijten en vertaalt standpunten naar de belangen eronder. Vervolgens formuleert hij concrete, evenwichtige voorstellen waar je samen op verder bouwt — tot er een afspraak ligt die voor beiden werkt.',
+      bullets: [
+        'De-escaleert: scherpe woorden worden respectvolle, oplossingsgerichte taal.',
+        'Onpartijdig: beide partijen krijgen evenveel ruimte en gewicht.',
+        'Concreet: het eindpunt is een heldere, ondertekende afspraak.',
+      ],
+    },
+    costs: SHARED_COSTS,
+    privacy: SHARED_PRIVACY,
+    limits: {
+      heading: 'Wat Rsolve wél en niet doet',
+      body:
+        'Rsolve begeleidt het gesprek en helpt je eigen afspraken vast te leggen. Het is geen advocaat en geeft geen juridisch advies of oordeel over je rechtspositie.',
+      bullets: [
+        'Bij juridisch complexe zaken (ontslag, huurrecht, erfrecht) is toetsing door een jurist verstandig.',
+        'Bij strafbare feiten, geweld of gevaar is bemiddeling niet het juiste kanaal.',
+        'Een vaststellingsovereenkomst via Rsolve legt jullie eigen afspraken vast en is geen juridische toetsing.',
+      ],
+    },
+    faq: [
+      {
+        q: 'Hoe lang duurt een dossier?',
+        a: 'Veel geschillen zijn in ongeveer 10 minuten tot concrete afspraken te brengen. Omdat het asynchroon werkt, bepaal je zelf je tempo.',
+      },
+      {
+        q: 'Moet de andere partij een account aanmaken?',
+        a: 'Nee. Je deelt een beveiligde link; de ander doet mee zonder account of installatie, en gratis.',
+      },
+      {
+        q: 'Wat als we er niet uitkomen?',
+        a: 'Dan houd je een gedocumenteerd dossier van de poging. Rsolve kan je doorverwijzen naar een mediator of advocaat, of naar Het Juridisch Loket bij een laag inkomen.',
+      },
+      {
+        q: 'Is Rsolve echt neutraal?',
+        a: 'Ja. De AI-mediator kiest geen partij en heeft geen belang bij de uitkomst; beide partijen krijgen dezelfde behandeling.',
+      },
+    ],
+    cta: {
+      heading: 'Klaar om te beginnen?',
+      body: 'Start een neutraal dossier, nodig de andere partij uit en werk samen naar een bindende afspraak.',
+      button: 'Start bemiddeling (€3,99)',
+    },
+    related: [
+      { label: 'Wat is mediation?', to: '/wat-is-mediation' },
+      { label: 'Wat kost het?', to: '/kosten' },
+      { label: 'Juridische hulp nodig?', to: '/juridische-hulp' },
+    ],
+  },
+
+  '/kosten': {
+    slug: '/kosten',
+    seoTitle: 'Wat kost Rsolve? Eén vast tarief van € 3,99',
+    metaDescription:
+      'Wat kost online mediation via Rsolve? Eén vast tarief van € 3,99 per dossier, geen abonnement en gratis voor de uitgenodigde partij. Bekijk hoe dat zich verhoudt tot een advocaat of mediator.',
+    kicker: 'Tarieven',
+    h1: 'Wat kost Rsolve? Eén vast tarief van € 3,99',
+    intro:
+      'Geschillen blijven vaak liggen omdat de stap naar een advocaat of mediator duur en ingewikkeld voelt. Rsolve draait dat om met één transparant, vast tarief. Hieronder lees je precies wat je betaalt, wat je ervoor krijgt en hoe dat zich verhoudt tot de traditionele routes.',
+    problem: {
+      heading: 'Waarom een conflict normaal zo duur is',
+      body:
+        'De klassieke routes lopen snel op in de kosten, vooral omdat je per uur betaalt en trajecten lang duren.',
+      bullets: [
+        'Advocaat of rechtszaak: doorgaans € 2.500 – € 7.500 of meer, plus griffierechten.',
+        'Fysieke mediation: gemiddeld € 1.200 – € 2.400 tegen € 180 – € 240 per uur.',
+        'Lange doorlooptijd, waardoor kosten en spanning verder oplopen.',
+      ],
+    },
+    help: {
+      heading: 'Wat je krijgt voor € 3,99',
+      body:
+        'Bij Rsolve betaal je één keer € 3,99 per dossier — geen abonnement, geen uurtarief, geen verborgen kosten. Voor de uitgenodigde partij is deelname volledig gratis.',
+      bullets: [
+        'De volledige begeleide bemiddeling met een neutrale AI-mediator.',
+        'Een vaststellingsovereenkomst (art. 7:900 BW) met jullie afspraken.',
+        'Meertalige ondersteuning en een downloadbaar dossier.',
+        'Gratis deelname voor de tweede partij.',
+      ],
+    },
+    showProcess: true,
+    privacy: SHARED_PRIVACY,
+    faq: [
+      {
+        q: 'Zijn er verborgen kosten of een abonnement?',
+        a: 'Nee. Je betaalt eenmalig € 3,99 per dossier. Er is geen abonnement en er zijn geen extra kosten.',
+      },
+      {
+        q: 'Betaalt de andere partij ook?',
+        a: 'Nee, deelname is gratis voor de partij die je uitnodigt. Alleen degene die het dossier start, betaalt het vaste tarief.',
+      },
+      {
+        q: 'Hoe kan het zo goedkoop zijn?',
+        a: 'Omdat de bemiddeling online en met een AI-mediator verloopt, vervallen de dure uren van een fysiek traject. Die besparing geven we door in één laag, vast tarief.',
+      },
+      {
+        q: 'Wat als we er niet uitkomen?',
+        a: 'Je houdt een gedocumenteerd dossier van de poging, wat later in je voordeel kan werken. Rsolve kan je bovendien doorverwijzen naar een advocaat, mediator of Het Juridisch Loket.',
+      },
+    ],
+    cta: {
+      heading: 'Start voor € 3,99',
+      body: 'Eén vast tarief, gratis voor de andere partij. Begin direct een neutraal dossier.',
+      button: 'Start bemiddeling (€3,99)',
+    },
+    related: [
+      { label: 'Wat een conflict écht kost', to: '/kosten-conflict' },
+      { label: 'Hoe werkt Rsolve?', to: '/hoe-werkt-rsolve' },
+      { label: 'Wat is mediation?', to: '/wat-is-mediation' },
     ],
   },
 };

@@ -149,10 +149,7 @@ const App: React.FC = () => {
             ) : <Navigate to="/" />} />
             <Route path="/vso" element={finalVSO ? <VSO data={finalVSO} t={t} onReset={handleReset} /> : <Navigate to="/" />} />
             
-            {/* Marketing Routes */}
-            <Route path="/wat-is-mediation" element={<MarketingPage title="Wat is Mediation?" content="Mediation is een manier om conflicten op te lossen zonder tussenkomst van een rechter. Bij Rsolve gebruiken we AI om dit proces toegankelijker en neutraler te maken." />} />
-            <Route path="/kosten" element={<MarketingPage title="Tarieven" content="Bij Rsolve geloven we in transparantie. Voor een eenmalig bedrag van €3,99 start je een dossier. Voor de genodigde partij is deelname volledig gratis." />} />
-            <Route path="/hoe-werkt-rsolve" element={<MarketingPage title="Hoe werkt Rsolve?" content="In drie simpele stappen: Aanmelding, Begeleide Dialoog en Vaststelling. Onze AI mediator zorgt ervoor dat het gesprek constructief blijft." />} />
+            {/* Marketing Routes (wat-is-mediation, hoe-werkt-rsolve en kosten zijn nu volwaardige landingspagina's, zie hieronder) */}
             <Route path="/privacy" element={<MarketingPage title="Privacybeleid" content="Jouw gegevens zijn veilig. Gesprekken zijn versleuteld en we gebruiken AI-modellen die voldoen aan de strengste privacy-eisen (GDPR)." />} />
             <Route path="/terms" element={<MarketingPage title="Voorwaarden" content="Door gebruik te maken van Rsolve ga je akkoord met onze gebruikersvoorwaarden. We bieden ondersteuning bij bemiddeling, geen juridisch advies." />} />
             <Route path="/contact" element={<Contact />} />

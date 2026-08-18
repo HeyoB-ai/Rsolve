@@ -90,13 +90,16 @@ const ConflictLanding: React.FC<Props> = ({ data }) => {
         </section>
 
         {/* Probleemherkenning */}
+        {data.problem && (
         <Section id="probleem">
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">{data.problem.heading}</h2>
           <p className="mt-4 text-slate-300 leading-relaxed font-light">{data.problem.body}</p>
           <Bullets items={data.problem.bullets} />
         </Section>
+        )}
 
         {/* Hoe Rsolve helpt */}
+        {data.help && (
         <Section id="oplossing" alt>
           <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-5">
             <Users className="w-6 h-6 text-cyan-400" />
@@ -105,8 +108,10 @@ const ConflictLanding: React.FC<Props> = ({ data }) => {
           <p className="mt-4 text-slate-300 leading-relaxed font-light">{data.help.body}</p>
           <Bullets items={data.help.bullets} />
         </Section>
+        )}
 
         {/* Proces */}
+        {data.showProcess !== false && (
         <Section id="hoe-het-werkt">
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">Zo verloopt het in 4 stappen</h2>
           <div className="mt-8 space-y-5">
@@ -123,8 +128,10 @@ const ConflictLanding: React.FC<Props> = ({ data }) => {
             ))}
           </div>
         </Section>
+        )}
 
         {/* Kosten */}
+        {data.costs && (
         <Section id="kosten" alt>
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">{data.costs.heading}</h2>
           <p className="mt-4 text-slate-300 leading-relaxed font-light">{data.costs.body}</p>
@@ -132,8 +139,10 @@ const ConflictLanding: React.FC<Props> = ({ data }) => {
             Bekijk wat een conflict werkelijk kost <ArrowRight className="w-3.5 h-3.5" />
           </a>
         </Section>
+        )}
 
         {/* Privacy */}
+        {data.privacy && (
         <Section id="privacy">
           <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-5">
             <Lock className="w-6 h-6 text-cyan-400" />
@@ -141,8 +150,10 @@ const ConflictLanding: React.FC<Props> = ({ data }) => {
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">{data.privacy.heading}</h2>
           <p className="mt-4 text-slate-300 leading-relaxed font-light">{data.privacy.body}</p>
         </Section>
+        )}
 
         {/* Beperkingen / vertrouwen */}
+        {data.limits && (
         <Section id="beperkingen" alt>
           <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-5">
             <Scale className="w-6 h-6 text-amber-400" />
@@ -160,6 +171,7 @@ const ConflictLanding: React.FC<Props> = ({ data }) => {
             </ul>
           )}
         </Section>
+        )}
 
         {/* FAQ — antwoorden staan in de DOM (details/summary), crawlbaar */}
         <Section id="faq">
