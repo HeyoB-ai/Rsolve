@@ -37,7 +37,7 @@ export const LEGAL: Record<string, LegalDoc> = {
       {
         heading: '1. Wie is verantwoordelijk?',
         paragraphs: [
-          `De verwerkingsverantwoordelijke voor jouw gegevens is ${COMPANY}, gevestigd aan ${ADDRESS} (KvK-nummer: [KvK-nummer invullen]). Voor vragen over dit privacybeleid of over jouw gegevens kun je contact met ons opnemen via ${EMAIL}.`,
+          `De verwerkingsverantwoordelijke voor jouw gegevens is ${COMPANY}, gevestigd aan ${ADDRESS} (KvK-nummer: 61971480). Voor vragen over dit privacybeleid of over jouw gegevens kun je contact met ons opnemen via ${EMAIL}.`,
         ],
       },
       {
