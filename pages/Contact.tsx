@@ -1,12 +1,15 @@
 import React from 'react';
 import { Logo } from '../components/ui/Logo';
+import LangBar from '../components/landing/components/LangBar';
 
 const Contact: React.FC = () => {
   const iconWrap = 'w-11 h-11 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center shrink-0';
   const label = 'text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5';
 
   return (
-    <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-6 pt-16 animate-in fade-in duration-500">
+    <>
+      <LangBar />
+      <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-6 pt-16 animate-in fade-in duration-500">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <Logo className="w-16 h-16 mx-auto mb-6" />
@@ -53,7 +56,8 @@ const Contact: React.FC = () => {
           <a href="/" className="text-cyan-400 font-bold text-sm hover:underline">← Terug naar home</a>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

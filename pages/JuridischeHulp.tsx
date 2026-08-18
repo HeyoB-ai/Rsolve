@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Logo } from '../components/ui/Logo';
 import { Button } from '../components/ui/Button';
+import LangBar from '../components/landing/components/LangBar';
 
 const encode = (data: Record<string, string>) =>
   Object.keys(data)
@@ -35,7 +36,9 @@ const JuridischeHulp: React.FC = () => {
     'w-full p-4 rounded-2xl border-2 border-slate-700 bg-slate-800 font-medium text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-all';
 
   return (
-    <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-6 pt-14 pb-20 animate-in fade-in duration-500">
+    <>
+      <LangBar />
+      <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-6 pt-14 pb-20 animate-in fade-in duration-500">
       <div className="w-full max-w-lg space-y-8">
         <div className="text-center">
           <Logo className="w-16 h-16 mx-auto mb-6" />
@@ -108,10 +111,11 @@ const JuridischeHulp: React.FC = () => {
         )}
 
         <div className="text-center">
-          <a href="/" className="text-[#0b50da] font-bold text-sm hover:underline">← Terug naar home</a>
+          <a href="/" className="text-cyan-400 font-bold text-sm hover:underline">← Terug naar home</a>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
