@@ -18,6 +18,8 @@ import JuridischeHulp from './pages/JuridischeHulp';
 import Partners from './pages/Partners';
 import ConflictLanding from './pages/landings/ConflictLanding';
 import { LANDINGS, LANDING_SLUGS } from './pages/landings/data';
+import LegalPage from './pages/legal/LegalPage';
+import { LEGAL } from './pages/legal/data';
 
 // Marketing Boilerplates (Placeholder voor content)
 const MarketingPage = ({ title, content }: { title: string, content: string }) => (
@@ -149,9 +151,9 @@ const App: React.FC = () => {
             ) : <Navigate to="/" />} />
             <Route path="/vso" element={finalVSO ? <VSO data={finalVSO} t={t} onReset={handleReset} /> : <Navigate to="/" />} />
             
-            {/* Marketing Routes (wat-is-mediation, hoe-werkt-rsolve en kosten zijn nu volwaardige landingspagina's, zie hieronder) */}
-            <Route path="/privacy" element={<MarketingPage title="Privacybeleid" content="Jouw gegevens zijn veilig. Gesprekken zijn versleuteld en we gebruiken AI-modellen die voldoen aan de strengste privacy-eisen (GDPR)." />} />
-            <Route path="/terms" element={<MarketingPage title="Voorwaarden" content="Door gebruik te maken van Rsolve ga je akkoord met onze gebruikersvoorwaarden. We bieden ondersteuning bij bemiddeling, geen juridisch advies." />} />
+            {/* Juridische pagina's */}
+            <Route path="/privacy" element={<LegalPage doc={LEGAL['/privacy']} />} />
+            <Route path="/terms" element={<LegalPage doc={LEGAL['/terms']} />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/zakelijk" element={<Zakelijk />} />
             <Route path="/kosten-conflict" element={<KostenConflict />} />
