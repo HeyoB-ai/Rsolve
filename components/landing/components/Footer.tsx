@@ -16,7 +16,7 @@ export function Footer({ brandPrimaryColor = '#10B981' }: FooterProps) {
             <img
               src="/assets/rsolve-logo-header.png"
               alt="RSolve"
-              className="h-9 w-auto object-contain select-none"
+              className="h-10 w-auto object-contain select-none"
             />
             <p className="text-slate-400 leading-relaxed text-xs">
               Het intelligente AI mediation platform voor onpartijdige, snelle en rechtsgeldige geschilbeslechting.

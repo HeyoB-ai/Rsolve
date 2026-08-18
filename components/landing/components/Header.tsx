@@ -19,7 +19,7 @@ export function Header({ onStartMediation, onJoin, brandPrimaryColor }: HeaderPr
           <img
             src="/assets/rsolve-logo-header.png"
             alt="RSolve"
-            className="h-9 sm:h-10 w-auto object-contain select-none"
+            className="h-10 sm:h-12 w-auto object-contain select-none"
           />
         </a>
 
