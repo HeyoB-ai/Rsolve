@@ -10,7 +10,8 @@ import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, extname, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const DIST = join(ROOT, 'dist');
@@ -70,12 +71,23 @@ async function run() {
   }
 
   const server = await startServer();
-  const browser = await puppeteer.launch({
-    headless: true,
-    // Op Netlify gebruikt puppeteer zijn eigen gedownloade Chromium; lokaal kun je
-    // PUPPETEER_EXECUTABLE_PATH zetten naar een bestaande Chromium.
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-  });
+
+  // Chromium komt uit het npm-pakket @sparticuz/chromium (geen download tijdens de
+  // build nodig, dus betrouwbaar op Netlify). Lokaal kun je met
+  // PUPPETEER_EXECUTABLE_PATH naar een bestaande Chromium wijzen.
+  const localExe = process.env.PUPPETEER_EXECUTABLE_PATH;
+  const launchOpts = localExe
+    ? {
+        executablePath: localExe,
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      }
+    : {
+        executablePath: await chromium.executablePath(),
+        args: chromium.args,
+        headless: true,
+      };
+  const browser = await puppeteer.launch(launchOpts);
 
   let done = 0;
   for (const route of ROUTES) {
