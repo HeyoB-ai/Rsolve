@@ -13,11 +13,20 @@ export function Footer({ brandPrimaryColor = '#10B981' }: FooterProps) {
 
           {/* Brand Col */}
           <div className="space-y-4 md:col-span-1">
-            <img
-              src="/assets/rsolve-logo-header.png"
-              alt="RSolve"
-              className="h-10 w-auto object-contain select-none"
-            />
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/assets/rsolve-emblem.png"
+                alt=""
+                aria-hidden="true"
+                className="h-9 w-auto object-contain select-none"
+              />
+              <span
+                className="text-white font-extrabold leading-none select-none text-xl tracking-tight"
+                style={{ fontFamily: "'Poppins', 'Inter', system-ui, sans-serif" }}
+              >
+                RSOLVE
+              </span>
+            </div>
             <p className="text-slate-400 leading-relaxed text-xs">
               Het intelligente AI mediation platform voor onpartijdige, snelle en rechtsgeldige geschilbeslechting.
             </p>

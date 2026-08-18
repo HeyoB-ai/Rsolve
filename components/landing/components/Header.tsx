@@ -14,13 +14,20 @@ export function Header({ onStartMediation, onJoin, brandPrimaryColor }: HeaderPr
     <header className="sticky top-0 z-40 w-full bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
 
-        {/* Brand Logo — officiële RSolve-lockup (emblem + wordmark) */}
-        <a href="#" className="flex items-center group focus:outline-none">
+        {/* Brand Logo — beeldmerk + kraakhelder wordmerk */}
+        <a href="#" className="flex items-center gap-2.5 group focus:outline-none">
           <img
-            src="/assets/rsolve-logo-header.png"
-            alt="RSolve"
+            src="/assets/rsolve-emblem.png"
+            alt=""
+            aria-hidden="true"
             className="h-10 sm:h-12 w-auto object-contain select-none"
           />
+          <span
+            className="text-white font-extrabold leading-none select-none text-2xl sm:text-[28px] tracking-tight"
+            style={{ fontFamily: "'Poppins', 'Inter', system-ui, sans-serif" }}
+          >
+            RSOLVE
+          </span>
         </a>
 
         {/* Navigation */}
