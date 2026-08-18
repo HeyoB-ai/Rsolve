@@ -17,7 +17,7 @@ const ROOT = dirname(fileURLToPath(import.meta.url));
 const DIST = join(ROOT, 'dist');
 const PORT = Number(process.env.PRERENDER_PORT || 4183);
 
-// Alleen publieke, indexeerbare marketingpagina's.
+// Alleen publieke, indexeerbare marketingpagina's (Nederlands).
 const ROUTES = [
   '/',
   '/zakelijk',
@@ -35,6 +35,31 @@ const ROUTES = [
   '/conflict-met-werkgever',
   '/burenruzie-oplossen',
   '/huurconflict-oplossen',
+];
+
+// Talen met vaste vertalingen (v1) en de routes die vertaald zijn.
+const LOCALES = ['pl', 'en', 'de', 'uk', 'ar', 'tr', 'ro', 'es', 'fr', 'bg', 'pt'];
+const LOCALIZED_ROUTES = [
+  '/',
+  '/wat-is-mediation',
+  '/hoe-werkt-rsolve',
+  '/kosten',
+  '/arbeidsconflict-oplossen',
+  '/conflict-met-werkgever',
+  '/burenruzie-oplossen',
+  '/huurconflict-oplossen',
+];
+
+// Bouw de volledige takenlijst: Nederlandse routes + per taal de vertaalde routes.
+const TASKS = [
+  ...ROUTES.map((route) => ({ url: route, out: route, lang: null })),
+  ...LOCALES.flatMap((loc) =>
+    LOCALIZED_ROUTES.map((route) => ({
+      url: `/${loc}${route === '/' ? '' : route}`,
+      out: `/${loc}${route === '/' ? '' : route}`,
+      lang: loc,
+    }))
+  ),
 ];
 
 const MIME = {
@@ -90,10 +115,11 @@ async function run() {
   const browser = await puppeteer.launch(launchOpts);
 
   let done = 0;
-  for (const route of ROUTES) {
+  for (const task of TASKS) {
+    const { url, out, lang } = task;
     const page = await browser.newPage();
     try {
-      await page.goto(`http://localhost:${PORT}${route}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.goto(`http://localhost:${PORT}${url}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
       // Wacht tot React de inhoud in #root heeft gezet.
       await page
         .waitForFunction(
@@ -104,17 +130,24 @@ async function run() {
           { timeout: 15000 }
         )
         .catch(() => {});
-      // Kleine marge zodat RouteSeo de <head>-meta heeft bijgewerkt.
-      await new Promise((r) => setTimeout(r, 400));
+      // Voor vertaalde routes: wacht tot de statische vertaling is toegepast
+      // (engine zet <html lang> pas na het laden + toepassen van het woordenboek).
+      if (lang) {
+        await page
+          .waitForFunction((l) => document.documentElement.lang === l, { timeout: 15000 }, lang)
+          .catch(() => {});
+      }
+      // Kleine marge zodat RouteSeo de <head>-meta heeft bijgewerkt en de na-passes klaar zijn.
+      await new Promise((r) => setTimeout(r, lang ? 700 : 400));
 
       const html = await page.content();
-      const outDir = route === '/' ? DIST : join(DIST, route);
+      const outDir = out === '/' ? DIST : join(DIST, out);
       await mkdir(outDir, { recursive: true });
       await writeFile(join(outDir, 'index.html'), html, 'utf8');
       done++;
-      console.log(`[prerender] ✓ ${route}`);
+      console.log(`[prerender] ✓ ${url}`);
     } catch (e) {
-      console.warn(`[prerender] ✗ ${route}: ${e && e.message ? e.message : e}`);
+      console.warn(`[prerender] ✗ ${url}: ${e && e.message ? e.message : e}`);
     } finally {
       await page.close().catch(() => {});
     }
@@ -122,7 +155,7 @@ async function run() {
 
   await browser.close().catch(() => {});
   server.close();
-  console.log(`[prerender] klaar: ${done}/${ROUTES.length} pagina's geprerenderd`);
+  console.log(`[prerender] klaar: ${done}/${TASKS.length} pagina's geprerenderd`);
 }
 
 run().catch((e) => {

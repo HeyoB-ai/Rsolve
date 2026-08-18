@@ -146,7 +146,7 @@ export function MultilingualShowcase({ brandPrimaryColor = '#10B981' }: Multilin
           <div className="mt-8 pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4 text-emerald-400" />
-              <span>Ondersteunt meer dan <strong className="text-white">25+ talen</strong> (o.a. Nederlands, Engels, Pools, Spaans, Arabisch, Turks, Duits, Frans).</span>
+              <span>Beschikbaar in <strong className="text-white">12 talen</strong> <span data-no-translate>— Nederlands · English · Polski · Українська · العربية · Türkçe · Deutsch · Français · Română · Español · Български · Português</span></span>
             </div>
             <span className="text-slate-300 font-medium">Real-time &amp; Automatisch</span>
           </div>

@@ -1,0 +1,34 @@
+{
+  "/": {
+    "title": "Rsolve — Résolvez vos conflits sans combat | Médiation en ligne par IA",
+    "description": "Rsolve est un médiateur IA en ligne qui aide deux parties à résoudre leur conflit rapidement, en toute neutralité et à moindre coût — avec un accord de règlement juridiquement valable. Tarif fixe €3,99, participation gratuite pour l'autre partie."
+  },
+  "/arbeidsconflict-oplossen": {
+    "title": "Résoudre un conflit de travail sans avocat",
+    "description": "Un conflit de travail à régler sans procédure coûteuse ? Rsolve guide les deux parties avec un médiateur IA neutre vers un accord concret. Tarif fixe € 3,99."
+  },
+  "/conflict-met-werkgever": {
+    "title": "Résoudre un conflit avec votre employeur",
+    "description": "Un conflit avec votre employeur, sans passer directement par un procès ? Rsolve vous guide, vous et votre employeur, vers un accord clair. Tarif fixe € 3,99."
+  },
+  "/burenruzie-oplossen": {
+    "title": "Résoudre un conflit de voisinage sans escalade",
+    "description": "Un conflit de voisinage pour le bruit, une clôture, des arbres ou la limite de propriété ? Rsolve vous aide, avec vos voisins, à trouver un accord. Tarif fixe € 3,99."
+  },
+  "/huurconflict-oplossen": {
+    "title": "Résoudre un conflit locatif — locataire & bailleur",
+    "description": "Un conflit locatif sur la caution, les charges, l'entretien ou l'état des lieux ? Rsolve aide locataire et bailleur à trouver un accord. Tarif fixe € 3,99."
+  },
+  "/wat-is-mediation": {
+    "title": "Qu'est-ce que la médiation ? Comment ça marche",
+    "description": "Qu'est-ce que la médiation, comment ça marche et quand la choisir ? Explication claire, et comment Rsolve la rend en ligne, rapide et abordable grâce à l'IA."
+  },
+  "/hoe-werkt-rsolve": {
+    "title": "Comment fonctionne Rsolve ? Du conflit à l'accord",
+    "description": "Comment fonctionne Rsolve ? En quatre étapes, un médiateur IA neutre guide les deux parties du conflit vers un accord de règlement contraignant. Tarif fixe € 3,99."
+  },
+  "/kosten": {
+    "title": "Prix de Rsolve ? Un tarif fixe de € 3,99",
+    "description": "Combien coûte la médiation en ligne via Rsolve ? Un tarif fixe de € 3,99 par dossier, sans abonnement, gratuit pour la partie invitée. Comparez avec un avocat ou un médiateur."
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "/": {
+    "title": "Rsolve — Çatışmaları Kavga Etmeden Çözün | Çevrimiçi Yapay Zeka Arabuluculuk",
+    "description": "Rsolve, iki tarafın anlaşmazlığını hızlı, tarafsız ve uygun maliyetle çözmesine yardımcı olan çevrimiçi bir yapay zeka arabulucudur — hukuken geçerli sulh sözleşmesi dahil. Sabit ücret €3,99, diğer taraf için katılım ücretsiz."
+  },
+  "/arbeidsconflict-oplossen": {
+    "title": "İş Anlaşmazlığını Avukatsız Çözün",
+    "description": "İşyerinde yaşanan bir anlaşmazlığı pahalı bir süreç olmadan mı çözmek istiyorsunuz? Rsolve, tarafsız bir yapay zeka arabulucuyla her iki tarafı somut anlaşmalara yönlendirir. Sabit ücret € 3,99."
+  },
+  "/conflict-met-werkgever": {
+    "title": "İşvereninizle Yaşadığınız Anlaşmazlığı Çözün",
+    "description": "İşvereninizle yaşadığınız bir anlaşmazlığı hemen dava açmadan mı çözmek istiyorsunuz? Rsolve, sizi ve işvereninizi tarafsız şekilde net anlaşmalara yönlendirir. Sabit ücret € 3,99."
+  },
+  "/burenruzie-oplossen": {
+    "title": "Komşu Kavgasını Büyütmeden Çözün",
+    "description": "Gürültü, çit, ağaçlar veya arsa sınırı yüzünden komşu kavgası mı yaşıyorsunuz? Rsolve, tarafsız bir yapay zeka arabulucuyla sizi ve komşunuzu bir anlaşmaya yönlendirir. Sabit ücret € 3,99."
+  },
+  "/huurconflict-oplossen": {
+    "title": "Kira Anlaşmazlığını Çözün — Kiracı ve Ev Sahibi",
+    "description": "Depozito, aidat, bakım veya teslim konusunda kira anlaşmazlığı mı yaşıyorsunuz? Rsolve, kiracı ve ev sahibini tarafsız bir yapay zeka arabulucuyla anlaşmaya yönlendirir. Sabit ücret € 3,99."
+  },
+  "/wat-is-mediation": {
+    "title": "Arabuluculuk Nedir? Çevrimiçi Nasıl İşler",
+    "description": "Arabuluculuk nedir, nasıl işler ve ne zaman tercih edilir? Rsolve'un yapay zeka arabulucuyla arabuluculuğu çevrimiçi, hızlı ve uygun maliyetli hale getirişinin net açıklaması."
+  },
+  "/hoe-werkt-rsolve": {
+    "title": "Rsolve Nasıl Çalışır? Anlaşmazlıktan Anlaşmaya",
+    "description": "Rsolve nasıl çalışır? Tarafsız bir yapay zeka arabulucu, dört adımda her iki tarafı anlaşmazlıktan bağlayıcı bir sulh sözleşmesine yönlendirir. Sabit ücret € 3,99."
+  },
+  "/kosten": {
+    "title": "Rsolve Ne Kadar Tutar? Sabit Ücret € 3,99",
+    "description": "Rsolve ile çevrimiçi arabuluculuk ne kadar tutar? Dosya başına sabit € 3,99 ücret, abonelik yok ve davet edilen taraf için ücretsiz. Bir avukat veya arabulucuyla nasıl kıyaslandığına bakın."
+  }
+}

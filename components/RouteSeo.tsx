@@ -2,6 +2,53 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { LANDINGS } from '../pages/landings/data';
 import { LEGAL } from '../pages/legal/data';
+import { NON_DEFAULT_LOCALES, SITE_LOCALES } from '../lib/i18n/engine';
+
+// Routes waarvoor vaste vertalingen bestaan (v1). Alleen hiervoor tonen we
+// hreflang-alternatieven en vertaalde meta.
+const LOCALIZED_ROUTES = new Set<string>([
+  '/',
+  '/wat-is-mediation',
+  '/hoe-werkt-rsolve',
+  '/kosten',
+  '/arbeidsconflict-oplossen',
+  '/conflict-met-werkgever',
+  '/burenruzie-oplossen',
+  '/huurconflict-oplossen',
+]);
+
+// og-locale codes per taal.
+const OG_LOCALE: Record<string, string> = {
+  nl: 'nl_NL', pl: 'pl_PL', en: 'en_US', de: 'de_DE', uk: 'uk_UA', ar: 'ar_AR',
+  tr: 'tr_TR', ro: 'ro_RO', es: 'es_ES', fr: 'fr_FR', bg: 'bg_BG', pt: 'pt_PT',
+};
+
+// In-memory cache van de vertaalde meta (title/description) per taal.
+const metaCache: Record<string, Record<string, { title?: string; description?: string }> | undefined> = {};
+async function loadMeta(code: string) {
+  if (metaCache[code]) return metaCache[code]!;
+  try {
+    const r = await fetch(`/i18n/meta.${code}.json`, { cache: 'force-cache' });
+    metaCache[code] = r.ok ? await r.json() : {};
+  } catch {
+    metaCache[code] = {};
+  }
+  return metaCache[code]!;
+}
+
+function localeFromPath(pathname: string): string {
+  const seg = pathname.split('/').filter(Boolean)[0];
+  return seg && NON_DEFAULT_LOCALES.includes(seg) ? seg : 'nl';
+}
+function stripLocale(pathname: string): string {
+  const parts = pathname.split('/').filter(Boolean);
+  if (parts[0] && NON_DEFAULT_LOCALES.includes(parts[0])) parts.shift();
+  return '/' + parts.join('/');
+}
+function localeHref(code: string, basePath: string): string {
+  const base = basePath === '/' ? '' : basePath;
+  return code === 'nl' ? SITE + (base || '/') : `${SITE}/${code}${base || ''}`;
+}
 
 // Centrale, per-route SEO-meta. Zonder extra dependency: we zetten document.title,
 // description, Open Graph, canonical en robots afhankelijk van het pad. Google rendert
@@ -87,25 +134,71 @@ function upsertCanonical(href: string) {
   el.setAttribute('href', href);
 }
 
+// Vervang alle hreflang-alternatieven door de meegegeven set.
+function setAlternates(pairs: { hreflang: string; href: string }[]) {
+  document.head.querySelectorAll('link[data-rs-alt]').forEach((el) => el.remove());
+  for (const p of pairs) {
+    const el = document.createElement('link');
+    el.setAttribute('rel', 'alternate');
+    el.setAttribute('hreflang', p.hreflang);
+    el.setAttribute('href', p.href);
+    el.setAttribute('data-rs-alt', '1');
+    document.head.appendChild(el);
+  }
+}
+
 export default function RouteSeo() {
   const { pathname } = useLocation();
 
   useEffect(() => {
     const isPrivate = PRIVATE.test(pathname);
-    const m = META[pathname];
-    const title = m?.title ? `${m.title} | Rsolve` : DEFAULT_TITLE;
-    const description = m?.description || DEFAULT_DESC;
-    const url = SITE + (pathname === '/' ? '/' : pathname);
+    const lang = localeFromPath(pathname);
+    const basePath = stripLocale(pathname);
+    const m = META[basePath];
+    const localizable = LOCALIZED_ROUTES.has(basePath) && !isPrivate;
 
-    document.title = title;
-    upsertMeta('name', 'description', description);
-    upsertMeta('name', 'robots', isPrivate ? 'noindex,nofollow' : 'index,follow');
-    upsertMeta('property', 'og:title', title);
-    upsertMeta('property', 'og:description', description);
-    upsertMeta('property', 'og:url', url);
-    upsertMeta('name', 'twitter:title', title);
-    upsertMeta('name', 'twitter:description', description);
-    upsertCanonical(url);
+    // Basis (Nederlandse) title/description.
+    let title = m?.title ? `${m.title} | Rsolve` : DEFAULT_TITLE;
+    let description = m?.description || DEFAULT_DESC;
+
+    const url = localeHref(lang, basePath);
+    document.documentElement.setAttribute('lang', lang);
+
+    const apply = () => {
+      document.title = title;
+      upsertMeta('name', 'description', description);
+      upsertMeta('name', 'robots', isPrivate ? 'noindex,nofollow' : 'index,follow');
+      upsertMeta('property', 'og:title', title);
+      upsertMeta('property', 'og:description', description);
+      upsertMeta('property', 'og:url', url);
+      upsertMeta('property', 'og:locale', OG_LOCALE[lang] || 'nl_NL');
+      upsertMeta('name', 'twitter:title', title);
+      upsertMeta('name', 'twitter:description', description);
+      upsertCanonical(url);
+
+      // hreflang-alternatieven (+ x-default = Nederlands) alleen voor vertaalde routes.
+      if (localizable) {
+        const pairs = SITE_LOCALES.map((c) => ({ hreflang: c, href: localeHref(c, basePath) }));
+        pairs.push({ hreflang: 'x-default', href: localeHref('nl', basePath) });
+        setAlternates(pairs);
+      } else {
+        setAlternates([]);
+      }
+    };
+
+    apply();
+
+    // Vertaalde meta ophalen (indien beschikbaar) en opnieuw toepassen.
+    if (localizable && lang !== 'nl') {
+      loadMeta(lang).then((mm) => {
+        const t = mm[basePath];
+        if (t) {
+          if (t.title) title = basePath === '/' ? t.title : `${t.title} | Rsolve`;
+          if (t.description) description = t.description;
+          apply();
+        }
+      });
+    }
   }, [pathname]);
 
   return null;

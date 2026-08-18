@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import RouteSeo from './components/RouteSeo';
 import { UI_TRANSLATIONS } from './constants';
 import { isConfigured } from './lib/supabase';
+import { setSiteLanguage, restoreDutch, NON_DEFAULT_LOCALES } from './lib/i18n/engine';
 
 // Pagina's
 import Landing from './pages/Landing';
@@ -33,6 +34,54 @@ const MarketingPage = ({ title, content }: { title: string, content: string }) =
     </div>
   </div>
 );
+
+// Bepaal de actieve taalcode uit het pad (/pl/... -> pl), anders 'nl'.
+function localeFromPath(pathname: string): string {
+  const seg = pathname.split('/').filter(Boolean)[0];
+  return seg && NON_DEFAULT_LOCALES.includes(seg) ? seg : 'nl';
+}
+
+// Past bij elke navigatie de sitetaal toe: taal uit de URL heeft voorrang,
+// anders een eerder gekozen taal (localStorage). Zo blijft de vertaling staan
+// terwijl je door de site klikt, en werken de /<taal>/-URL's voor Google.
+const LanguageManager: React.FC = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    let target = localeFromPath(pathname);
+    if (target === 'nl') {
+      try {
+        const stored = localStorage.getItem('rsolve_site_lang');
+        if (stored && NON_DEFAULT_LOCALES.includes(stored)) target = stored;
+      } catch {}
+    }
+    if (target === 'nl') restoreDutch();
+    else setSiteLanguage(target);
+  }, [pathname]);
+  return null;
+};
+
+// Rendert de publieke marketingpagina's onder een taal-prefix (/pl, /uk, ...).
+const LocaleShell: React.FC = () => {
+  const { lang } = useParams();
+  const code = lang || '';
+  if (!NON_DEFAULT_LOCALES.includes(code)) return <Navigate to="/" replace />;
+  return (
+    <Routes>
+      <Route index element={<Landing />} />
+      <Route path="zakelijk" element={<Zakelijk />} />
+      <Route path="partners" element={<Partners />} />
+      <Route path="kosten-conflict" element={<KostenConflict />} />
+      <Route path="juridische-hulp" element={<JuridischeHulp />} />
+      <Route path="contact" element={<Contact />} />
+      <Route path="privacy" element={<LegalPage doc={LEGAL['/privacy']} />} />
+      <Route path="terms" element={<LegalPage doc={LEGAL['/terms']} />} />
+      {LANDING_SLUGS.map((slug) => (
+        <Route key={slug} path={slug.replace(/^\//, '')} element={<ConflictLanding data={LANDINGS[slug]} />} />
+      ))}
+      <Route path="*" element={<Navigate to={`/${code}`} replace />} />
+    </Routes>
+  );
+};
 
 const App: React.FC = () => {
   const [appLanguage, setAppLanguage] = useState<string>(() => {
@@ -117,6 +166,7 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <RouteSeo />
+      <LanguageManager />
       <div className="flex flex-col min-h-screen bg-white relative">
         {!isConfigured && (
           <div className="bg-red-600 text-white text-[10px] font-black py-2 px-4 text-center z-[200] uppercase tracking-widest">
@@ -164,6 +214,9 @@ const App: React.FC = () => {
             {LANDING_SLUGS.map((slug) => (
               <Route key={slug} path={slug} element={<ConflictLanding data={LANDINGS[slug]} />} />
             ))}
+
+            {/* Vertaalde marketingpagina's per taal: /pl, /uk, /pl/burenruzie-oplossen, ... */}
+            <Route path=":lang/*" element={<LocaleShell />} />
 
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
