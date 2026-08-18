@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Clock, ShieldCheck, CircleCheck, Users, Lock, Scale, ChevronDown } from 'lucide-react';
 import { Header } from '../../components/landing/components/Header';
 import { Footer } from '../../components/landing/components/Footer';
+import LangBar from '../../components/landing/components/LangBar';
 import { PROCESS_STEPS, type LandingContent } from './data';
 
 const ACCENT = '#00E5FF';
@@ -60,6 +61,7 @@ const ConflictLanding: React.FC<Props> = ({ data }) => {
   return (
     <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-cyan-400 selection:text-slate-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <LangBar onStart={startMediation} />
       <Header onStartMediation={startMediation} brandPrimaryColor={ACCENT} />
 
       <main className="flex-1">

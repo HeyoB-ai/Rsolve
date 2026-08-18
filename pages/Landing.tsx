@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/landing/components/Header';
+import LangBar from '../components/landing/components/LangBar';
 import { Hero } from '../components/landing/components/Hero';
 import { HowItWorks } from '../components/landing/components/HowItWorks';
 import { LiveConflictSimulator } from '../components/landing/components/LiveConflictSimulator';
@@ -30,6 +31,7 @@ const Landing: React.FC<LandingProps> = () => {
 
   return (
     <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-cyan-400 selection:text-slate-950 antialiased">
+      <LangBar onStart={startMediation} />
       <Header onStartMediation={startMediation} brandPrimaryColor={ACCENT} />
       <main className="flex-1">
         <Hero onSelectScenario={setSelectedScenarioId} onStartMediation={startMediation} brandPrimaryColor={ACCENT} />
