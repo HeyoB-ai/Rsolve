@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { LANDINGS } from '../pages/landings/data';
 
 // Centrale, per-route SEO-meta. Zonder extra dependency: we zetten document.title,
 // description, Open Graph, canonical en robots afhankelijk van het pad. Google rendert
@@ -53,6 +54,11 @@ const META: Record<string, { title?: string; description: string }> = {
     description: 'De gebruikersvoorwaarden van Rsolve. Wij bieden ondersteuning bij bemiddeling; dit is geen juridisch advies.',
   },
 };
+
+// Voeg de SEO-landingspagina's toe uit hetzelfde datamodel (één bron van waarheid).
+for (const [slug, c] of Object.entries(LANDINGS)) {
+  META[slug] = { title: c.seoTitle, description: c.metaDescription };
+}
 
 // Privé routes: niet indexeren (ook via robots.txt afgeschermd).
 const PRIVATE = /^\/(mediation|vso|payment|payment-complete|invite|invite-partner)(\/|$)/;

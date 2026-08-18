@@ -16,6 +16,8 @@ import Zakelijk from './pages/Zakelijk';
 import KostenConflict from './pages/KostenConflict';
 import JuridischeHulp from './pages/JuridischeHulp';
 import Partners from './pages/Partners';
+import ConflictLanding from './pages/landings/ConflictLanding';
+import { LANDINGS, LANDING_SLUGS } from './pages/landings/data';
 
 // Marketing Boilerplates (Placeholder voor content)
 const MarketingPage = ({ title, content }: { title: string, content: string }) => (
@@ -158,6 +160,11 @@ const App: React.FC = () => {
             <Route path="/kosten-conflict" element={<KostenConflict />} />
             <Route path="/juridische-hulp" element={<JuridischeHulp />} />
             <Route path="/partners" element={<Partners />} />
+
+            {/* SEO-landingspagina's per conflicttype */}
+            {LANDING_SLUGS.map((slug) => (
+              <Route key={slug} path={slug} element={<ConflictLanding data={LANDINGS[slug]} />} />
+            ))}
 
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

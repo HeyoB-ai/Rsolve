@@ -29,6 +29,11 @@ const ROUTES = [
   '/kosten',
   '/privacy',
   '/terms',
+  // SEO-landingspagina's per conflicttype
+  '/arbeidsconflict-oplossen',
+  '/conflict-met-werkgever',
+  '/burenruzie-oplossen',
+  '/huurconflict-oplossen',
 ];
 
 const MIME = {
