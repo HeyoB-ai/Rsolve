@@ -10,6 +10,8 @@ export default defineConfig({
     'process.env.SUPABASE_URL': JSON.stringify(process.env.SUPABASE_URL),
     'process.env.SUPABASE_ANON_KEY': JSON.stringify(process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_PUBLIC),
     'process.env.SUPABASE_ANON_PUBLIC': JSON.stringify(process.env.SUPABASE_ANON_PUBLIC),
+    // Crash reporting (optioneel): alleen actief als SENTRY_DSN is ingesteld.
+    'process.env.SENTRY_DSN': JSON.stringify(process.env.SENTRY_DSN || ''),
   },
   build: {
     outDir: 'dist',

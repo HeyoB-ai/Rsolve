@@ -1,7 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import ErrorBoundary from './components/ErrorBoundary';
+import { initMonitoring } from './lib/monitoring';
 import './index.css';
+
+// Crash reporting starten (stil als er geen SENTRY_DSN is ingesteld).
+initMonitoring();
 
 const updateVh = () => {
   let vh = window.innerHeight * 0.01;
@@ -28,4 +33,8 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
-root.render(<App />);
+root.render(
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+);

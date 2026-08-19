@@ -19,6 +19,30 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
   const [isSigning, setIsSigning] = useState(false);
   const [isDownloadingLog, setIsDownloadingLog] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Verwijder het volledige dossier permanent van de servers (AVG-recht op wissen),
+  // en wis daarna de lokale sessie. Twee klikken ter bevestiging.
+  const handleDeleteDossier = async () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      setTimeout(() => setConfirmDelete(false), 4000);
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      await fetch('/.netlify/functions/delete-case', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caseId: data.caseId }),
+      });
+    } catch {
+      /* zelfs bij een serverfout ruimen we de lokale sessie op */
+    } finally {
+      onReset();
+    }
+  };
 
   // Identity logic - Ensure boolean type
   const isRespondent = !!data.isRespondent;
@@ -490,11 +514,16 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
              </p>
           )}
 
-          <button 
-            onClick={onReset}
-            className="text-[10px] font-black text-slate-300 hover:text-red-500 uppercase tracking-widest transition-colors duration-300"
+          <button
+            onClick={handleDeleteDossier}
+            disabled={isDeleting}
+            className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-300 disabled:opacity-60 ${confirmDelete ? 'text-red-500' : 'text-slate-300 hover:text-red-500'}`}
           >
-            {t('delete_close')}
+            {isDeleting
+              ? 'Bezig met verwijderen…'
+              : confirmDelete
+                ? 'Zeker weten? Klik nogmaals om alles permanent te verwijderen'
+                : t('delete_close')}
           </button>
         </footer>
       </div>
