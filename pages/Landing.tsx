@@ -11,6 +11,7 @@ import { SecurityAndLegal } from '../components/landing/components/SecurityAndLe
 import { TestimonialsFAQ } from '../components/landing/components/TestimonialsFAQ';
 import { CTASection } from '../components/landing/components/CTASection';
 import { Footer } from '../components/landing/components/Footer';
+import { track } from '../lib/analytics';
 
 // Accentkleur van de nieuwe donkere stijl (cyaan/teal).
 const ACCENT = '#00E5FF';
@@ -27,7 +28,10 @@ const Landing: React.FC<LandingProps> = () => {
   // Standaard-scenario voor de simulator: een werkgerelateerde kwestie.
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>('werk-team');
 
-  const startMediation = () => navigate('/payment');
+  const startMediation = () => {
+    track('Start bemiddeling');
+    navigate('/payment');
+  };
 
   return (
     <div className="rsolve-dark min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-cyan-400 selection:text-slate-950 antialiased">

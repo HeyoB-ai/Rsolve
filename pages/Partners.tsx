@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ShieldCheck, Scale, Lock, Sparkles, Building2, MapPin, Globe, Mail, Phone, User, Check } from 'lucide-react';
 import LangBar from '../components/landing/components/LangBar';
+import { track } from '../lib/analytics';
 
 const ACCENT = '#00E5FF';
 
@@ -43,6 +44,7 @@ const Partners: React.FC = () => {
       });
       if (!res.ok) throw new Error('mislukt');
       setStatus('ok');
+      track('Partner-aanmelding', form.rechtsgebieden ? { rechtsgebied: form.rechtsgebieden } : undefined);
     } catch {
       setStatus('error');
     }

@@ -4,6 +4,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Logo } from '../components/ui/Logo';
 import { ICONS } from '../constants';
+import { track } from '../lib/analytics';
 import { supabase } from '../lib/supabase';
 
 interface VSOProps {
@@ -122,6 +123,8 @@ const VSO: React.FC<VSOProps> = ({ data, t, onReset }) => {
             [updateField]: signatureName,
             [dateField]: new Date().toISOString()
         }).eq('id', data.caseId);
+
+        track('VSO getekend', { partij: isRespondent ? 'respondent' : 'initiator' });
 
     } catch (e) {
         console.error("Signing failed", e);

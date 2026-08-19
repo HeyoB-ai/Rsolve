@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Logo } from '../components/ui/Logo';
 import { Button } from '../components/ui/Button';
 import LangBar from '../components/landing/components/LangBar';
+import { track } from '../lib/analytics';
 
 const encode = (data: Record<string, string>) =>
   Object.keys(data)
@@ -27,6 +28,7 @@ const JuridischeHulp: React.FC = () => {
       });
       if (!res.ok) throw new Error('mislukt');
       setStatus('ok');
+      track('Juridische hulp aangevraagd');
     } catch {
       setStatus('error');
     }

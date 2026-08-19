@@ -7,6 +7,7 @@ import { Input } from '../components/ui/Input';
 import { ICONS } from '../constants';
 import { supabase } from '../lib/supabase';
 import { LanguageSelector } from '../components/ui/LanguageSelector';
+import { track } from '../lib/analytics';
 
 interface PaymentProps {
   onSuccess: () => void;
@@ -53,6 +54,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
         const data = await res.json();
         if (data?.paid) {
           localStorage.removeItem('rsolve_pending_order');
+          track('Betaling gelukt', { methode: 'stripe' });
           onSuccess();
           navigate('/invite-partner');
           return;
@@ -81,6 +83,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
       const data = await res.json();
       if (data?.url && data?.orderId) {
         localStorage.setItem('rsolve_pending_order', data.orderId);
+        track('Betaling gestart');
         window.location.href = data.url; // door naar Stripe Checkout
       } else {
         throw new Error('geen checkout-url');
@@ -120,6 +123,7 @@ const Payment: React.FC<PaymentProps> = ({ onSuccess, t, appLanguage, setAppLang
         .eq('code', data.code);
 
       setIsProcessing(true);
+      track('Toegang via code');
       setTimeout(() => {
         onSuccess();
         navigate('/invite-partner');
